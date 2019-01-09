@@ -76,6 +76,30 @@ query_jx <- function(compilation, gene, interval, range_filters = NULL,
     rse(query_data, metadata)
 }
 
+#' @export
+query_coverage <- function(genes_or_intervals, compilation, group_names = NULL,
+    sids = NULL, bulk = FALSE, split_by_region = FALSE)
+{
+    uri <- generate_snaptron_uri(
+        compilation = compilation,
+        gene = genes_or_intervals,
+        interval = interval,
+        endpoint = "bases",
+        sids = sids)
+
+    tsv <- submit_query(uri)
+    query_data <- data.table::fread(tsv, sep = '\t')
+    metadata <- get_compilation_metadata(compilation)
+
+    rse(
+        query_data,
+        metadata,
+        extract_col_data = coverage_col_data,
+        extract_row_ranges = coverage_row_ranges,
+        extract_counts = coverage_counts
+    )
+}
+
 get_compilation_metadata <- function(compilation) {
     stopifnot(compilation %in% c("tcga", "srav2", "srav1", "gtex"))
 
@@ -92,7 +116,12 @@ get_compilation_metadata <- function(compilation) {
 exprs <- function(..., frame = as.list(parent.frame())) {
     filters <- lapply(rlang::exprs(...),
         function(e) {
-            deparse(methods::substituteDirect(e, frame = frame))
+            if (length(e) != 3) {
+                err_msg <- paste0(deparse(e), ": is not a valid expression")
+                stop(err_msg)
+            }
+            e[[3]] <- eval(methods::substituteDirect(e[[3]], frame = frame))
+            deparse(e)
         }
     )
     tidy_filters(simplify2array(filters))
@@ -106,7 +135,7 @@ tidy_filters <- function(filters) {
     filters
 }
 
-generate_snaptron_uri <- function(compilation, gene, interval, range_filters = NULL,
+generate_snaptron_uri <- function(compilation, gene, interval, endpoint = "snaptron", range_filters = NULL,
                      sample_filters = NULL, contains = FALSE, exact = FALSE, either = FALSE, sids = NULL)
 {
     url <- "http://snaptron.cs.jhu.edu/"
@@ -117,7 +146,7 @@ generate_snaptron_uri <- function(compilation, gene, interval, range_filters = N
 
     stopifnot(compilation %in% c("tcga", "srav2", "srav1", "gtex"))
 
-    path <- paste(compilation, "snaptron?", sep = '/')
+    path <- paste(compilation, paste0(endpoint, "?"), sep = '/')
     query <- ""
 
     if (!missing(gene)) {
@@ -153,7 +182,7 @@ generate_snaptron_uri <- function(compilation, gene, interval, range_filters = N
     }
 
     if (!is.null(sids)) {
-        stopifnot(is.integer(sids))
+        stopifnot(is.wholenumber(sids))
         query <- c(query, paste("sids", paste(sids, collapse = ','), sep = '='))
     }
 
@@ -191,20 +220,50 @@ counts <- function(query_data) {
     convert_to_sparse_matrix(samples, query_data$samples_count, query_data$snaptron_id)
 }
 
-rse <- function(query_data, metadata) {
+col_data <- function(metadata, sids) {
+    metadata[metadata$rail_id %in% sids, ]
+}
+
+row_data <- function(query_data) {
     mcols <- subset(query_data,
         select = -c(chromosome, start, end, length, strand, samples))
 
-    row_ranges <- GenomicRanges::GRanges(
+    GenomicRanges::GRanges(
         seqnames = query_data$chromosome,
         IRanges::IRanges(query_data$start, query_data$end),
         strand = query_data$strand,
         mcols
     )
+}
 
-    counts <- counts(query_data)
+coverage_row_ranges <- function(query_data) {
+    GenomicRanges::GRanges(
+        seqnames = query_data$chromosome,
+        IRanges::IRanges(query_data$start, query_data$end)
+    )
+}
 
-    col_data <- metadata[metadata$rail_id %in% colnames(counts), ]
+coverage_counts <- function(query_data) {
+    data <- query_data[, -(1:4)]
+    Matrix::Matrix(as.matrix(data), sparse = TRUE)
+}
 
-    SummarizedExperiment::SummarizedExperiment(assays = list(counts = counts), rowRanges = row_ranges, colData = col_data)
+coverage_col_data <- function(metadata, sids) {
+    metadata[metadata$rail_id %in% sids, ]
+}
+
+rse <- function(query_data, metadata, extract_counts = counts, extract_row_ranges = row_ranges, extract_col_data = col_data) {
+    row_ranges <- extract_row_ranges(query_data)
+    counts <- extract_counts(query_data)
+    col_data <- extract_col_data(metadata, colnames(counts))
+
+    SummarizedExperiment::SummarizedExperiment(
+        assays = list(counts = counts),
+        rowRanges = row_ranges,
+        colData = col_data
+    )
+}
+
+is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) {
+    abs(x - round(x)) < tol
 }
