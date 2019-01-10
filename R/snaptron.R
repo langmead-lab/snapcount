@@ -16,10 +16,18 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
         },
         genes = function(genes = NULL) {
             if (!missing(genes)) {
-                private$query$gene <- genes
+                private$query$genes_or_intervals <- genes
                 invisible(self)
             } else {
                 private$query$gene
+            }
+        },
+        intervals = function(intervals = NULL) {
+            if (!missing(genes)) {
+                private$query$genes_or_intervals <- genes
+                invisible(self)
+            } else {
+                private$query$intervals
             }
         },
         range_filters = function(range_filters = NULL) {
@@ -49,6 +57,18 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
         query_jx = function() {
             jx_query_fn <- get("query_jx", parent.frame())
             do.call(jx_query_fn, private$query)
+        },
+        query_exon = function() {
+            exon_query_fn <- get("query_exon", parent.frame())
+            do.call(exon_query_fn, private$query)
+        },
+        query_gene = function() {
+            gene_query_fn <- get("query_gene", parent.frame())
+            do.call(gene_query_fn, private$query)
+        },
+        query_coverage = function() {
+            coverage_query_fn <- get("query_coverage", parent.frame())
+            do.call(coverage_query_fn, private$query)
         }
     ),
     private = list(
@@ -57,14 +77,13 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
 )
 
 #' @export
-query_jx <- function(compilation, gene, interval, range_filters = NULL,
+query_jx <- function(compilation, genes_or_intervals, range_filters = NULL,
                 sample_filters = NULL, sids = NULL)
 {
     uri <-
         generate_snaptron_uri(
             compilation = compilation,
-            gene = gene,
-            interval = interval,
+            genes_or_intervals = genes_or_intervals,
             range_filters = range_filters,
             sample_filters = sample_filters,
             sids = sids
@@ -77,13 +96,52 @@ query_jx <- function(compilation, gene, interval, range_filters = NULL,
 }
 
 #' @export
-query_coverage <- function(genes_or_intervals, compilation, group_names = NULL,
+query_gene <- function(compilation, genes_or_intervals,
+    range_filters = NULL, sample_filters = NULL, sids = NULL)
+{
+    uri <-
+        generate_snaptron_uri(
+            compilation = compilation,
+            genes_or_intervals = genes_or_intervals,
+            endpoint = "genes",
+            range_filters = range_filters,
+            sample_filters = sample_filters,
+            sids = sids
+        )
+
+    tsv <- submit_query(uri)
+    query_data <- data.table::fread(tsv, sep = '\t')
+    metadata <- get_compilation_metadata(compilation)
+    rse(query_data, metadata)
+}
+
+#' @export
+query_exon <- function(compilation, genes_or_intervals,
+    range_filters = NULL, sample_filters = NULL, sids = NULL)
+{
+    uri <-
+        generate_snaptron_uri(
+            compilation = compilation,
+            genes_or_intervals = genes_or_intervals,
+            endpoint = "exons",
+            range_filters = range_filters,
+            sample_filters = sample_filters,
+            sids = sids
+        )
+
+    tsv <- submit_query(uri)
+    query_data <- data.table::fread(tsv, sep = '\t')
+    metadata <- get_compilation_metadata(compilation)
+    rse(query_data, metadata)
+}
+
+#' @export
+query_coverage <- function(compilation, genes_or_intervals, group_names = NULL,
     sids = NULL, bulk = FALSE, split_by_region = FALSE)
 {
     uri <- generate_snaptron_uri(
         compilation = compilation,
         gene = genes_or_intervals,
-        interval = interval,
         endpoint = "bases",
         sids = sids)
 
@@ -135,7 +193,7 @@ tidy_filters <- function(filters) {
     filters
 }
 
-generate_snaptron_uri <- function(compilation, gene, interval, endpoint = "snaptron", range_filters = NULL,
+generate_snaptron_uri <- function(compilation, genes_or_intervals, endpoint = "snaptron", range_filters = NULL,
                      sample_filters = NULL, contains = FALSE, exact = FALSE, either = FALSE, sids = NULL)
 {
     url <- "http://snaptron.cs.jhu.edu/"
@@ -149,10 +207,8 @@ generate_snaptron_uri <- function(compilation, gene, interval, endpoint = "snapt
     path <- paste(compilation, paste0(endpoint, "?"), sep = '/')
     query <- ""
 
-    if (!missing(gene)) {
-        query <- paste("regions", gene, sep = '=')
-    } else if (!missing(interval)) {
-        query <- paste("regions", gene, sep = '=')
+    if (!missing(genes_or_intervals)) {
+        query <- paste("regions", genes_or_intervals, sep = '=')
     } else {
         stop("please specify either a gene or an interval")
     }
@@ -224,7 +280,7 @@ col_data <- function(metadata, sids) {
     metadata[metadata$rail_id %in% sids, ]
 }
 
-row_data <- function(query_data) {
+row_ranges <- function(query_data) {
     mcols <- subset(query_data,
         select = -c(chromosome, start, end, length, strand, samples))
 
