@@ -1,6 +1,22 @@
 metadata <- new.env()
 
+#' A Reference Class for building Snaptron queries
+#'
+#' @method compilation
+#' @method genes
+#' @method intervals
+#' @method range_filters
+#' @method sample_filters
+#' @method sids
+#' @method query_jx
+#' @method query_gene
+#' @method query_exon
+#' @method query_coverage
 #' @export
+#'
+#' @examples
+#' sb <- SnaptronQueryBuilder$new()
+#' sb$compilation("srav2")$genes("CD99")$query_jx()
 SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
     public = list(
         initialize = function(...) {
@@ -76,6 +92,20 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
     )
 )
 
+#' Query Junctions/Genes/Exons
+#'
+#' Given one or more gene names or genomic range
+#' intervals it will return a list of 0 or more genes, junctions, or exons
+#' (depending on which query form is used) which overlap the ranges.
+#' @param compilation A single string containing the name of the Snaptron datasource
+#' @param genes_or_intervals Either a list of >=1 `HUGO` gene names `(e.g. "BRCA1")` or a
+#'   GRanges-class object containing one or more genomic intervals `(e.g. "chr1:1-1000")`.
+#'   Strand information is ignored.
+#' @param range_filters A list of strings defining range-related contraints
+#' @param sample_filters A list of strings defining sample-related contraints
+#' @param sids A list of rail_ids (integer sample IDs) to filter results on. Only
+#'   records which have been found in at least one of these samples will be returned.
+
 #' @export
 query_jx <- function(compilation, genes_or_intervals, range_filters = NULL,
                 sample_filters = NULL, sids = NULL)
@@ -95,6 +125,7 @@ query_jx <- function(compilation, genes_or_intervals, range_filters = NULL,
     rse(query_data, metadata)
 }
 
+#' @rdname query_jx
 #' @export
 query_gene <- function(compilation, genes_or_intervals,
     range_filters = NULL, sample_filters = NULL, sids = NULL)
@@ -115,6 +146,7 @@ query_gene <- function(compilation, genes_or_intervals,
     rse(query_data, metadata)
 }
 
+#' @rdname query_jx
 #' @export
 query_exon <- function(compilation, genes_or_intervals,
     range_filters = NULL, sample_filters = NULL, sids = NULL)
@@ -135,7 +167,33 @@ query_exon <- function(compilation, genes_or_intervals,
     rse(query_data, metadata)
 }
 
+#' Query Coverage data
+#'
+#' This is the basic coverage query function.  Given one or more
+#' gene names or genomic range intervals it will return a list of 1
+#' or more bases (in 1-base pair intervals) with their list of coverage
+#' counts across all samples `(default)` or a sub-selection of sample
+#' columns.  This form doesn’t support any filters (except sample IDs `sids`) or modifiers.
+#' NOTE: coordinates in this query form always half-open intervals, so their left
+#' coordinate starts at 0 while the right coordinate starts at 1.
+#' @inheritParams query_jx
+#' @param group_names A list of one or more labels of the same length as the list of
+#'   `genes_or_intervals`. These labels serve as demarcation sentinels for the output
+#'   list of the bases since any one query will split over many output records `(typically)`.
+#'   Not required, but highly recommended.
+#' @param bulk Use the `Snaptron` bulk query interface. This will perform better when
+#'   running many queries at once. There is a limit of 50 queries per unit. More than 50
+#'   queries can be submitted but they will be broken up into units of 50.
+#' @param split_by_region By default the results from multiple queries will be returned
+#'   in `RangedSummarizedExperiment` object with a `rowData` entry for each labeling each
+#'   result row according to the query it resulted from. However, if this is set to `TRUE`,
+#'   the result will be a list of RangedSummarizedExperiment objects, one per original
+#'   interval/gene. This latter option may be useful but reqires metadata for each original
+#'   interval/gene.
+
 #' @export
+#' @examples
+#' query_coverage("gtex", "BRCA1", sids = c(50099,50102,50113))
 query_coverage <- function(compilation, genes_or_intervals, group_names = NULL,
     sids = NULL, bulk = FALSE, split_by_region = FALSE)
 {
