@@ -124,6 +124,7 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
     )
 )
 
+
 #' Query Junctions/Genes/Exons
 #'
 #' Given one or more gene names or genomic range
@@ -277,11 +278,25 @@ exprs <- function(..., frame = as.list(parent.frame())) {
                 err_msg <- paste0(deparse(e), ": is not a valid expression")
                 stop(err_msg)
             }
+            stopifnot(is_logical_op(e[[1]]))
             e[[3]] <- eval(methods::substituteDirect(e[[3]], frame = frame))
             deparse(e)
         }
     )
     simplify2array(filters)
+}
+
+is_logical_op <- function(op) {
+    logical_ops <-
+        c(
+            as.symbol("=="),
+            as.symbol("="),
+            as.symbol("<="),
+            as.symbol("<"),
+            as.symbol(">"),
+            as.symbol(">=")
+        )
+    any(vapply(logical_ops, identical, FUN.VALUE = logical(1), op))
 }
 
 tidy_filters <- function(filters) {
