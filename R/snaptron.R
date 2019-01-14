@@ -1,8 +1,10 @@
 metadata <- new.env()
 
+URI <- NULL
+
 #' A Reference Class for building Snaptron queries
 #'
-#' @method compilation
+#' @method compilation Get/set snaptron
 #' @method genes
 #' @method intervals
 #' @method range_filters
@@ -30,20 +32,12 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
                 private$query$compilation
             }
         },
-        genes = function(genes = NULL) {
-            if (!missing(genes)) {
-                private$query$genes_or_intervals <- genes
+        genes_or_intervals = function(genes_or_intervals = NULL) {
+            if (!missing(genes_or_intervals)) {
+                private$query$genes_or_intervals <- genes_or_intervals
                 invisible(self)
             } else {
-                private$query$gene
-            }
-        },
-        intervals = function(intervals = NULL) {
-            if (!missing(genes)) {
-                private$query$genes_or_intervals <- genes
-                invisible(self)
-            } else {
-                private$query$intervals
+                private$query$gene_or_intervals
             }
         },
         range_filters = function(range_filters = NULL) {
@@ -71,24 +65,62 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
             }
         },
         query_jx = function() {
-            jx_query_fn <- get("query_jx", parent.frame())
-            do.call(jx_query_fn, private$query)
+            private$call("query_jx", private$query)
         },
         query_exon = function() {
-            exon_query_fn <- get("query_exon", parent.frame())
-            do.call(exon_query_fn, private$query)
+            private$call("query_exon", private$query)
         },
         query_gene = function() {
-            gene_query_fn <- get("query_gene", parent.frame())
-            do.call(gene_query_fn, private$query)
+            private$call("query_gene", private$query)
         },
         query_coverage = function() {
-            coverage_query_fn <- get("query_coverage", parent.frame())
-            do.call(coverage_query_fn, private$query)
+            private$call("query_coverage", private$query)
+        },
+        from_url = function(url) {
+            url <- httr::parse_url(url)
+            if (url$hostname != "snaptron.cs.jhu.edu") {
+                stop("URL does not point to Snaptron server")
+            }
+
+            resp <- httr::HEAD(url)
+            if (resp$status_code != 200 || httr::http_type(resp) != "text/plain") {
+                stop(sprintf("%s: is not a valid URL", url))
+            }
+
+            query <- list()
+            for (i in 1:(length(url$query))) {
+                name <- switch(names(url$query[i]),
+                    rfilter = "range_filters",
+                    sfilter = "sample_filters",
+                    regions = "genes_or_intervals",
+                    name)
+
+                if (name == "sids") {
+                    query[[name]] <- scan(url$query[[i]], sep = ",")
+                }
+                query[[name]] <- c(query[[name]], url$query[[i]])
+            }
+
+            query$compilation <- strsplit(url$path, '/')[[1]][1]
+            private$query <- query
+        },
+        print = function() {
+            cat("<SnaptronQueryBuilder>\n")
+            for (param in names(private$query)) {
+                if (is.null(private$query[[param]])) {
+                    next
+                }
+
+                cat("  ", param, ": ", paste(private$query[[param]], collapse = ','), '\n', sep = '')
+            }
         }
     ),
     private = list(
-        query = list()
+        query = list(),
+        call = function(fn_name, args) {
+            fn <- get(fn_name, parent.frame())
+            do.call(fn, private$query)
+        }
     )
 )
 
@@ -120,6 +152,7 @@ query_jx <- function(compilation, genes_or_intervals, range_filters = NULL,
         )
 
     tsv <- submit_query(uri)
+    URI <<- uri
     query_data <- data.table::fread(tsv, sep = '\t')
     metadata <- get_compilation_metadata(compilation)
     rse(query_data, metadata)
@@ -141,6 +174,7 @@ query_gene <- function(compilation, genes_or_intervals,
         )
 
     tsv <- submit_query(uri)
+    URI <<- uri
     query_data <- data.table::fread(tsv, sep = '\t')
     metadata <- get_compilation_metadata(compilation)
     rse(query_data, metadata)
@@ -162,6 +196,7 @@ query_exon <- function(compilation, genes_or_intervals,
         )
 
     tsv <- submit_query(uri)
+    URI <<- uri
     query_data <- data.table::fread(tsv, sep = '\t')
     metadata <- get_compilation_metadata(compilation)
     rse(query_data, metadata)
@@ -204,6 +239,7 @@ query_coverage <- function(compilation, genes_or_intervals, group_names = NULL,
         sids = sids)
 
     tsv <- submit_query(uri)
+    URI <<- uri
     query_data <- data.table::fread(tsv, sep = '\t')
     metadata <- get_compilation_metadata(compilation)
 
@@ -214,6 +250,11 @@ query_coverage <- function(compilation, genes_or_intervals, group_names = NULL,
         extract_row_ranges = coverage_row_ranges,
         extract_counts = coverage_counts
     )
+}
+
+#' @export
+uri_of_last_successful_request <- function() {
+    URI
 }
 
 get_compilation_metadata <- function(compilation) {
@@ -240,7 +281,7 @@ exprs <- function(..., frame = as.list(parent.frame())) {
             deparse(e)
         }
     )
-    tidy_filters(simplify2array(filters))
+    simplify2array(filters)
 }
 
 tidy_filters <- function(filters) {
@@ -274,13 +315,13 @@ generate_snaptron_uri <- function(compilation, genes_or_intervals, endpoint = "s
     if (!is.null(range_filters)) {
         stopifnot(is.character(range_filters))
 
-        query <- c(query, paste("rfilter", gsub('=', ':', range_filters), sep = '='))
+        query <- c(query, paste("rfilter", tidy_filters(range_filters), sep = '='))
     }
 
     if (!is.null(sample_filters)) {
         stopifnot(is.character(sample_filters))
 
-        query <- c(query, paste("sfilter", gsub('=', ':', sample_filters), sep = '='))
+        query <- c(query, paste("sfilter", tidy_filters(sample_filters), sep = '='))
     }
 
     if (contains) {
@@ -304,9 +345,9 @@ generate_snaptron_uri <- function(compilation, genes_or_intervals, endpoint = "s
 }
 
 submit_query <- function(uri) {
-    resp <- curl::curl_fetch_memory(uri)
+    resp <- httr::GET(uri)
     if (resp$status_code != "200"
-        && curl::parse_headers_list(resp$header)[["content-type"]] != "text/plain") {
+        || resp$header[["content-type"]] != "text/plain") {
         stop("API did not return tsv", call. = FALSE)
     }
     rawToChar(resp$content)
