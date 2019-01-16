@@ -379,7 +379,7 @@ convert_to_sparse_matrix <- function(samples, samples_count, snaptron_ids, compi
     sorted_rail_ids <- sort(unique(rail_ids))
 
     i <- rep(seq_along(samples_count), samples_count)
-    j <- match(rail_ids, sorted_rail_ids)
+    j <- match(rail_ids, compilation_rail_ids)
     x <- as.numeric(vapply(rail_ids_and_counts, `[`, 2, FUN.VALUE = ""))
 
     dims <- c(length(snaptron_ids), length(compilation_rail_ids))
