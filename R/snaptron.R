@@ -398,7 +398,6 @@ col_data <- function(metadata, sids) {
 }
 
 row_ranges <- function(query_data) {
-    print(query_data)
     mcols <- subset(query_data,
         select = -c(chromosome, start, end, length, strand, samples))
 
