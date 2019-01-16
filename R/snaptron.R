@@ -372,7 +372,7 @@ extract_samples <- function(query_data) {
     unlist(lapply(strsplit(query_data$samples, ","), `[`, -1))
 }
 
-convert_to_sparse_matrix <- function(samples, samples_count, snaptron_ids) {
+convert_to_sparse_matrix <- function(samples, samples_count, snaptron_ids, compilation_rail_ids) {
     rail_ids_and_counts <- strsplit(samples, ':', fixed = TRUE)
 
     rail_ids <- as.numeric(vapply(rail_ids_and_counts, `[`, 1, FUN.VALUE = ""))
@@ -382,12 +382,15 @@ convert_to_sparse_matrix <- function(samples, samples_count, snaptron_ids) {
     j <- match(rail_ids, sorted_rail_ids)
     x <- as.numeric(vapply(rail_ids_and_counts, `[`, 2, FUN.VALUE = ""))
 
-    Matrix::sparseMatrix(i = i, j = j, x = x, dimnames = list(snaptron_ids, sorted_rail_ids))
+    dims <- c(length(snaptron_ids), length(compilation_rail_ids))
+
+    Matrix::sparseMatrix(i = i, j = j, x = x, dimnames = list(snaptron_ids, compilation_rail_ids), dims = dims)
 }
 
-counts <- function(query_data) {
+counts <- function(query_data, metadata) {
     samples <- extract_samples(query_data)
-    convert_to_sparse_matrix(samples, query_data$samples_count, query_data$snaptron_id)
+    compilation_rail_ids <- metadata$rail_id
+    convert_to_sparse_matrix(samples, query_data$samples_count, query_data$snaptron_id, compilation_rail_ids)
 }
 
 col_data <- function(metadata, sids) {
@@ -395,6 +398,7 @@ col_data <- function(metadata, sids) {
 }
 
 row_ranges <- function(query_data) {
+    print(query_data)
     mcols <- subset(query_data,
         select = -c(chromosome, start, end, length, strand, samples))
 
@@ -424,8 +428,9 @@ coverage_col_data <- function(metadata, sids) {
 
 rse <- function(query_data, metadata, extract_counts = counts, extract_row_ranges = row_ranges, extract_col_data = col_data) {
     row_ranges <- extract_row_ranges(query_data)
-    counts <- extract_counts(query_data)
-    col_data <- extract_col_data(metadata, colnames(counts))
+    counts <- extract_counts(query_data, metadata)
+    # col_data <- extract_col_data(metadata, colnames(counts))
+    col_data <- metadata
 
     SummarizedExperiment::SummarizedExperiment(
         assays = list(counts = counts),
