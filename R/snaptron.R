@@ -49,7 +49,7 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
             }
         },
         sample_filters = function(sample_filters = NULL) {
-            if (!missing(range_filters)) {
+            if (!missing(sample_filters)) {
                 private$query$sample_filters <- sample_filters_filters
                 invisible(self)
             } else {
@@ -426,6 +426,7 @@ coverage_col_data <- function(metadata, sids) {
 }
 
 rse <- function(query_data, metadata, extract_counts = counts, extract_row_ranges = row_ranges, extract_col_data = col_data) {
+    print(names(query_data))
     row_ranges <- extract_row_ranges(query_data)
     counts <- extract_counts(query_data, metadata)
     # col_data <- extract_col_data(metadata, colnames(counts))
