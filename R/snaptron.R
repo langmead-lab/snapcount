@@ -1,6 +1,6 @@
-metadata <- new.env()
+pkg_env <- new.env()
 
-URI <- NULL
+pkg_env$URI <- NULL
 
 #' A Reference Class for building Snaptron queries
 #'
@@ -153,7 +153,7 @@ query_jx <- function(compilation, genes_or_intervals, range_filters = NULL,
         )
 
     tsv <- submit_query(uri)
-    URI <<- uri
+    pkg_env$URI <<- uri
     query_data <- data.table::fread(tsv, sep = '\t')
     metadata <- get_compilation_metadata(compilation)
     rse(query_data, metadata)
@@ -175,7 +175,7 @@ query_gene <- function(compilation, genes_or_intervals,
         )
 
     tsv <- submit_query(uri)
-    URI <<- uri
+    pkg_env$URI <<- uri
     query_data <- data.table::fread(tsv, sep = '\t')
     metadata <- get_compilation_metadata(compilation)
     rse(query_data, metadata)
@@ -197,7 +197,7 @@ query_exon <- function(compilation, genes_or_intervals,
         )
 
     tsv <- submit_query(uri)
-    URI <<- uri
+    pkg_env$URI <<- uri
     query_data <- data.table::fread(tsv, sep = '\t')
     metadata <- get_compilation_metadata(compilation)
     rse(query_data, metadata)
@@ -240,14 +240,13 @@ query_coverage <- function(compilation, genes_or_intervals, group_names = NULL,
         sids = sids)
 
     tsv <- submit_query(uri)
-    URI <<- uri
+    pkg_env$URI <<- uri
     query_data <- data.table::fread(tsv, sep = '\t')
     metadata <- get_compilation_metadata(compilation)
 
     rse(
         query_data,
         metadata,
-        extract_col_data = coverage_col_data,
         extract_row_ranges = coverage_row_ranges,
         extract_counts = coverage_counts
     )
@@ -255,7 +254,7 @@ query_coverage <- function(compilation, genes_or_intervals, group_names = NULL,
 
 #' @export
 uri_of_last_successful_request <- function() {
-    URI
+    pkg_env$URI
 }
 
 get_compilation_metadata <- function(compilation) {
@@ -264,10 +263,10 @@ get_compilation_metadata <- function(compilation) {
     if (is.null(metadata[[compilation]])) {
         uri <- sprintf("http://snaptron.cs.jhu.edu/%s/samples?all=1", compilation)
         tsv <- submit_query(uri)
-        metadata[[compilation]] <- data.table::fread(tsv, sep = '\t', quote = "")
+        pkg_env$metadata[[compilation]] <- data.table::fread(tsv, sep = '\t', quote = "")
     }
 
-    metadata[[compilation]]
+    pkg_env$metadata[[compilation]]
 }
 
 #' @export
@@ -393,8 +392,8 @@ counts <- function(query_data, metadata) {
     convert_to_sparse_matrix(samples, query_data$samples_count, query_data$snaptron_id, compilation_rail_ids)
 }
 
-col_data <- function(metadata, sids) {
-    metadata[metadata$rail_id %in% sids, ]
+col_data <- function(metadata, sids = NULL) {
+    metadata
 }
 
 row_ranges <- function(query_data) {
@@ -421,16 +420,10 @@ coverage_counts <- function(query_data) {
     Matrix::Matrix(as.matrix(data), sparse = TRUE)
 }
 
-coverage_col_data <- function(metadata, sids) {
-    metadata[metadata$rail_id %in% sids, ]
-}
-
 rse <- function(query_data, metadata, extract_counts = counts, extract_row_ranges = row_ranges, extract_col_data = col_data) {
-    print(names(query_data))
     row_ranges <- extract_row_ranges(query_data)
     counts <- extract_counts(query_data, metadata)
-    # col_data <- extract_col_data(metadata, colnames(counts))
-    col_data <- metadata
+    col_data <- extract_col_data(metadata)
 
     SummarizedExperiment::SummarizedExperiment(
         assays = list(counts = counts),
