@@ -260,7 +260,7 @@ uri_of_last_successful_request <- function() {
 get_compilation_metadata <- function(compilation) {
     stopifnot(compilation %in% c("tcga", "srav2", "srav1", "gtex"))
 
-    if (is.null(metadata[[compilation]])) {
+    if (is.null(pkg_env$metadata[[compilation]])) {
         uri <- sprintf("http://snaptron.cs.jhu.edu/%s/samples?all=1", compilation)
         tsv <- submit_query(uri)
         pkg_env$metadata[[compilation]] <- data.table::fread(tsv, sep = '\t', quote = "")
