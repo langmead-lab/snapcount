@@ -143,20 +143,8 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
 query_jx <- function(compilation, genes_or_intervals, range_filters = NULL,
                 sample_filters = NULL, sids = NULL)
 {
-    uri <-
-        generate_snaptron_uri(
-            compilation = compilation,
-            genes_or_intervals = genes_or_intervals,
-            range_filters = range_filters,
-            sample_filters = sample_filters,
-            sids = sids
-        )
-
-    tsv <- submit_query(uri)
-    pkg_env$URI <<- uri
-    query_data <- data.table::fread(tsv, sep = '\t')
-    metadata <- get_compilation_metadata(compilation)
-    rse(query_data, metadata)
+    run_query(compilation = compilation, genes_or_intervals = genes_or_intervals,
+        range_filters = range_filters, sample_filters = sample_filters, sids = sids)
 }
 
 #' @rdname query_jx
@@ -164,21 +152,8 @@ query_jx <- function(compilation, genes_or_intervals, range_filters = NULL,
 query_gene <- function(compilation, genes_or_intervals,
     range_filters = NULL, sample_filters = NULL, sids = NULL)
 {
-    uri <-
-        generate_snaptron_uri(
-            compilation = compilation,
-            genes_or_intervals = genes_or_intervals,
-            endpoint = "genes",
-            range_filters = range_filters,
-            sample_filters = sample_filters,
-            sids = sids
-        )
-
-    tsv <- submit_query(uri)
-    pkg_env$URI <<- uri
-    query_data <- data.table::fread(tsv, sep = '\t')
-    metadata <- get_compilation_metadata(compilation)
-    rse(query_data, metadata)
+    run_query(compilation = compilation, genes_or_intervals = genes_or_intervals,
+        endpoint = "genes", range_filters = range_filters, sample_filters = sample_filters, sids = sids)
 }
 
 #' @rdname query_jx
@@ -186,21 +161,8 @@ query_gene <- function(compilation, genes_or_intervals,
 query_exon <- function(compilation, genes_or_intervals,
     range_filters = NULL, sample_filters = NULL, sids = NULL)
 {
-    uri <-
-        generate_snaptron_uri(
-            compilation = compilation,
-            genes_or_intervals = genes_or_intervals,
-            endpoint = "exons",
-            range_filters = range_filters,
-            sample_filters = sample_filters,
-            sids = sids
-        )
-
-    tsv <- submit_query(uri)
-    pkg_env$URI <<- uri
-    query_data <- data.table::fread(tsv, sep = '\t')
-    metadata <- get_compilation_metadata(compilation)
-    rse(query_data, metadata)
+    run_query(compilation = compilation, genes_or_intervals = genes_or_intervals,
+        endpoint = "exons", range_filters = range_filters, sample_filters = sample_filters, sids = sids)
 }
 
 #' Query Coverage data
@@ -233,16 +195,8 @@ query_exon <- function(compilation, genes_or_intervals,
 query_coverage <- function(compilation, genes_or_intervals, group_names = NULL,
     sids = NULL, bulk = FALSE, split_by_region = FALSE)
 {
-    uri <- generate_snaptron_uri(
-        compilation = compilation,
-        gene = genes_or_intervals,
-        endpoint = "bases",
-        sids = sids)
-
-    tsv <- submit_query(uri)
-    pkg_env$URI <<- uri
-    query_data <- data.table::fread(tsv, sep = '\t')
-    metadata <- get_compilation_metadata(compilation)
+    query_data <- run_query(compilation = compilation, genes_or_intervals = genes_or_intervals,
+        endpoint = "bases", sids = sids, construct_rse = FALSE)
 
     rse(
         query_data,
@@ -277,9 +231,16 @@ exprs <- function(..., frame = as.list(parent.frame())) {
                 err_msg <- paste0(deparse(e), ": is not a valid expression")
                 stop(err_msg)
             }
+
             stopifnot(is_logical_op(e[[1]]))
-            e[[3]] <- eval(methods::substituteDirect(e[[3]], frame = frame))
-            deparse(e)
+
+            if (is.character(e[[3]])) {
+                e[[3]] <- as.symbol(e[[3]])
+            } else {
+                e[[3]] <- eval(methods::substituteDirect(e[[3]], frame = frame))
+            }
+
+            deparse(e, backtick = FALSE)
         }
     )
     simplify2array(filters)
@@ -289,7 +250,6 @@ is_logical_op <- function(op) {
     logical_ops <-
         c(
             as.symbol("=="),
-            as.symbol("="),
             as.symbol("<="),
             as.symbol("<"),
             as.symbol(">"),
@@ -304,6 +264,36 @@ tidy_filters <- function(filters) {
     filters <- gsub("\\s+", "", filters)
 
     filters
+}
+
+run_query <- function(compilation, genes_or_intervals, endpoint = "snaptron", range_filters = NULL,
+    sample_filters = NULL, contains = FALSE, exact = FALSE, either = FALSE, sids = NULL, construct_rse = TRUE) {
+
+    uri <-
+        generate_snaptron_uri(
+            compilation = compilation,
+            genes_or_intervals = genes_or_intervals,
+            endpoint = endpoint,
+            range_filters = range_filters,
+            sample_filters = sample_filters,
+            contains = contains,
+            exact = exact,
+            either = either,
+            sids = sids
+        )
+
+
+    if (!is.null(getOption("test_ctx"))) {
+        pkg_env$URI <<- uri
+        return(NULL)
+    } else {
+        tsv <- submit_query(uri)
+        pkg_env$URI <<- uri
+    }
+
+    query_data <- data.table::fread(tsv, sep = '\t')
+    metadata <- get_compilation_metadata(compilation)
+    rse(query_data, metadata)
 }
 
 generate_snaptron_uri <- function(compilation, genes_or_intervals, endpoint = "snaptron", range_filters = NULL,
@@ -375,7 +365,6 @@ convert_to_sparse_matrix <- function(samples, samples_count, snaptron_ids, compi
     rail_ids_and_counts <- strsplit(samples, ':', fixed = TRUE)
 
     rail_ids <- as.numeric(vapply(rail_ids_and_counts, `[`, 1, FUN.VALUE = ""))
-    sorted_rail_ids <- sort(unique(rail_ids))
 
     i <- rep(seq_along(samples_count), samples_count)
     j <- match(rail_ids, compilation_rail_ids)
