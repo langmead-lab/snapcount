@@ -1,0 +1,6 @@
+base_sids.tsv	http://snaptron.cs.jhu.edu/gtex/bases?regions=chrX:2691179-2691188&sids=50099,50200,59759
+exon.tsv	http://snaptron.cs.jhu.edu/gtex/exons?regions=CD99&sfilter=SMTS:Brain
+gene.tsv	http://snaptron.cs.jhu.edu/srav2/genes?regions=CD99&sfilter=description:cortex
+gene2.tsv	http://snaptron.cs.jhu.edu/gtex/genes?regions=CD99&sfilter=SMTS:Brain
+jx.tsv	http://snaptron.cs.jhu.edu/srav2/snaptron?regions=CD99&rfilter=annotated:1&sfilter=description:cortex
+base.tsv	http://snaptron.cs.jhu.edu/gtex/bases?regions=chrX:2691179-2691188
