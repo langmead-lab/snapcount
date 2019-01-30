@@ -1,0 +1,51 @@
+---
+output:
+  github_document:
+    html_preview: false
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+library(snapr)
+```
+
+# snapr
+[![Travis-CI Build Status](https://travis-ci.org/langmead-lab/snapr.svg?branch=master)](https://travis-ci.org/langmead-lab/snapr)
+
+## Overview
+`snapr` is a package for interfacing with Snaptron's REST API.
+
+## Installation
+
+```{r installation, eval = FALSE}
+# Install the development version from GitHub:
+# install.packages("devtools")
+devtools::install_github("langmead-lab/snapr")
+```
+
+## Usage
+
+##### snapr can be used with either a procedural interface
+```{r}
+library(snapr)
+
+query_jx(compilation = "gtex", genes_or_intervals = "CD99")
+query_jx(compilation = "gtex", genes_or_intervals = "CD99", range_filters = exprs(samples_count == 10))
+```
+
+##### Or using the query-builder class
+```{r}
+sb <- SnaptronQueryBuilder$new()
+sb$compilation("gtex")$genes_or_intervals("CD99")$query_jx()
+
+# sb$from_url("http://snaptron.cs.jhu.edu/gtex/bases?regions=BRCA1&sids=50099,50102,50113")$query_gene()
+```
+
+## Reference
+For more information on Snaptron please visit: http://snaptron.cs.jhu.edu/index.html.
