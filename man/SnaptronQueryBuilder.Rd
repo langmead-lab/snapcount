@@ -11,8 +11,50 @@ SnaptronQueryBuilder
 \description{
 A Reference Class for building Snaptron queries
 }
+\section{Usage}{
+
+\preformatted{
+sb <- SnaptronQueryBuilder$new()
+
+sb$compilation("tcga")
+sb$range_filters(exprs(samples_count <= 10))$sids(500:600)
+
+sb$from_url("http://snaptron.cs.jhu.edu/tcga/snaptron?region=CD99")$query_jx()
+
+print(sb)
+}
+}
+
+\section{Methods}{
+
+\code{compilation} Get/set snaptron
+
+\code{genes_or_intervals} Get/set genes or intervals
+
+\code{range_filters} Get or set range filters
+
+\code{sample_filters} Get or set sample filters
+
+\code{sids} Get or set sample ids
+
+\code{query_jx} call query_jx function
+
+\code{query_gene} call \code{\link{query_gene}} function
+
+\code{query_exon} call \code{\link{query_exon}} function
+
+\code{query_coverage} call \code{\link{query_coverage}} function
+
+\code{print} print output the state of the object
+
+\code{from_url} set attributes from url
+}
+
 \examples{
 sb <- SnaptronQueryBuilder$new()
-sb$compilation("srav2")$genes("CD99")$query_jx()
+sb$compilation("srav2")$genes_or_intervals("CD99")$query_jx()
+}
+\seealso{
+\code{\link{query_jx}}
 }
 \keyword{datasets}

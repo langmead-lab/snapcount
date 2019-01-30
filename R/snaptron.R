@@ -1,24 +1,67 @@
-pkg_env <- new.env()
+pkg_env <- new.env(parent = emptyenv())
 
 pkg_env$URI <- NULL
 
+enum <- function(...) {
+    values <- sapply(match.call(expand.dots = TRUE)[-1L], deparse)
+
+    stopifnot(identical(unique(values), values))
+
+    res <- setNames(seq_along(values), values)
+    res <- as.environment(as.list(res))
+    lockEnvironment(res, bindings = TRUE)
+    res
+}
+
+Compilations <- enum(a, b, c, d)
+
+Compilations
+
 #' A Reference Class for building Snaptron queries
 #'
-#' @method compilation Get/set snaptron
-#' @method genes
-#' @method intervals
-#' @method range_filters
-#' @method sample_filters
-#' @method sids
-#' @method query_jx
-#' @method query_gene
-#' @method query_exon
-#' @method query_coverage
+#'
+#' @section Usage:
+#' \preformatted{
+#' sb <- SnaptronQueryBuilder$new()
+#'
+#' sb$compilation("tcga")
+#' sb$range_filters(exprs(samples_count <= 10))$sids(500:600)
+#'
+#' sb$from_url("http://snaptron.cs.jhu.edu/tcga/snaptron?region=CD99")$query_jx()
+#'
+#' print(sb)
+#'}
+#'
+#' @section Methods:
+#' \code{compilation} Get/set snaptron
+#'
+#' \code{genes_or_intervals} Get/set genes or intervals
+#'
+#' \code{range_filters} Get or set range filters
+#'
+#' \code{sample_filters} Get or set sample filters
+#'
+#' \code{sids} Get or set sample ids
+#'
+#' \code{query_jx} call query_jx function
+#'
+#' \code{query_gene} call \code{\link{query_gene}} function
+#'
+#' \code{query_exon} call \code{\link{query_exon}} function
+#'
+#' \code{query_coverage} call \code{\link{query_coverage}} function
+#'
+#' \code{print} print output the state of the object
+#'
+#' \code{from_url} set attributes from url
+#'
+#' @seealso \code{\link{query_jx}}
+#'
 #' @export
 #'
 #' @examples
 #' sb <- SnaptronQueryBuilder$new()
-#' sb$compilation("srav2")$genes("CD99")$query_jx()
+#' sb$compilation("srav2")$genes_or_intervals("CD99")$query_jx()
 SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
     public = list(
         initialize = function(...) {
@@ -37,7 +80,7 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
                 private$query$genes_or_intervals <- genes_or_intervals
                 invisible(self)
             } else {
-                private$query$gene_or_intervals
+                private$query$genes_or_intervals
             }
         },
         range_filters = function(range_filters = NULL) {
@@ -50,7 +93,7 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
         },
         sample_filters = function(sample_filters = NULL) {
             if (!missing(sample_filters)) {
-                private$query$sample_filters <- sample_filters_filters
+                private$query$sample_filters <- sample_filters
                 invisible(self)
             } else {
                 private$query$sample_filters
@@ -82,23 +125,26 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
                 stop("URL does not point to Snaptron server")
             }
 
-            resp <- httr::HEAD(url)
-            if (resp$status_code != 200 || httr::http_type(resp) != "text/plain") {
-                stop(sprintf("%s: is not a valid URL", url))
+            if (is.null(getOption("test_ctx"))) {
+                resp <- httr::HEAD(url)
+                if (resp$status_code != 200 || httr::http_type(resp) != "text/plain") {
+                    stop(sprintf("%s: is not a valid URL", url))
+                }
             }
 
             query <- list()
             for (i in 1:(length(url$query))) {
-                name <- switch(names(url$query[i]),
+                name <- switch(n <- names(url$query[i]),
                     rfilter = "range_filters",
                     sfilter = "sample_filters",
                     regions = "genes_or_intervals",
-                    name)
+                    n)
 
                 if (name == "sids") {
-                    query[[name]] <- scan(url$query[[i]], sep = ",")
+                    query[[name]] <- scan(textConnection(url$query[[i]]), sep = ",")
+                } else {
+                    query[[name]] <- c(query[[name]], url$query[[i]])
                 }
-                query[[name]] <- c(query[[name]], url$query[[i]])
             }
 
             query$compilation <- strsplit(url$path, '/')[[1]][1]
@@ -119,7 +165,8 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
         query = list(),
         call = function(fn_name, args) {
             fn <- get(fn_name, parent.frame())
-            do.call(fn, private$query)
+            args <- intersect(names(formals(fn)), names(private$query))
+            do.call(fn, private$query[args])
         }
     )
 )
@@ -195,18 +242,32 @@ query_exon <- function(compilation, genes_or_intervals,
 query_coverage <- function(compilation, genes_or_intervals, group_names = NULL,
     sids = NULL, bulk = FALSE, split_by_region = FALSE)
 {
-    query_data <- run_query(compilation = compilation, genes_or_intervals = genes_or_intervals,
+    data <- run_query(compilation = compilation, genes_or_intervals = genes_or_intervals,
         endpoint = "bases", sids = sids, construct_rse = FALSE)
 
-    rse(
-        query_data,
-        metadata,
-        extract_row_ranges = coverage_row_ranges,
-        extract_counts = coverage_counts
-    )
+    if (is.null(getOption("test_ctx"))) {
+        rse(
+            data$query_data,
+            data$metadata,
+            extract_row_ranges = coverage_row_ranges,
+            extract_counts = coverage_counts
+        )
+    }
 }
-
+#' Return the URI of the last successful request to Snaptron
+#'
+#' @description
+#' This function can be paired with the \code{from_url} method from the
+#' SnaptronQueryBuilder class, allowing users to share sources of
+#' data from Snaptron.
+#' @return
+#' URI of last successful request to Snaptron or \code{NULL} if there have
+#' not been any successful requests.
+#'
 #' @export
+#' @examples
+#' query_jx(compilation = "tcga", genes_or_intervals = "CD99")
+#' uri_of_last_successful_request()
 uri_of_last_successful_request <- function() {
     pkg_env$URI
 }
@@ -223,7 +284,19 @@ get_compilation_metadata <- function(compilation) {
     pkg_env$metadata[[compilation]]
 }
 
+#' Utility function for formatting range and sample filters
+#'
+#' @description
+#' This function makes it easier to compose sample and range filters for Snaptron queries.
+#' Each expression is expected to be a boolean expression.
+#'
+#' @param ... A list of expression to be converted to strings
+#'
 #' @export
+#' @examples
+#' a <- 10
+#' exprs(sample_filters < a)
+#' exprs(samples_count == a + 10)
 exprs <- function(..., frame = as.list(parent.frame())) {
     filters <- lapply(rlang::exprs(...),
         function(e) {
@@ -282,17 +355,21 @@ run_query <- function(compilation, genes_or_intervals, endpoint = "snaptron", ra
             sids = sids
         )
 
-
     if (!is.null(getOption("test_ctx"))) {
-        pkg_env$URI <<- uri
+        pkg_env$URI <- uri
         return(NULL)
     } else {
         tsv <- submit_query(uri)
-        pkg_env$URI <<- uri
+        pkg_env$URI <- uri
     }
 
     query_data <- data.table::fread(tsv, sep = '\t')
     metadata <- get_compilation_metadata(compilation)
+
+    if (construct_rse == FALSE) {
+        return(list(query_data = query_data, metadata = metadata))
+    }
+
     rse(query_data, metadata)
 }
 
@@ -377,17 +454,17 @@ convert_to_sparse_matrix <- function(samples, samples_count, snaptron_ids, compi
 
 counts <- function(query_data, metadata) {
     samples <- extract_samples(query_data)
-    compilation_rail_ids <- metadata$rail_id
-    convert_to_sparse_matrix(samples, query_data$samples_count, query_data$snaptron_id, compilation_rail_ids)
+    convert_to_sparse_matrix(samples, query_data$samples_count, query_data$snaptron_id, metadata$rail_id)
 }
 
 col_data <- function(metadata, sids = NULL) {
     metadata
 }
 
+#' @import data.table
 row_ranges <- function(query_data) {
-    mcols <- subset(query_data,
-        select = -c(chromosome, start, end, length, strand, samples))
+    cols <- c("chromosome", "start", "end", "length", "strand", "samples")
+    mcols <- query_data[, !cols, with = FALSE]
 
     GenomicRanges::GRanges(
         seqnames = query_data$chromosome,
@@ -404,9 +481,19 @@ coverage_row_ranges <- function(query_data) {
     )
 }
 
-coverage_counts <- function(query_data) {
+coverage_counts <- function(query_data, metadata) {
     data <- query_data[, -(1:4)]
-    Matrix::Matrix(as.matrix(data), sparse = TRUE)
+    rail_ids <- as.numeric(colnames(data))
+    smallest_rail_id <- metadata$rail_id[1]
+
+    i <- rep(1:nrow(data), ncol(data))
+    j <- rep((rail_ids - smallest_rail_id) + 1, each = nrow(data))
+
+    m <- base::as.matrix(data)
+    dim(m) <- c(nrow(m) * ncol(m), 1)
+
+    dims <- c(nrow(query_data), length(metadata$rail_id))
+    Matrix::sparseMatrix(i = i , j = j, x = as.numeric(m[, 1]), dimnames = list(NULL, metadata$rail_id), dims = dims)
 }
 
 rse <- function(query_data, metadata, extract_counts = counts, extract_row_ranges = row_ranges, extract_col_data = col_data) {

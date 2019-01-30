@@ -10,25 +10,25 @@ query_coverage(compilation, genes_or_intervals, group_names = NULL,
 \arguments{
 \item{compilation}{A single string containing the name of the Snaptron datasource}
 
-\item{genes_or_intervals}{Either a list of >=1 `HUGO` gene names `(e.g. "BRCA1")` or a
-GRanges-class object containing one or more genomic intervals `(e.g. "chr1:1-1000")`.
+\item{genes_or_intervals}{Either a list of >=1 \code{HUGO} gene names \code{(e.g. "BRCA1")} or a
+GRanges-class object containing one or more genomic intervals \code{(e.g. "chr1:1-1000")}.
 Strand information is ignored.}
 
 \item{group_names}{A list of one or more labels of the same length as the list of
-`genes_or_intervals`. These labels serve as demarcation sentinels for the output
-list of the bases since any one query will split over many output records `(typically)`.
+\code{genes_or_intervals}. These labels serve as demarcation sentinels for the output
+list of the bases since any one query will split over many output records \code{(typically)}.
 Not required, but highly recommended.}
 
 \item{sids}{A list of rail_ids (integer sample IDs) to filter results on. Only
 records which have been found in at least one of these samples will be returned.}
 
-\item{bulk}{Use the `Snaptron` bulk query interface. This will perform better when
+\item{bulk}{Use the \code{Snaptron} bulk query interface. This will perform better when
 running many queries at once. There is a limit of 50 queries per unit. More than 50
 queries can be submitted but they will be broken up into units of 50.}
 
 \item{split_by_region}{By default the results from multiple queries will be returned
-in `RangedSummarizedExperiment` object with a `rowData` entry for each labeling each
-result row according to the query it resulted from. However, if this is set to `TRUE`,
+in \code{RangedSummarizedExperiment} object with a \code{rowData} entry for each labeling each
+result row according to the query it resulted from. However, if this is set to \code{TRUE},
 the result will be a list of RangedSummarizedExperiment objects, one per original
 interval/gene. This latter option may be useful but reqires metadata for each original
 interval/gene.}
@@ -37,8 +37,8 @@ interval/gene.}
 This is the basic coverage query function.  Given one or more
 gene names or genomic range intervals it will return a list of 1
 or more bases (in 1-base pair intervals) with their list of coverage
-counts across all samples `(default)` or a sub-selection of sample
-columns.  This form doesn’t support any filters (except sample IDs `sids`) or modifiers.
+counts across all samples \code{(default)} or a sub-selection of sample
+columns.  This form doesn’t support any filters (except sample IDs \code{sids}) or modifiers.
 NOTE: coordinates in this query form always half-open intervals, so their left
 coordinate starts at 0 while the right coordinate starts at 1.
 }

@@ -1,5 +1,9 @@
 context("exprs")
 
+test_that("invalid expression", {
+    expect_error(exrs(samples_count))
+})
+
 test_that("convert simple expression to string", {
     expect_match(exprs(samples_count < 10), c("samples_count < 10"))
 })

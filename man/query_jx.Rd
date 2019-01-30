@@ -18,8 +18,8 @@ query_exon(compilation, genes_or_intervals, range_filters = NULL,
 \arguments{
 \item{compilation}{A single string containing the name of the Snaptron datasource}
 
-\item{genes_or_intervals}{Either a list of >=1 `HUGO` gene names `(e.g. "BRCA1")` or a
-GRanges-class object containing one or more genomic intervals `(e.g. "chr1:1-1000")`.
+\item{genes_or_intervals}{Either a list of >=1 \code{HUGO} gene names \code{(e.g. "BRCA1")} or a
+GRanges-class object containing one or more genomic intervals \code{(e.g. "chr1:1-1000")}.
 Strand information is ignored.}
 
 \item{range_filters}{A list of strings defining range-related contraints}
