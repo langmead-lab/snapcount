@@ -19,7 +19,7 @@ r-packages:
 
 bioc_packages:
     - GenomicRanges
-    - SummarizedExperiments
+    - SummarizedExperiment
     - IRanges
 
 after_success:
