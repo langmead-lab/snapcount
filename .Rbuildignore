@@ -1,0 +1,11 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.travis\.yml$
+^codecov\.yml$
+^README\.Rmd$
+^README-.*\.png$
+^appveyor\.yml$
+^cran-comments\.md$
+^docs$
+^script\.R$
+^_pkgdown\.yml$

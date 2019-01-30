@@ -2,20 +2,20 @@ pkg_env <- new.env(parent = emptyenv())
 
 pkg_env$URI <- NULL
 
-enum <- function(...) {
-    values <- sapply(match.call(expand.dots = TRUE)[-1L], deparse)
+## enum <- function(...) {
+##     values <- sapply(match.call(expand.dots = TRUE)[-1L], deparse)
 
-    stopifnot(identical(unique(values), values))
+##     stopifnot(identical(unique(values), values))
 
-    res <- setNames(seq_along(values), values)
-    res <- as.environment(as.list(res))
-    lockEnvironment(res, bindings = TRUE)
-    res
-}
+##     res <- setNames(seq_along(values), values)
+##     res <- as.environment(as.list(res))
+##     lockEnvironment(res, bindings = TRUE)
+##     res
+## }
 
-Compilations <- enum(a, b, c, d)
+# Compilations <- enum(a, b, c, d)
 
-Compilations
+# Compilations
 
 #' A Reference Class for building Snaptron queries
 #'
@@ -266,7 +266,7 @@ query_coverage <- function(compilation, genes_or_intervals, group_names = NULL,
 #'
 #' @export
 #' @examples
-#' query_jx(compilation = "tcga", genes_or_intervals = "CD99")
+#' query_jx(compilation = "gtex", genes_or_intervals = "CD99")
 #' uri_of_last_successful_request()
 uri_of_last_successful_request <- function() {
     pkg_env$URI
@@ -291,6 +291,7 @@ get_compilation_metadata <- function(compilation) {
 #' Each expression is expected to be a boolean expression.
 #'
 #' @param ... A list of expression to be converted to strings
+#' @param frame An environment or list object
 #'
 #' @export
 #' @examples
