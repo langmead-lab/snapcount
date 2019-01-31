@@ -16,7 +16,7 @@ library(snapr)
 ```
 
 # snapr
-[![Travis-CI Build Status](https://travis-ci.org/langmead-lab/snapr.svg?branch=master)](https://travis-ci.org/langmead-lab/snapr)
+[![Build Status](https://travis-ci.com/langmead-lab/snapr.svg?token=vEUBb2QKjox3PdRAssp8&branch=master)](https://travis-ci.com/langmead-lab/snapr)
 
 ## Overview
 `snapr` is a package for interfacing with Snaptron's REST API.

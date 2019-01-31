@@ -3,8 +3,8 @@
 
 # snapr
 
-[![Travis-CI Build
-Status](https://travis-ci.org/langmead-lab/snapr.svg?branch=master)](https://travis-ci.org/langmead-lab/snapr)
+[![Build
+Status](https://travis-ci.com/langmead-lab/snapr.svg?token=vEUBb2QKjox3PdRAssp8&branch=master)](https://travis-ci.com/langmead-lab/snapr)
 
 ## Overview
 
@@ -26,9 +26,6 @@ devtools::install_github("langmead-lab/snapr")
 library(snapr)
 
 query_jx(compilation = "gtex", genes_or_intervals = "CD99")
-#> Called from: eval(expr, p)
-#> debug at /Users/rcharles/Development/git/snapr/R/snaptron.R#469: GenomicRanges::GRanges(seqnames = query_data$chromosome, IRanges::IRanges(query_data$start, 
-#>     query_data$end), strand = query_data$strand, mcols)
 #> class: RangedSummarizedExperiment 
 #> dim: 3485 9662 
 #> metadata(0):
@@ -40,9 +37,6 @@ query_jx(compilation = "gtex", genes_or_intervals = "CD99")
 #> colData names(322): rail_id Run ... junction_coverage
 #>   junction_avg_coverage
 query_jx(compilation = "gtex", genes_or_intervals = "CD99", range_filters = exprs(samples_count == 10))
-#> Called from: eval(expr, p)
-#> debug at /Users/rcharles/Development/git/snapr/R/snaptron.R#469: GenomicRanges::GRanges(seqnames = query_data$chromosome, IRanges::IRanges(query_data$start, 
-#>     query_data$end), strand = query_data$strand, mcols)
 #> class: RangedSummarizedExperiment 
 #> dim: 25 9662 
 #> metadata(0):
@@ -60,9 +54,6 @@ query_jx(compilation = "gtex", genes_or_intervals = "CD99", range_filters = expr
 ``` r
 sb <- SnaptronQueryBuilder$new()
 sb$compilation("gtex")$genes_or_intervals("CD99")$query_jx()
-#> Called from: eval(expr, p)
-#> debug at /Users/rcharles/Development/git/snapr/R/snaptron.R#469: GenomicRanges::GRanges(seqnames = query_data$chromosome, IRanges::IRanges(query_data$start, 
-#>     query_data$end), strand = query_data$strand, mcols)
 #> class: RangedSummarizedExperiment 
 #> dim: 3485 9662 
 #> metadata(0):
