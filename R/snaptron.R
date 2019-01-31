@@ -149,6 +149,8 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
 
             query$compilation <- strsplit(url$path, '/')[[1]][1]
             private$query <- query
+
+            invisible(self)
         },
         print = function() {
             cat("<SnaptronQueryBuilder>\n")
@@ -365,6 +367,9 @@ run_query <- function(compilation, genes_or_intervals, endpoint = "snaptron", ra
     }
 
     query_data <- data.table::fread(tsv, sep = '\t')
+    if (nrow(query_data) == 0) {
+        stop("Query returned 0 rows", call. = FALSE)
+    }
     metadata <- get_compilation_metadata(compilation)
 
     if (!is.null(sids)) {
@@ -487,7 +492,7 @@ coverage_row_ranges <- function(query_data) {
 }
 
 coverage_counts <- function(query_data, metadata) {
-    data <- query_data[, -(1:4)]
+    data <- query_data[, -c("DataSource:Type", "chromosome", "start", "end")]
     rail_ids <- as.numeric(colnames(data))
     smallest_rail_id <- metadata$rail_id[1]
 
