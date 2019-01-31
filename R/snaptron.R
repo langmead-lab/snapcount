@@ -373,7 +373,7 @@ run_query <- function(compilation, genes_or_intervals, endpoint = "snaptron", ra
     metadata <- get_compilation_metadata(compilation)
 
     if (!is.null(sids)) {
-        metadata <- metadata[rail_id %in% sids]
+        metadata <- metadata[metadata$rail_id %in% sids,]
     }
 
     if (construct_rse == FALSE) {
