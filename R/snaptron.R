@@ -367,6 +367,10 @@ run_query <- function(compilation, genes_or_intervals, endpoint = "snaptron", ra
     query_data <- data.table::fread(tsv, sep = '\t')
     metadata <- get_compilation_metadata(compilation)
 
+    if (!is.null(sids)) {
+        metadata <- metadata[rail_id %in% sids]
+    }
+
     if (construct_rse == FALSE) {
         return(list(query_data = query_data, metadata = metadata))
     }
@@ -488,7 +492,13 @@ coverage_counts <- function(query_data, metadata) {
     smallest_rail_id <- metadata$rail_id[1]
 
     i <- rep(1:nrow(data), ncol(data))
-    j <- rep((rail_ids - smallest_rail_id) + 1, each = nrow(data))
+
+    # did the user specify a list of sids?
+    if (nrow(metadata) == ncol(data)) {
+        j <- rep(1:ncol(data), each = nrow(data))
+    } else {
+        j <- rep((rail_ids - smallest_rail_id) + 1, each = nrow(data))
+    }
 
     m <- base::as.matrix(data)
     dim(m) <- c(nrow(m) * ncol(m), 1)
