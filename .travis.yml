@@ -5,6 +5,10 @@ sudo: false
 
 r: bioc-devel
 
+branches:
+  only:
+    - master
+
 r-packages:
     - rmarkdown
     - knitr

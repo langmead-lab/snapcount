@@ -2,6 +2,7 @@
 
 export(SnaptronQueryBuilder)
 export(exprs)
+export(junction_inclusion_ratio)
 export(query_coverage)
 export(query_exon)
 export(query_gene)
