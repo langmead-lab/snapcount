@@ -2,16 +2,6 @@ pkg_env <- new.env(parent = emptyenv())
 
 pkg_env$URI <- NULL
 
-## enum <- function(...) {
-##     values <- sapply(match.call(expand.dots = TRUE)[-1L], deparse)
-
-##     stopifnot(identical(unique(values), values))
-
-##     res <- setNames(seq_along(values), values)
-##     res <- as.environment(as.list(res))
-##     lockEnvironment(res, bindings = TRUE)
-##     res
-## }
 
 # Compilations <- enum(a, b, c, d)
 
@@ -107,38 +97,22 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
                 private$query$sids
             }
         },
-        either = function(either = NULL) {
-            if (!missing(either)) {
-                private$query$either <- either
-                invisible(self)
-            } else {
-                private$query$either
-            }
-        },
-        contains = function(contains = NULL) {
-            if (!missing(contains)) {
-                private$query$contains <- contains
-                invisible(self)
-            } else {
-                private$query$contains
-            }
-        },
-        exact = function(exact = NULL) {
+        coordinate_modifier = function(coordinate_modifier = NULL) {
             if (!missing(exact)) {
-                private$query$exact <- exact
+                private$query$coordinate_modifier <- coordinate_modifier
                 invisible(self)
             } else {
-                private$query$exact
+                private$query$coordinate_modifier
             }
         },
-        query_jx = function() {
-            private$call("query_jx", private$query)
+        query_jx = function(return_rse = TRUE) {
+            private$call("query_jx", c(list(return_rse = return_rse), private$query))
         },
-        query_exon = function() {
-            private$call("query_exon", private$query)
+        query_exon = function(return_rse = TRUE) {
+            private$call("query_exon", c(list(return_rse = return_rse), private$query))
         },
-        query_gene = function() {
-            private$call("query_gene", private$query)
+        query_gene = function(return_rse = TRUE) {
+            private$call("query_gene", c(list(return_rse = return_rse), private$query))
         },
         query_coverage = function() {
             private$call("query_coverage", private$query)
@@ -167,9 +141,19 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
                 if (name == "sids") {
                     query[[name]] <- scan(textConnection(url$query[[i]]), sep = ",")
                 } else if (name == "contains") {
-                    query[[name]] <- if (url$query[[i]] == "1") TRUE else FALSE
+                    if (url$query[[i]] == "1") {
+                        query[["coordinate_modifier"]] <- Coordinates$Within
+                    }
                 } else if (name == "exact") {
-                    query[[name]] <- if (url$query[[i]] == "1") TRUE else FALSE
+                    if (url$query[[i]] == "1") {
+                        query[["coordinate_modifier"]] <- Coordinates$Exact
+                    }
+                } else if (name == "either") {
+                    if (url$query[[i]] == "1") {
+                        query[["coordinate_modifier"]] <- Coordinates$StartIsExactOrWithin
+                    } else if (url$query[[i]] == "2") {
+                        query[["coordinate_modifier"]] <- Coordinates$EndIsExactOrWithin
+                    }
                 } else {
                     query[[name]] <- c(query[[name]], url$query[[i]])
                 }
@@ -187,7 +171,17 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
                     next
                 }
 
-                cat("  ", param, ": ", paste(private$query[[param]], collapse = ','), '\n', sep = '')
+                if (param == "coordinate_modifier") {
+                    desc <- switch(private$query[[param]],
+                                   `Coordinates$Exact` = "exact",
+                                   `Coordinates$Within` = "contains",
+                                   `Coordinates$StartIsExactOrWithin` = "either=1",
+                                   `Coordinates$EndIsExactOrWithin` = "either=2",
+                                   "overlaps")
+                } else {
+                    desc <- paste(private$query[[param]], collapse = ",")
+                }
+                cat("   ", param, ": ", desc, "\n", sep = "")
             }
         }
     ),
@@ -195,8 +189,8 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
         query = list(),
         call = function(fn_name, args) {
             fn <- get(fn_name, parent.frame())
-            args <- intersect(names(formals(fn)), names(private$query))
-            do.call(fn, private$query[args])
+            arg_names <- intersect(names(formals(fn)), names(args))
+            do.call(fn, args[arg_names])
         }
     )
 )
@@ -215,31 +209,39 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
 #' @param sample_filters A list of strings defining sample-related contraints
 #' @param sids A list of rail_ids (integer sample IDs) to filter results on. Only
 #'   records which have been found in at least one of these samples will be returned.
+#' @param either Contraints the results so that the start (either=1) or end
+#'   (either=2) coordinate matches or is within the boundaries of the specified range.
+#' @param contains Constraints the results so that the coordinates within (inclusive)
+#'   the specified range.
+#' @param exact Constraints the results so that the start/end coordinates
+#'   match the start/end of the specified range.
+#' @param return_rse Should the query data be returned as a simple data frame or
+#    converted to a RangeSummarizedExperiment.
 
 #' @export
 query_jx <- function(compilation, genes_or_intervals, range_filters = NULL,
-                sample_filters = NULL, sids = NULL, either = NULL, contains = FALSE, exact = FALSE)
+                sample_filters = NULL, sids = NULL, coordinate_modifier = NULL, return_rse = TRUE)
 {
     run_query(compilation = compilation, genes_or_intervals = genes_or_intervals,
-              range_filters = range_filters, sample_filters = sample_filters, sids = sids, either = either, contains = contains, exact = exact, only_raw_data = TRUE)
+              range_filters = range_filters, sample_filters = sample_filters, sids = sids, coordinate_modifier = coordinate_modifier, return_rse = return_rse)
 }
 
 #' @rdname query_jx
 #' @export
 query_gene <- function(compilation, genes_or_intervals,
-    range_filters = NULL, sample_filters = NULL, sids = NULL)
+    range_filters = NULL, sample_filters = NULL, sids = NULL, coordinate_modifier = NULL, return_rse = TRUE)
 {
     run_query(compilation = compilation, genes_or_intervals = genes_or_intervals,
-        endpoint = "genes", range_filters = range_filters, sample_filters = sample_filters, sids = sids)
+        endpoint = "genes", range_filters = range_filters, sample_filters = sample_filters, sids = sids, coordinate_modifier = coordinate_modifier, return_rse = return_rse)
 }
 
 #' @rdname query_jx
 #' @export
 query_exon <- function(compilation, genes_or_intervals,
-    range_filters = NULL, sample_filters = NULL, sids = NULL)
+    range_filters = NULL, sample_filters = NULL, sids = NULL, coordinate_modifier = NULL, return_rse = TRUE)
 {
     run_query(compilation = compilation, genes_or_intervals = genes_or_intervals,
-        endpoint = "exons", range_filters = range_filters, sample_filters = sample_filters, sids = sids)
+        endpoint = "exons", range_filters = range_filters, sample_filters = sample_filters, sids = sids, coordinate_modifier = coordinate_modifier, return_rse = return_rse)
 }
 
 #' Query Coverage data
@@ -371,7 +373,7 @@ tidy_filters <- function(filters) {
 }
 
 run_query <- function(compilation, genes_or_intervals, endpoint = "snaptron", range_filters = NULL,
-    sample_filters = NULL, contains = FALSE, exact = FALSE, either = NULL, sids = NULL, construct_rse = TRUE, only_raw_data = FALSE) {
+    sample_filters = NULL, sids = NULL, coordinate_modifier = NULL, construct_rse = TRUE, return_rse = TRUE) {
 
     uri <-
         generate_snaptron_uri(
@@ -380,9 +382,7 @@ run_query <- function(compilation, genes_or_intervals, endpoint = "snaptron", ra
             endpoint = endpoint,
             range_filters = range_filters,
             sample_filters = sample_filters,
-            contains = contains,
-            exact = exact,
-            either = either,
+            coordinate_modifier = coordinate_modifier,
             sids = sids
         )
 
@@ -399,7 +399,7 @@ run_query <- function(compilation, genes_or_intervals, endpoint = "snaptron", ra
         stop("Query returned 0 rows", call. = FALSE)
     }
 
-    if (only_raw_data) {
+    if (!return_rse) {
         return(query_data)
     }
 
@@ -417,7 +417,7 @@ run_query <- function(compilation, genes_or_intervals, endpoint = "snaptron", ra
 }
 
 generate_snaptron_uri <- function(compilation, genes_or_intervals, endpoint = "snaptron", range_filters = NULL,
-                     sample_filters = NULL, contains = FALSE, exact = FALSE, either = NULL, sids = NULL)
+                     sample_filters = NULL, coordinate_modifier = NULL, sids = NULL)
 {
     url <- "http://snaptron.cs.jhu.edu/"
 
@@ -448,16 +448,18 @@ generate_snaptron_uri <- function(compilation, genes_or_intervals, endpoint = "s
         query <- c(query, paste("sfilter", tidy_filters(sample_filters), sep = '='))
     }
 
-    if (contains) {
-        query <- c(query, paste("contains", "1", sep = '='))
-    }
-
-    if (exact) {
-        query <- c(query, paste("exact", "1", sep = '='))
-    }
-
-    if (!is.null(either)) {
-        query <- c(query, paste("either", either, sep = '='))
+    if (!is.null(coordinate_modifier)) {
+        if (coordinate_modifier == Coordinates$Exact) {
+            query <- c(query, paste("exact", "1", sep = "="))
+        } else if (coordinate_modifier == Coordinates$Within) {
+            query <- c(query, paste("contains", "1", sep = "="))
+        } else if (coordinate_modifier == Coordinates$StartIsExactOrWithin) {
+            query <- c(query, paste("either", "1", sep = "="))
+        } else if (coordinate_modifier == Coordinates$EndIsExactOrWithin) {
+            query <- c(query, paste("either", "2", sep = "="))
+        } else {
+            stop("Invalid coordinate filter")
+        }
     }
 
     if (!is.null(sids)) {

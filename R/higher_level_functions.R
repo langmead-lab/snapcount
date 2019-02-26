@@ -79,7 +79,7 @@ tissue_specificity_per_group <- function(group1, group2, group_name) {
     stopifnot(is.list(group1), is.list(group2))
     c(res1, res2) %<-% run_queries(group1, group2, summarize = FALSE)
     res <- rbind(res1, res2)
-    res <- res[, .N, by = sample_id]
+    res <- res[, .N, by = .(sample_id)]
     res$N <- ifelse(res$N > 1, 1, 0)
 
     metadata <- get_compilation_metadata(group1[[1]]$compilation())
@@ -133,7 +133,7 @@ run_queries <- function(..., summarize = TRUE) {
 
 count_samples <- function(group, summarize = TRUE) {
     dfs <- lapply(group, function(e) {
-        q <- e$query_jx()
+        q <- e$query_jx(return_rse = FALSE)
 
         data.table::data.table(sample = extract_samples(q)) %>%
             tidyr::separate("sample", into = c("sample_id", "coverage"), convert = TRUE)
