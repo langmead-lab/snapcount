@@ -123,6 +123,14 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
                 private$query$contains
             }
         },
+        exact = function(exact = NULL) {
+            if (!missing(exact)) {
+                private$query$exact <- exact
+                invisible(self)
+            } else {
+                private$query$exact
+            }
+        },
         query_jx = function() {
             private$call("query_jx", private$query)
         },
@@ -160,7 +168,9 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
                     query[[name]] <- scan(textConnection(url$query[[i]]), sep = ",")
                 } else if (name == "contains") {
                     query[[name]] <- if (url$query[[i]] == "1") TRUE else FALSE
-                }else {
+                } else if (name == "exact") {
+                    query[[name]] <- if (url$query[[i]] == "1") TRUE else FALSE
+                } else {
                     query[[name]] <- c(query[[name]], url$query[[i]])
                 }
             }
@@ -208,10 +218,10 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
 
 #' @export
 query_jx <- function(compilation, genes_or_intervals, range_filters = NULL,
-                sample_filters = NULL, sids = NULL, either = FALSE, contains = FALSE)
+                sample_filters = NULL, sids = NULL, either = NULL, contains = FALSE, exact = FALSE)
 {
     run_query(compilation = compilation, genes_or_intervals = genes_or_intervals,
-              range_filters = range_filters, sample_filters = sample_filters, sids = sids, either = FALSE, contains = contains, only_raw_data = TRUE)
+              range_filters = range_filters, sample_filters = sample_filters, sids = sids, either = either, contains = contains, exact = exact, only_raw_data = TRUE)
 }
 
 #' @rdname query_jx
@@ -361,7 +371,7 @@ tidy_filters <- function(filters) {
 }
 
 run_query <- function(compilation, genes_or_intervals, endpoint = "snaptron", range_filters = NULL,
-    sample_filters = NULL, contains = FALSE, exact = FALSE, either = FALSE, sids = NULL, construct_rse = TRUE, only_raw_data = FALSE) {
+    sample_filters = NULL, contains = FALSE, exact = FALSE, either = NULL, sids = NULL, construct_rse = TRUE, only_raw_data = FALSE) {
 
     uri <-
         generate_snaptron_uri(
@@ -407,7 +417,7 @@ run_query <- function(compilation, genes_or_intervals, endpoint = "snaptron", ra
 }
 
 generate_snaptron_uri <- function(compilation, genes_or_intervals, endpoint = "snaptron", range_filters = NULL,
-                     sample_filters = NULL, contains = FALSE, exact = FALSE, either = FALSE, sids = NULL)
+                     sample_filters = NULL, contains = FALSE, exact = FALSE, either = NULL, sids = NULL)
 {
     url <- "http://snaptron.cs.jhu.edu/"
 
@@ -446,8 +456,8 @@ generate_snaptron_uri <- function(compilation, genes_or_intervals, endpoint = "s
         query <- c(query, paste("exact", "1", sep = '='))
     }
 
-    if (either) {
-        query <- c(query, paste("either", "1", sep = '='))
+    if (!is.null(either)) {
+        query <- c(query, paste("either", either, sep = '='))
     }
 
     if (!is.null(sids)) {
