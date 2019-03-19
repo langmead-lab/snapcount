@@ -220,28 +220,135 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
 
 #' @export
 query_jx <- function(compilation, genes_or_intervals, range_filters = NULL,
-                sample_filters = NULL, sids = NULL, coordinate_modifier = NULL, return_rse = TRUE)
+                sample_filters = NULL, sids = NULL, coordinate_modifier = NULL, return_rse = TRUE, split_by_region = FALSE)
 {
-    run_query(compilation = compilation, genes_or_intervals = genes_or_intervals,
-              range_filters = range_filters, sample_filters = sample_filters, sids = sids, coordinate_modifier = coordinate_modifier, return_rse = return_rse)
+    regions <- genes_or_intervals
+    strands <- NULL
+
+    if (class(genes_or_intervals) == "GRanges") {
+        regions <- extract_intervals(genes_or_intervals)
+        strands <- extract_strands(genes_or_intervals)
+
+        stopifnot(length(regions) == length(regions))
+    }
+
+    should_bind = length(regions) > 1 && !split_by_region
+
+    res <- lapply(1:length(regions), function(i) {
+        if (!is.null(strands) && (strands[i] == "+" || strands[i] == "-")) {
+            pos <- grep("strand", range_filters)
+            if (!identical(pos, integer(0))) {
+                range_filters[pos] <- paste0("strand:", strands[i])
+            } else {
+                range_filters <- c(range_filters, paste0("strand:", strands[i]))
+            }
+        }
+
+        run_query(compilation = compilation,
+                  genes_or_intervals = regions[i],
+                  range_filters = range_filters,
+                  sample_filters = sample_filters,
+                  coordinate_modifier = coordinate_modifier,
+                  sids = sids,
+                  return_rse = return_rse)
+    })
+
+    if (should_bind) {
+        rbind_func <- if (return_rse) SummarizedExperiment::rbind else rbind
+        res <- do.call(rbind_func, res)
+    }
+
+    res
 }
 
 #' @rdname query_jx
 #' @export
 query_gene <- function(compilation, genes_or_intervals,
-    range_filters = NULL, sample_filters = NULL, sids = NULL, coordinate_modifier = NULL, return_rse = TRUE)
+    range_filters = NULL, sample_filters = NULL, sids = NULL, coordinate_modifier = NULL, return_rse = TRUE, split_by_region = FALSE)
 {
-    run_query(compilation = compilation, genes_or_intervals = genes_or_intervals,
-        endpoint = "genes", range_filters = range_filters, sample_filters = sample_filters, sids = sids, coordinate_modifier = coordinate_modifier, return_rse = return_rse)
+    regions <- genes_or_intervals
+    strands <- NULL
+
+    if (class(genes_or_intervals) == "GRanges") {
+        regions <- extract_intervals(genes_or_intervals)
+        strands <- extract_strands(genes_or_intervals)
+
+        stopifnot(length(regions) == length(regions))
+    }
+
+    should_bind = length(regions) > 1 && !split_by_region
+
+    res <- lapply(1:length(regions), function(i) {
+        if (!is.null(strands) && (strands[i] == "+" || strands[i] == "-")) {
+            pos <- grep("strand", range_filters)
+            if (!identical(pos, integer(0))) {
+                range_filters[pos] <- paste0("strand:", strands[i])
+            } else {
+                range_filters <- c(range_filters, paste0("strand:", strands[i]))
+            }
+        }
+
+        run_query(compilation = compilation,
+                  genes_or_intervals = regions[i],
+                  range_filters = range_filters,
+                  sample_filters = sample_filters,
+                  coordinate_modifier = coordinate_modifier,
+                  sids = sids,
+                  endpoint = "genes",
+                  return_rse = return_rse)
+    })
+
+    if (should_bind) {
+        rbind_func <- if (return_rse) SummarizedExperiment::rbind else rbind
+        res <- do.call(rbind_func, res)
+    }
+
+    res
 }
 
 #' @rdname query_jx
 #' @export
 query_exon <- function(compilation, genes_or_intervals,
-    range_filters = NULL, sample_filters = NULL, sids = NULL, coordinate_modifier = NULL, return_rse = TRUE)
+    range_filters = NULL, sample_filters = NULL, sids = NULL, coordinate_modifier = NULL, return_rse = TRUE, split_by_region = FALSE)
 {
-    run_query(compilation = compilation, genes_or_intervals = genes_or_intervals,
-        endpoint = "exons", range_filters = range_filters, sample_filters = sample_filters, sids = sids, coordinate_modifier = coordinate_modifier, return_rse = return_rse)
+    regions <- genes_or_intervals
+    strands <- NULL
+
+    if (class(genes_or_intervals) == "GRanges") {
+        regions <- extract_intervals(genes_or_intervals)
+        strands <- extract_strands(genes_or_intervals)
+
+        stopifnot(length(regions) == length(regions))
+    }
+
+    should_bind = length(regions) > 1 && !split_by_region
+
+    res <- lapply(1:length(regions), function(i) {
+        if (!is.null(strands) && (strands[i] == "+" || strands[i] == "-")) {
+            pos <- grep("strand", range_filters)
+            if (!identical(pos, integer(0))) {
+                range_filters[pos] <- paste0("strand:", strands[i])
+            } else {
+                range_filters <- c(range_filters, paste0("strand:", strands[i]))
+            }
+        }
+
+        run_query(compilation = compilation,
+                  genes_or_intervals = regions[i],
+                  range_filters = range_filters,
+                  sample_filters = sample_filters,
+                  coordinate_modifier = coordinate_modifier,
+                  sids = sids,
+                  endpoint = "exons",
+                  return_rse = return_rse)
+    })
+
+    if (should_bind) {
+        rbind_func <- if (return_rse) SummarizedExperiment::rbind else rbind
+        res <- do.call(rbind_func, res)
+    }
+
+    res
 }
 
 #' Query Coverage data
@@ -468,6 +575,23 @@ generate_snaptron_uri <- function(compilation, genes_or_intervals, endpoint = "s
     }
 
     paste0(url, path, paste(query, collapse = '&'))
+}
+
+extract_intervals <- function(g) {
+    chr <- GenomicRanges::seqnames(g)
+    beg <- GenomicRanges::start(g)
+    end <- GenomicRanges::end(g)
+
+    chr <- as.vector(rep(chr@values, chr@lengths))
+
+    paste0(chr, ":", beg, "-", end)
+}
+
+extract_strands <- function(g) {
+    strands <- GenomicRanges::strand(g)
+    strands <- as.vector(rep(strands@values, strands@lengths))
+
+    strands
 }
 
 submit_query <- function(uri) {
