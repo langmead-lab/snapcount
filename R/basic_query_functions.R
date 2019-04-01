@@ -232,7 +232,7 @@ query_jx <- function(compilation, genes_or_intervals, range_filters = NULL,
         stopifnot(length(regions) == length(regions))
     }
 
-    should_bind = length(regions) > 1 && !split_by_region
+    should_bind <- length(regions) > 1 && !split_by_region
 
     res <- lapply(1:length(regions), function(i) {
         if (!is.null(strands) && (strands[i] == "+" || strands[i] == "-")) {
@@ -252,6 +252,10 @@ query_jx <- function(compilation, genes_or_intervals, range_filters = NULL,
                   sids = sids,
                   return_rse = return_rse)
     })
+
+    if (length(res) == 1) {
+        res <- res[[1]]
+    }
 
     if (should_bind) {
         rbind_func <- if (return_rse) SummarizedExperiment::rbind else rbind

@@ -1,4 +1,9 @@
-num_cores <- parallel::detectCores()
+if (Sys.info()["sysname"] == "Windows") {
+    num_cores <- 1
+} else {
+    num_cores <- parallel::detectCores()
+}
+
 `%>%` <- magrittr::`%>%`
 
 #' @export
@@ -7,7 +12,7 @@ junction_inclusion_ratio <- function(group1, group2, group_names = NULL) {
 
     c(s1, s2) %<-% run_queries(group1, group2)
 
-    jir <- s1[s2, on = .(sample_id), all = TRUE]
+    jir <- s1[s2, on = c("sample_id"), all = TRUE]
     jir[is.na(jir)] <- 0
     jir[, jir := calc_jir(coverage, i.coverage)]
 
@@ -40,12 +45,13 @@ percent_spliced_in <- function(inclusion_group1, inclusion_group2, exclusion_gro
 }
 
 calc_psi <- function(inclusion1, inclusion2, exclusion) {
-    mean_inclusion = (inclusion1 + inclusion2) / 2.
-    total = mean_inclusion + exclusion
-
     if (inclusion1 == 0 || inclusion2 == 0) {
         return(-1)
     }
+
+    mean_inclusion = (inclusion1 + inclusion2) / 2.
+    total = mean_inclusion + exclusion
+
     mean_inclusion / total
 }
 
