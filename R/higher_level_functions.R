@@ -36,23 +36,23 @@ calc_jir <- function(a, b) {
 }
 
 #' @export
-percent_spliced_in <- function(inclusion_group1, inclusion_group2, exclusion_group, group_names = NULL) {
+percent_spliced_in <- function(inclusion_group1, inclusion_group2, exclusion_group, min_count = 20, group_names = NULL) {
     c(g1, g2, ex) %<-% run_queries(inclusion_group1, inclusion_group2, exclusion_group)
 
     psi <- merge(g1, g2, by = "sample_id", all = TRUE) %>%
         merge(ex, by = "sample_id", all = TRUE)
     psi[is.na(psi)] <- 0
 
-    psi[, psi := calc_psi(coverage.x, coverage.y, coverage)][,]
+    psi[, psi := calc_psi(coverage.x, coverage.y, coverage, min_count)][,]
 }
 
-calc_psi <- function(inclusion1, inclusion2, exclusion) {
-    if (inclusion1 == 0 || inclusion2 == 0) {
-        return(-1)
-    }
-
+calc_psi <- function(inclusion1, inclusion2, exclusion, min_count) {
     mean_inclusion = (inclusion1 + inclusion2) / 2.
     total = mean_inclusion + exclusion
+
+    if (inclusion1 == 0 || inclusion2 == 0 || total < min_count) {
+        return(-1)
+    }
 
     mean_inclusion / total
 }
@@ -86,9 +86,9 @@ tissue_specificity_per_group <- function(group1, group2, group_name) {
 
     stopifnot(is.list(group1), is.list(group2))
     c(res1, res2) %<-% run_queries(group1, group2, summarize = FALSE)
-    res <- rbind(res1, res2)
-    res <- res[, .N, by = .(sample_id)]
-    res$N <- ifelse(res$N > 1, 1, 0)
+    res <- merge(res1, res2, by = "sample_id", all = TRUE)
+    res[is.na(res)] <- 0
+    res <- res[, shared := shared(coverage.x, coverage.y)][, !c("coverage.x", "coverage.y")]
 
     metadata <- get_compilation_metadata(group1[[1]]$compilation())
     metadata <- metadata[, .(rail_id, SMTS)]
@@ -97,9 +97,12 @@ tissue_specificity_per_group <- function(group1, group2, group_name) {
     res[is.na(res)] <- 0
     res$group <- rep(group_name, nrow(res))
     data.table::setnames(res, old = "SMTS", new = "tissue")
-    data.table::setnames(res, old = "N", new = "shared")
 
-    res
+    unique(res)
+}
+
+shared <- function(cov1, cov2) {
+    as.integer(cov1 != 0 & cov2 != 0)
 }
 
 #' @export
