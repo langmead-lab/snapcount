@@ -41,7 +41,7 @@ percent_spliced_in <- function(inclusion_group1, inclusion_group2, exclusion_gro
         merge(ex, by = "sample_id", all = TRUE)
     psi[is.na(psi)] <- 0
 
-    psi[, psi := calc_psi(coverage.x, coverage.y, coverage)]
+    psi[, psi := calc_psi(coverage.x, coverage.y, coverage)][,]
 }
 
 calc_psi <- function(inclusion1, inclusion2, exclusion) {
