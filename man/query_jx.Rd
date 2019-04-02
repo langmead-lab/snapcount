@@ -8,15 +8,15 @@
 \usage{
 query_jx(compilation, genes_or_intervals, range_filters = NULL,
   sample_filters = NULL, sids = NULL, coordinate_modifier = NULL,
-  return_rse = TRUE)
+  return_rse = TRUE, split_by_region = FALSE)
 
 query_gene(compilation, genes_or_intervals, range_filters = NULL,
   sample_filters = NULL, sids = NULL, coordinate_modifier = NULL,
-  return_rse = TRUE)
+  return_rse = TRUE, split_by_region = FALSE)
 
 query_exon(compilation, genes_or_intervals, range_filters = NULL,
   sample_filters = NULL, sids = NULL, coordinate_modifier = NULL,
-  return_rse = TRUE)
+  return_rse = TRUE, split_by_region = FALSE)
 }
 \arguments{
 \item{compilation}{A single string containing the name of the Snaptron datasource}
