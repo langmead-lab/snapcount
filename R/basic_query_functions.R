@@ -1,3 +1,5 @@
+#' @import data.table
+
 pkg_env <- new.env(parent = emptyenv())
 
 pkg_env$URI <- NULL
@@ -634,7 +636,6 @@ col_data <- function(metadata, sids = NULL) {
     metadata
 }
 
-#' @import data.table
 row_ranges <- function(query_data) {
     cols <- c("chromosome", "start", "end", "length", "strand", "samples")
     mcols <- query_data[, !cols, with = FALSE]

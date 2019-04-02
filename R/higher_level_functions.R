@@ -1,3 +1,5 @@
+#' @import data.table
+
 if (Sys.info()["sysname"] == "Windows") {
     num_cores <- 1
 } else {
@@ -12,9 +14,9 @@ junction_inclusion_ratio <- function(group1, group2, group_names = NULL) {
 
     c(s1, s2) %<-% run_queries(group1, group2)
 
-    jir <- s1[s2, on = c("sample_id"), all = TRUE]
+    jir <- merge(s1, s2, by = "sample_id", all = TRUE)
     jir[is.na(jir)] <- 0
-    jir[, jir := calc_jir(coverage, i.coverage)]
+    jir[, jir := calc_jir(coverage.y, coverage.x)]
 
     if (is.null(group_names)) {
         group_names <- c("Group1 Coverage", "Group2 Coverage")
@@ -23,8 +25,8 @@ junction_inclusion_ratio <- function(group1, group2, group_names = NULL) {
     }
 
     data.table::setnames(jir, old = "jir", new = "JIR")
-    data.table::setnames(jir, old = "coverage", new = group_names[1])
-    data.table::setnames(jir, old = "i.coverage", new = group_names[2])
+    data.table::setnames(jir, old = "coverage.x", new = group_names[1])
+    data.table::setnames(jir, old = "coverage.y", new = group_names[2])
 
     jir[order(-JIR)]
 }
