@@ -1,11 +1,14 @@
-Package: snapr
+Package: snapcount
 Type: Package
-Title: Package for interfacing with Snaptron
+Title: R/Bioconductor Package for interfacing with Snaptron for rapid quering of expression counts
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Rone Charles
+Maintainer: Rone Charles (rcharle8@jhu.edu)
+Description: snapcount is a client interface to the Snaptron webservices
+    which support querying by gene name or genomic region.
+    Results include raw expression counts derived from alignment of RNA-seq samples
+    and/or various summarized measures of expression across one or more regions/genes
+    per-sample (e.g. percent spliced in).
 Depends:
     R (>= 3.1)
 Imports:
