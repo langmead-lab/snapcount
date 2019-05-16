@@ -3,6 +3,8 @@
 export(SnaptronQueryBuilder)
 export(exprs)
 export(junction_inclusion_ratio)
+export(junction_intersection)
+export(junction_union)
 export(percent_spliced_in)
 export(query_coverage)
 export(query_exon)

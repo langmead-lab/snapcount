@@ -100,7 +100,7 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
             }
         },
         coordinate_modifier = function(coordinate_modifier = NULL) {
-            if (!missing(exact)) {
+            if (!missing(coordinate_modifier)) {
                 private$query$coordinate_modifier <- coordinate_modifier
                 invisible(self)
             } else {
@@ -161,7 +161,7 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
                 }
             }
 
-            query$compilation <- strsplit(url$path, '/')[[1]][1]
+            query$compilation <- strsplit(url$path, "/")[[1]][1]
             private$query <- query
 
             invisible(self)
@@ -423,7 +423,7 @@ get_compilation_metadata <- function(compilation) {
     if (is.null(pkg_env$metadata[[compilation]])) {
         uri <- sprintf("http://snaptron.cs.jhu.edu/%s/samples?all=1", compilation)
         tsv <- submit_query(uri)
-        pkg_env$metadata[[compilation]] <- data.table::fread(tsv, sep = '\t', quote = "")
+        pkg_env$metadata[[compilation]] <- data.table::fread(tsv, sep = "\t", quote = "")
     }
 
     pkg_env$metadata[[compilation]]
@@ -507,7 +507,7 @@ run_query <- function(compilation, genes_or_intervals, endpoint = "snaptron", ra
         pkg_env$URI <- uri
     }
 
-    query_data <- data.table::fread(tsv, sep = '\t')
+    query_data <- data.table::fread(tsv, sep = "\t")
     if (nrow(query_data) == 0) {
         stop("Query returned 0 rows", call. = FALSE)
     }
@@ -540,11 +540,11 @@ generate_snaptron_uri <- function(compilation, genes_or_intervals, endpoint = "s
 
     stopifnot(compilation %in% c("tcga", "srav2", "srav1", "gtex"))
 
-    path <- paste(compilation, paste0(endpoint, "?"), sep = '/')
+    path <- paste(compilation, paste0(endpoint, "?"), sep = "/")
     query <- ""
 
     if (!missing(genes_or_intervals)) {
-        query <- paste("regions", genes_or_intervals, sep = '=')
+        query <- paste("regions", genes_or_intervals, sep = "=")
     } else {
         stop("please specify either a gene or an interval")
     }
@@ -552,13 +552,13 @@ generate_snaptron_uri <- function(compilation, genes_or_intervals, endpoint = "s
     if (!is.null(range_filters)) {
         stopifnot(is.character(range_filters))
 
-        query <- c(query, paste("rfilter", tidy_filters(range_filters), sep = '='))
+        query <- c(query, paste("rfilter", tidy_filters(range_filters), sep = "="))
     }
 
     if (!is.null(sample_filters)) {
         stopifnot(is.character(sample_filters))
 
-        query <- c(query, paste("sfilter", tidy_filters(sample_filters), sep = '='))
+        query <- c(query, paste("sfilter", tidy_filters(sample_filters), sep = "="))
     }
 
     if (!is.null(coordinate_modifier)) {
@@ -577,10 +577,10 @@ generate_snaptron_uri <- function(compilation, genes_or_intervals, endpoint = "s
 
     if (!is.null(sids)) {
         stopifnot(is.wholenumber(sids))
-        query <- c(query, paste("sids", paste(sids, collapse = ','), sep = '='))
+        query <- c(query, paste("sids", paste(sids, collapse = ","), sep = "="))
     }
 
-    paste0(url, path, paste(query, collapse = '&'))
+    paste0(url, path, paste(query, collapse = "&"))
 }
 
 extract_intervals <- function(g) {
@@ -614,7 +614,7 @@ extract_samples <- function(query_data) {
 }
 
 convert_to_sparse_matrix <- function(samples, samples_count, snaptron_ids, compilation_rail_ids) {
-    rail_ids_and_counts <- strsplit(samples, ':', fixed = TRUE)
+    rail_ids_and_counts <- strsplit(samples, ":", fixed = TRUE)
 
     rail_ids <- as.numeric(vapply(rail_ids_and_counts, `[`, 1, FUN.VALUE = ""))
 

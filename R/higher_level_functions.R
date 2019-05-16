@@ -9,6 +9,75 @@ if (Sys.info()["sysname"] == "Windows") {
 `%>%` <- magrittr::`%>%`
 
 #' @export
+junction_union <- function(...) {
+    merge_compilations(..., all = TRUE)
+}
+
+#' @export
+junction_intersection <- function(...) {
+    merge_compilations(..., all = FALSE)
+}
+
+merge_compilations <- function(..., all) {
+    compilations <- lapply(list(...), function(sb) {
+        sb$query_jx(return_rse = FALSE)
+    })
+
+    print(compilations)
+
+    if (length(compilations) == 1) {
+        return(compilations[[1]])
+    }
+
+    res <- compilations[[1]]
+    for (i in 2:length(compilations)) {
+        res <- merge(res, compilations[[i]], all = all,
+                     by = c("chromosome", "start", "end", "strand")) %>%
+            finalize_merge(col_names = names(compilations[[1]]))
+    }
+
+    res
+}
+
+finalize_merge <- function(dt, col_names) {
+    dt$samples <- str_cat(dt$samples.x, dt$samples.y)
+    dt$snaptron_id <- str_cat(dt$snaptron_id.x, dt$snaptron_id.y, sep = ",")
+    dt$`DataSource:Type` <- str_cat(dt$`DataSource:Type.x`, dt$`DataSource:Type.y`, sep = ",")
+    dt$source_dataset_id <- str_cat(dt$source_dataset_id.x, dt$source_dataset_id.y, sep = ",")
+
+    dt$coverage_sum <- sum(dt$coverage_sum.x, dt$coverage_sum.y, na.rm = TRUE)
+    dt$samples_count <- sum(dt$samples_count.x, dt$samples_count.y, na.rm = TRUE)
+    dt$coverage_avg <- dt$coverage_sum / dt$samples_count
+    dt$coverage_median <-
+        stringr::str_extract_all(dt$samples, "\\b\\d+\\b")[[1]][c(FALSE, TRUE)] %>%
+        as.numeric() %>% median()
+
+    dt$length <- choose_non_na(dt$length.x, dt$length.y)
+    dt$left_motif <- choose_non_na(dt$left_motif.x, dt$left_motif.y)
+    dt$right_motif <- choose_non_na(dt$right_motif.x, dt$right_motif.y)
+    dt$annotated <- choose_non_na(dt$annotated.x, dt$annotated.y)
+    dt$left_annotated <- choose_non_na(dt$left_annotated.x, dt$left_annotated.y)
+    dt$right_annotated <- choose_non_na(dt$right_annotated.x, dt$right_annotated.y)
+
+    dt[, col_names, with = FALSE]
+}
+
+str_cat <- function(..., sep = "") {
+    args <- list(...)
+    strings <- lapply(args, stringr::str_replace_na, replacement = "")
+
+    paste(strings[[1]], strings[[2]], sep = sep)
+}
+
+choose_non_na <- function(x, y) {
+    if (any(is.na(x))) {
+        y
+    } else {
+        x
+    }
+}
+
+#' @export
 junction_inclusion_ratio <- function(group1, group2, group_names = NULL) {
     stopifnot(is.list(group1), is.list(group2))
 
@@ -95,6 +164,7 @@ tissue_specificity_per_group <- function(group1, group2, group_name) {
 
     res <- merge(res, metadata, by.x = "sample_id", by.y = "rail_id", all = TRUE)
     res[is.na(res)] <- 0
+    # res[, -c("SMTS")][is.na(res[, -c("SMTS")])] <- 0
     res$group <- rep(group_name, nrow(res))
     data.table::setnames(res, old = "SMTS", new = "tissue")
 
