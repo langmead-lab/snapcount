@@ -23,8 +23,6 @@ merge_compilations <- function(..., all) {
         sb$query_jx(return_rse = FALSE)
     })
 
-    print(compilations)
-
     if (length(compilations) == 1) {
         return(compilations[[1]])
     }
@@ -42,15 +40,20 @@ merge_compilations <- function(..., all) {
 finalize_merge <- function(dt, col_names) {
     dt$samples <- str_cat(dt$samples.x, dt$samples.y)
     dt$snaptron_id <- str_cat(dt$snaptron_id.x, dt$snaptron_id.y, sep = ",")
-    dt$`DataSource:Type` <- str_cat(dt$`DataSource:Type.x`, dt$`DataSource:Type.y`, sep = ",")
-    dt$source_dataset_id <- str_cat(dt$source_dataset_id.x, dt$source_dataset_id.y, sep = ",")
 
-    dt$coverage_sum <- sum(dt$coverage_sum.x, dt$coverage_sum.y, na.rm = TRUE)
-    dt$samples_count <- sum(dt$samples_count.x, dt$samples_count.y, na.rm = TRUE)
+    dt$`DataSource:Type` <- str_cat(dt$`DataSource:Type.x`,
+                                    dt$`DataSource:Type.y`, sep = ",")
+    dt$source_dataset_id <- str_cat(dt$source_dataset_id.x,
+                                    dt$source_dataset_id.y, sep = ",")
+
+    dt$coverage_sum <- purrr::map2_int(dt$coverage_sum.x,
+                                   dt$coverage_sum.y, sum, na.rm = TRUE)
+    dt$samples_count <- purrr::map2_int(dt$samples_count.x,
+                                    dt$samples_count.y, sum, na.rm = TRUE)
     dt$coverage_avg <- dt$coverage_sum / dt$samples_count
     dt$coverage_median <-
-        stringr::str_extract_all(dt$samples, "\\b\\d+\\b")[[1]][c(FALSE, TRUE)] %>%
-        as.numeric() %>% median()
+        stringr::str_extract_all(dt$samples, "\\b\\d+\\b") %>%
+        lapply(calculate_coverage_median) %>% unlist()
 
     dt$length <- choose_non_na(dt$length.x, dt$length.y)
     dt$left_motif <- choose_non_na(dt$left_motif.x, dt$left_motif.y)
@@ -70,11 +73,11 @@ str_cat <- function(..., sep = "") {
 }
 
 choose_non_na <- function(x, y) {
-    if (any(is.na(x))) {
-        y
-    } else {
-        x
-    }
+    ifelse(is.na(x), y, x)
+}
+
+calculate_coverage_median <- function(samples) {
+    samples[c(FALSE, TRUE)] %>% as.numeric() %>% median()
 }
 
 #' @export
@@ -243,4 +246,18 @@ count_samples <- function(group, summarize = TRUE) {
 
 is_query_builder <- function(object) {
     return("SnaptronQueryBuilder" %in% class(object))
+}
+
+replace_na <- function(dt, replacement, colnames = NULL) {
+    if (!is.null(colnames)) {
+        for (name in colnames) {
+            set(dt, which(is.na(dt[[name]])), name, 0)
+        }
+    } else {
+        for (i in seq_along(dt)) {
+            set(dt, which(is.na(dt[[i]])), i, 0)
+        }
+    }
+
+    dt
 }

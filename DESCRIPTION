@@ -16,6 +16,7 @@ Imports:
     httr,
     rlang,
     tidyr,
+    purrr,
     testthat,
     data.table,
     Matrix,
