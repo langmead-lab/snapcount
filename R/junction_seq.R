@@ -1,3 +1,4 @@
+#' @export
 FormatForJunctionSeq <-
     R6::R6Class(
         "FormatForJunctionSeq",
