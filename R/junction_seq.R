@@ -7,7 +7,7 @@ FormatForJunctionSeq <-
                 private$group_names <- group_names
                 private$gene <- gene
                 private$design <-
-                    data.table::data.table(condition = factor(unlist(group_names)))
+                    data.frame(condition = factor(unlist(group_names)))
                 private$create_gff_inputs()
             },
 
@@ -320,10 +320,9 @@ FormatForJunctionSeq <-
                             data.table::fread(
                                 tsv,
                                 sep = "\t",
-                                header = FALSE,
-                                col.names = c("feature_id", "count")
-                            )
-                        data.table::setorder(dt, feature_id)
+                                header = FALSE
+                             )
+                        as.data.frame(data.table::setorder(dt, V1))
                     })
             },
 
