@@ -304,6 +304,10 @@ query_gene <- function(compilation, genes_or_intervals,
                   return_rse = return_rse)
     })
 
+    if (length(res) == 1) {
+        res <- res[[1]]
+    }
+
     if (should_bind) {
         rbind_func <- if (return_rse) SummarizedExperiment::rbind else rbind
         res <- do.call(rbind_func, res)
@@ -348,6 +352,10 @@ query_exon <- function(compilation, genes_or_intervals,
                   endpoint = "exons",
                   return_rse = return_rse)
     })
+
+    if (length(res) == 1) {
+        res <- res[[1]]
+    }
 
     if (should_bind) {
         rbind_func <- if (return_rse) SummarizedExperiment::rbind else rbind

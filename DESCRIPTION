@@ -17,6 +17,7 @@ Imports:
     rlang,
     tidyr,
     purrr,
+    jsonlite,
     testthat,
     data.table,
     Matrix,
