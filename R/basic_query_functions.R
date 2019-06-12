@@ -4,6 +4,8 @@ pkg_env <- new.env(parent = emptyenv())
 
 pkg_env$URI <- NULL
 
+`!!` <- rlang::`!!`
+
 
 # Compilations <- enum(a, b, c, d)
 
@@ -473,6 +475,40 @@ exprs <- function(..., frame = as.list(parent.frame())) {
     simplify2array(filters)
 }
 
+sample_filters_to_bool_expression <- function(sample_filters) {
+    sample_filters <- gsub("<:", "<=", sample_filters)
+    sample_filters <- gsub(">:", ">=", sample_filters)
+    sample_filters <- gsub(":", "==", sample_filters)
+
+    filter_expressions <- rlang::parse_exprs(sample_filters)
+    filter_expressions <- lapply(filter_expressions, function(e) {
+        if (!rlang::is_syntactic_literal(e[[3]])) {
+            e[[3]] <- rlang::as_string(e[[3]])
+        }
+
+        e
+    })
+
+    create_conjunction(filter_expressions)
+}
+
+create_conjunction <- function(expressions) {
+    if (length(expressions) == 0) {
+        return(NULL)
+    }
+
+    if (length(expressions) == 1) {
+        return(expressions[[1]])
+    }
+
+    res <- expressions[[1]]
+    for (i in 2:length(expressions)) {
+        res <- rlang::expr(!!res & !!expressions[[i]])
+    }
+
+    res
+}
+
 is_logical_op <- function(op) {
     logical_ops <-
         c(
@@ -534,7 +570,7 @@ run_query <- function(compilation, genes_or_intervals, endpoint = "snaptron", ra
         return(list(query_data = query_data, metadata = metadata))
     }
 
-    rse(query_data, metadata)
+    rse(query_data, metadata, sample_filters)
 }
 
 generate_snaptron_uri <- function(compilation, genes_or_intervals, endpoint = "snaptron", range_filters = NULL,
@@ -681,10 +717,15 @@ coverage_counts <- function(query_data, metadata) {
     dim(m) <- c(nrow(m) * ncol(m), 1)
 
     dims <- c(nrow(query_data), length(metadata$rail_id))
-    Matrix::sparseMatrix(i = i , j = j, x = as.numeric(m[, 1]), dimnames = list(NULL, metadata$rail_id), dims = dims)
+    Matrix::sparseMatrix(i = i, j = j, x = as.numeric(m[, 1]), dimnames = list(NULL, metadata$rail_id), dims = dims)
 }
 
-rse <- function(query_data, metadata, extract_counts = counts, extract_row_ranges = row_ranges, extract_col_data = col_data) {
+rse <- function(query_data, metadata, sample_filters = NULL, extract_counts = counts, extract_row_ranges = row_ranges, extract_col_data = col_data) {
+    if (!is.null(sample_filters)) {
+        predicate_expression <- sample_filters_to_bool_expression(sample_filters)
+        metadata <- eval(rlang::expr(metadata[!!predicate_expression]))
+    }
+
     row_ranges <- extract_row_ranges(query_data)
     counts <- extract_counts(query_data, metadata)
     col_data <- extract_col_data(metadata)
