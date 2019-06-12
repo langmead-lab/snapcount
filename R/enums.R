@@ -13,4 +13,5 @@ enum <- function(..., class) {
     res
 }
 
+#' @export
 Coordinates <- enum(Exact, Within, StartIsExactOrWithin, EndIsExactOrWithin, Overlaps)
