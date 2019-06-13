@@ -112,21 +112,18 @@ percent_spliced_in <- function(inclusion_group1, inclusion_group2, exclusion_gro
     c(g1, g2, ex) %<-% run_queries(inclusion_group1, inclusion_group2, exclusion_group)
 
     psi <- merge(g1, g2, by = "sample_id", all = TRUE) %>%
-        merge(ex, by = "sample_id", all = TRUE)
-    psi[is.na(psi)] <- 0
+        merge(ex, by = "sample_id", all = TRUE) %>%
+        replace_na(0L)
 
-    psi[, psi := calc_psi(coverage.x, coverage.y, coverage, min_count)][,]
+    psi[, psi := calc_psi(coverage.x, coverage.y, coverage, min_count)][]
 }
 
 calc_psi <- function(inclusion1, inclusion2, exclusion, min_count) {
-    mean_inclusion = (inclusion1 + inclusion2) / 2.
-    total = mean_inclusion + exclusion
+    mean_inclusion <- (inclusion1 + inclusion2) / 2.
+    total <- mean_inclusion + exclusion
+    psi <- mean_inclusion / total
 
-    if (inclusion1 == 0 || inclusion2 == 0 || total < min_count) {
-        return(-1)
-    }
-
-    mean_inclusion / total
+    ifelse(inclusion1 == 0 | inclusion2 == 0 | total < min_count, -1, psi)
 }
 
 #' @export
