@@ -201,6 +201,35 @@ jir<-junction_inclusion_ratio(list(groupA),list(groupB),group_names=c("groupA","
 head(jir)
 ```
 
+## Tissue Specificity
+
+The tissue specificity high level function supports the ability to look for enrichment of tissues across two sets of splicing patterns. 
+GTEx is the primary compilation targeted here, but it could work in  other compilations which have complete tissue metadata (possibly TCGA).
+
+The main output of the TS function is a list of all the samples in the compilation with either a "1" in the *shared* column or a "0".
+The "1" indicates that there was at least one junction from both groups which occurred in that sample, i.e. the sample is shared across the results of the two junction queries.
+
+The output of this function can be passed to an F-test to measure the signifcance of the specificity (if present) which uses the number of samples for a tissue
+that have the "shared" property set to "1".
+
+A use case of the TS function is to measure the significance of tissue enrichment across junctions which support a cassette exon.
+
+```{r 'merge', eval = FALSE}
+groupA <- SnaptronQueryBuilder$new(compilation="gtex", genes_or_intervals="chr4:20763023-20763023", range_filters="strand=-", coordinate_modifier=Coordinates$EndIsExactOrWithin)
+
+groupB <- SnaptronQueryBuilder$new(compilation="gtex", genes_or_intervals="chr4:20763098-20763098", range_filters="strand=-", coordinate_modifier=Coordinates$StartIsExactOrWithin)
+
+#inclusion_group1<-SnaptronQueryBuilder$new()
+#inclusion_group1<-inclusion_group1$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr4:20763023-20763023&either=2&rfilter=strand:-")
+#inclusion_group2<-SnaptronQueryBuilder$new()
+#inclusion_group2<-inclusion_group2$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr4:20763098-20763098&either=1&rfilter=strand:-")
+#ts2<-tissue_specificity(list(inclusion_group1, inclusion_group2), group_names = c("groupA","groupB"))
+
+ts<-tissue_specificity(list(groupA, groupB))
+head(ts)
+```
+
+
 ## Merge
 
 Merge is primarily useful for combining the results of two basic queries against two different compilations which share the same reference version (e.g. HG38).
