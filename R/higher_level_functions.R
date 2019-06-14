@@ -1,11 +1,5 @@
 #' @import data.table
 
-if (Sys.info()["sysname"] == "Windows") {
-    num_cores <- 1
-} else {
-    num_cores <- parallel::detectCores()
-}
-
 `%>%` <- magrittr::`%>%`
 
 #' @export
@@ -208,9 +202,7 @@ shared_sample_count <- function(group1, group2) {
 }
 
 run_queries <- function(..., summarize = TRUE) {
-    groups <- list(...)
-    suggested_cores <- min(num_cores, length(groups))
-    parallel::mclapply(groups, count_samples, summarize = summarize, mc.cores = suggested_cores)
+    lapply(list(...), count_samples, summarize = summarize)
 }
 
 count_samples <- function(group, summarize = TRUE) {
