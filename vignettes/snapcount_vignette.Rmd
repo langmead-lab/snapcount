@@ -201,7 +201,43 @@ jir<-junction_inclusion_ratio(list(groupA),list(groupB),group_names=c("groupA","
 head(jir)
 ```
 
-## Tissue Specificity
+## Shared Sample Count (SSC)
+
+The SSC high level function is designed to support the requirement of many analyses to incorporate multiple splice junctions that are related to the same alternative splicing variant (e.g. an alternatively spliced in cassette exon).  Shared sample count is therefore used to determine if the junctions related to this variant, resulting from the two basic queries the user defines, occur in the same sample.  
+
+If one or more junctions in each query's results occur in a specific sample then that sample is considered "shared", otherwise it's not counted.
+
+The output of the SSC function is a count of samples with this shared property, for each group of two basic junction queries that the user defines.
+
+```{r 'ssc', eval = FALSE}
+
+## We define the left/right splice junction supports of 3 cassete exons for the following 3 genes:
+
+## "left"/"right" is relative to the forward strand, reference genome coordinates, we use this terminology instead of 5' or 3' since the gene may be on the reverse strand.
+
+###GNB1
+GNB1_left <- SnaptronQueryBuilder$new(compilation="gtex", genes_or_intervals="chr1:1879786-1879786", range_filters="strand:-", coordinate_modifier=Coordinates$EndIsExactOrWithin)
+
+GNB1_right <- SnaptronQueryBuilder$new(compilation="gtex", genes_or_intervals="chr1:1879903-1879903", range_filters="strand:-", coordinate_modifier=Coordinates$StartIsExactOrWithin)
+
+###PIK3CD
+PIK3CD_left <- SnaptronQueryBuilder$new(compilation="gtex", genes_or_intervals="chr1:9664595-9664595", range_filters="strand:+", coordinate_modifier=Coordinates$EndIsExactOrWithin)
+
+PIK3CD_right <- SnaptronQueryBuilder$new(compilation="gtex", genes_or_intervals="chr1:9664759-9664759", range_filters="strand:+", coordinate_modifier=Coordinates$StartIsExactOrWithin)
+
+###TAP2
+TAP2_left <- SnaptronQueryBuilder$new(compilation="gtex", genes_or_intervals="chr6:32831148-32831148", range_filters="strand:-", coordinate_modifier=Coordinates$EndIsExactOrWithin)
+
+TAP2_right <- SnaptronQueryBuilder$new(compilation="gtex", genes_or_intervals="chr6:32831182-32831182", range_filters="strand:-", coordinate_modifier=Coordinates$StartIsExactOrWithin)
+
+
+ssc<-shared_sample_counts(list(GNB1_left, GNB1_right), list(PIK3CD_left, PIK3CD_right), list(TAP2_left, TAP2_right))
+ssc
+
+```
+
+
+## Tissue Specificity (TS)
 
 The tissue specificity high level function supports the ability to look for enrichment of tissues across two sets of splicing patterns. 
 GTEx is the primary compilation targeted here, but it could work in  other compilations which have complete tissue metadata (possibly TCGA).
@@ -214,7 +250,7 @@ that have the "shared" property set to "1".
 
 A use case of the TS function is to measure the significance of tissue enrichment across junctions which support a cassette exon.
 
-```{r 'merge', eval = FALSE}
+```{r 'ts', eval = FALSE}
 groupA <- SnaptronQueryBuilder$new(compilation="gtex", genes_or_intervals="chr4:20763023-20763023", range_filters="strand=-", coordinate_modifier=Coordinates$EndIsExactOrWithin)
 
 groupB <- SnaptronQueryBuilder$new(compilation="gtex", genes_or_intervals="chr4:20763098-20763098", range_filters="strand=-", coordinate_modifier=Coordinates$StartIsExactOrWithin)
