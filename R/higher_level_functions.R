@@ -86,8 +86,9 @@ junction_inclusion_ratio <- function(group1, group2, group_names = NULL) {
 
     c(s1, s2) %<-% run_queries(group1, group2)
 
-    jir <- merge(s1, s2, by = "sample_id", all = TRUE)
-    jir[is.na(jir)] <- 0
+    jir <- merge(s1, s2, by = "sample_id", all = TRUE) %>%
+        replace_na(0)
+
     jir[, jir := calc_jir(coverage.y, coverage.x)]
 
     if (is.null(group_names)) {
@@ -155,16 +156,16 @@ tissue_specificity_per_group <- function(group1, group2, group_name) {
 
     stopifnot(is.list(group1), is.list(group2))
     c(res1, res2) %<-% run_queries(group1, group2, summarize = FALSE)
-    res <- merge(res1, res2, by = "sample_id", all = TRUE)
-    res[is.na(res)] <- 0
+    res <- merge(res1, res2, by = "sample_id", all = TRUE) %>%
+        replace_na(0)
     res <- res[, shared := shared(coverage.x, coverage.y)][, !c("coverage.x", "coverage.y")]
 
     metadata <- get_compilation_metadata(group1[[1]]$compilation())
     metadata <- metadata[, .(rail_id, SMTS)]
 
     res <- merge(res, metadata, by.x = "sample_id", by.y = "rail_id", all = TRUE)
-    res[is.na(res)] <- 0
-    # res[, -c("SMTS")][is.na(res[, -c("SMTS")])] <- 0
+    res <- replace_na(res, 0, colnames = setdiff(names(res), "SMTS"))
+
     res$group <- rep(group_name, nrow(res))
     data.table::setnames(res, old = "SMTS", new = "tissue")
 
