@@ -1,13 +1,10 @@
-# https://stackoverflow.com/a/44152358
-enum <- function(..., class) {
-    values <- sapply(match.call(expand.dots = TRUE)[-1L], deparse)
+enum <- function(...) {
+    variants <- rlang::ensyms(...)
+    values <- purrr::map(variants, rlang::as_string)
 
-    stopifnot(identical(unique(values), values))
-
-    res <- setNames(seq_along(values), values)
+    res <- setNames(values, values)
     res <- as.environment(as.list(res))
 
-    class(res) <- c("enum", "environment")
     lockEnvironment(res, bindings = TRUE)
 
     res
@@ -15,3 +12,6 @@ enum <- function(..., class) {
 
 #' @export
 Coordinates <- enum(Exact, Within, StartIsExactOrWithin, EndIsExactOrWithin, Overlaps)
+
+#' @export
+Compilation <- enum(gtex, tcga, srav2, sra)

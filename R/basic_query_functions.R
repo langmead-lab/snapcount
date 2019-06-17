@@ -177,10 +177,10 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
 
                 if (param == "coordinate_modifier") {
                     desc <- switch(private$query[[param]],
-                                   `Coordinates$Exact` = "exact",
-                                   `Coordinates$Within` = "contains",
-                                   `Coordinates$StartIsExactOrWithin` = "either=1",
-                                   `Coordinates$EndIsExactOrWithin` = "either=2",
+                                   Exact = "exact",
+                                   Within = "contains",
+                                   StartIsExactOrWithin = "either=1",
+                                   EndIsExactOrWithin = "either=2",
                                    "overlaps")
                 } else {
                     desc <- paste(private$query[[param]], collapse = ",")
@@ -233,7 +233,7 @@ query_jx <- function(compilation, genes_or_intervals, range_filters = NULL,
         regions <- extract_intervals(genes_or_intervals)
         strands <- extract_strands(genes_or_intervals)
 
-        stopifnot(length(regions) == length(regions))
+        stopifnot(length(regions) == length(strands))
     }
 
     should_bind <- length(regions) > 1 && !split_by_region
@@ -582,7 +582,7 @@ generate_snaptron_uri <- function(compilation, genes_or_intervals, endpoint = "s
         stop("compilation is a required argument")
     }
 
-    stopifnot(compilation %in% c("tcga", "srav2", "srav1", "gtex"))
+    stopifnot(compilation %in% names(Compilation))
 
     path <- paste(compilation, paste0(endpoint, "?"), sep = "/")
     query <- ""
