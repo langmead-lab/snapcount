@@ -177,7 +177,7 @@ shared_sample_counts <- function(..., group_names = NULL) {
 
     counts <- lapply(list_of_groups, function(g) {
         shared_sample_count(g[[1]], g[[2]])
-    })
+    }) %>% unlist()
 
     if (is.null(group_names)) {
         group_names <- paste0("g", 1:num_groups)
