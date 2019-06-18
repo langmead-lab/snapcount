@@ -428,7 +428,7 @@ uri_of_last_successful_request <- function() {
 }
 
 get_compilation_metadata <- function(compilation) {
-    stopifnot(compilation %in% c("tcga", "srav2", "srav1", "gtex"))
+    stopifnot(compilation %in% names(Compilation))
 
     if (is.null(pkg_env$metadata[[compilation]])) {
         uri <- sprintf("http://snaptron.cs.jhu.edu/%s/samples?all=1", compilation)
