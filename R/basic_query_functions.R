@@ -661,14 +661,15 @@ convert_to_sparse_matrix <- function(samples, samples_count, snaptron_ids, compi
     rail_ids_and_counts <- strsplit(samples, ":", fixed = TRUE)
 
     rail_ids <- as.numeric(vapply(rail_ids_and_counts, `[`, 1, FUN.VALUE = ""))
+    unique_rail_ids <- unique(sort(rail_ids))
 
     i <- rep(seq_along(samples_count), samples_count)
-    j <- match(rail_ids, compilation_rail_ids)
+    j <- match(rail_ids, unique_rail_ids)
     x <- as.numeric(vapply(rail_ids_and_counts, `[`, 2, FUN.VALUE = ""))
 
-    dims <- c(length(snaptron_ids), length(compilation_rail_ids))
+    dims <- c(length(snaptron_ids), length(unique_rail_ids))
 
-    Matrix::sparseMatrix(i = i, j = j, x = x, dimnames = list(snaptron_ids, compilation_rail_ids), dims = dims)
+    Matrix::sparseMatrix(i = i, j = j, x = x, dimnames = list(snaptron_ids, unique_rail_ids), dims = dims)
 }
 
 counts <- function(query_data, metadata) {
@@ -677,7 +678,11 @@ counts <- function(query_data, metadata) {
 }
 
 col_data <- function(metadata, sids = NULL) {
-    metadata
+    if (is.null(sids) || length(sids) == length(metadata$rail_id)) {
+        metadata
+    } else {
+        metadata[rail_id %in% sids]
+    }
 }
 
 row_ranges <- function(query_data) {
@@ -721,14 +726,14 @@ coverage_counts <- function(query_data, metadata) {
 }
 
 rse <- function(query_data, metadata, sample_filters = NULL, extract_counts = counts, extract_row_ranges = row_ranges, extract_col_data = col_data) {
-    if (!is.null(sample_filters)) {
-        predicate_expression <- sample_filters_to_bool_expression(sample_filters)
-        metadata <- eval(rlang::expr(metadata[!!predicate_expression]))
-    }
+    ## if (!is.null(sample_filters)) {
+    ##     predicate_expression <- sample_filters_to_bool_expression(sample_filters)
+    ##     metadata <- eval(rlang::expr(metadata[!!predicate_expression]))
+    ## }
 
     row_ranges <- extract_row_ranges(query_data)
     counts <- extract_counts(query_data, metadata)
-    col_data <- extract_col_data(metadata)
+    col_data <- extract_col_data(metadata, sids = colnames(counts))
 
     SummarizedExperiment::SummarizedExperiment(
         assays = list(counts = counts),
