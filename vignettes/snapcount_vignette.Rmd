@@ -43,9 +43,9 @@ devtools::install_github("langmead-lab/snapr")
 
 ## Required knowledge
 
-`r Biocpkg('snapcount')` is based on other packages and in particular in those that have implemented the infrastructure needed for dealing with RNA-seq data. That is, packages like `r Biocpkg('GenomicFeatures')` and `r Biocpkg('recount')` that allow you to import the data. A `r Biocpkg('snapcount')` user is not expected to deal with those packages directly but will need to be familiar with `r Biocpkg('SummarizedExperiment')` to understand the results `r Biocpkg('snapcount')` generates.
+`r Biocpkg('snapcount')` is based on other packages and in particular in those that have implemented the infrastructure needed for dealing with RNA-seq data. That is, packages like `r Biocpkg('GenomicFeatures')` and `r Biocpkg('recount')` that allow you to import the data. A `r Biocpkg('snapcount')` user is not expected to deal with those packages directly but will need to be familiar with `r Biocpkg('SummarizedExperiment')` to understand the results `r Biocpkg('snapcount')` generates.  This vignette is based partially on the [recount2 quick start guide](https://bioconductor.org/packages/release/bioc/vignettes/recount/inst/doc/recount-quickstart.html).
 
-If you are asking yourself the question "Where do I start using Bioconductor?" you might be interested in [this blog post](http://lcolladotor.github.io/2014/10/16/startBioC/#.VkOKbq6rRuU).
+If you are asking yourself the question "Where do I start using Bioconductor?" you might be interested in [this blog post](http://lcolladotor.github.io/2014/10/16/startbioc/).
 
 ## Asking for help
 
@@ -58,9 +58,11 @@ For questions regarding Snaptron itself and/or its data, please use the [Gitter 
 
 We hope that `r Biocpkg('snapcount')` will be useful for your research. Please use the following information to cite the package and the overall approach. Thank you!
 
-```{r 'citation'}
-## Citation info
-#citation('snapcount')
+```
+  Christopher Wilks, Rone Charles, Ben Langmead (2019). 
+  snapcount: R/Bioconductor Package for interfacing with Snaptron 
+  for rapid quering of expression counts.
+  https://github.com/langmead-lab/snapr
 ```
 
 # Quick start to using `r Biocpkg('snapcount')`
