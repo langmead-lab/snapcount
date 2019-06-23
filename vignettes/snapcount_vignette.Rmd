@@ -56,13 +56,21 @@ For questions regarding Snaptron itself and/or its data, please use the [Gitter 
 
 ## Citing `r Biocpkg('snapcount')`
 
-We hope that `r Biocpkg('snapcount')` will be useful for your research. Please use the following information to cite the package and the overall approach. Thank you!
+We hope that `r Biocpkg('snapcount')` will be useful for your research. Please use the following information to cite the package specifically, thank you!
 
 ```
-  Christopher Wilks, Rone Charles, Ben Langmead (2019). 
-  snapcount: R/Bioconductor Package for interfacing with Snaptron 
-  for rapid quering of expression counts.
-  https://github.com/langmead-lab/snapr
+Christopher Wilks, Rone Charles, Ben Langmead (2019). 
+snapcount: R/Bioconductor Package for interfacing with Snaptron 
+for rapid quering of expression counts.
+https://github.com/langmead-lab/snapr
+```
+
+The Snaptron project itself is published separately and can be cited with the following:
+```
+Wilks, C, Gaddipati, P, Nellore, A, Langmead, B (2018). 
+Snaptron: querying splicing patterns across tens 
+of thousands of RNA-seq samples. 
+Bioinformatics, 34, 1:114-116.
 ```
 
 # Quick start to using `r Biocpkg('snapcount')`
