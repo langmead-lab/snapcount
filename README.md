@@ -10,6 +10,10 @@ Status](https://travis-ci.com/langmead-lab/snapr.svg?token=vEUBb2QKjox3PdRAssp8&
 
 `snapr` is a package for interfacing with Snaptron’s REST API.
 
+## Vignette
+
+http://snaptron.cs.jhu.edu/snapcount_vignette.html
+
 ## Installation
 
 ``` r
