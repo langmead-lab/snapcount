@@ -32,10 +32,9 @@ startTime <- Sys.time()
 `R` is an open-source statistical environment which can be easily modified to enhance its functionality via packages. `r Biocpkg('recount')` is a `R` package available via the [Bioconductor](http://bioconductor/packages/recount) repository for packages. `R` can be installed on any operating system from [CRAN](https://cran.r-project.org/) after which you can install `r Biocpkg('recount')` by using the following commands in your `R` session:
 
 ```{r 'installDer', eval = FALSE}
-install.packages("BiocManager")
-#BiocManager::install("snapcount")
-## Check that you have a valid Bioconductor installation
-#BiocManager::valid()
+#Snapcount is not yet in BioConfuctor, temporarily, you can install it from the GitHub repository directly using devtools
+devtools::install_github("langmead-lab/snapr")
+
 ```
 
 ## Required knowledge
@@ -159,11 +158,6 @@ Additionally the value of -1 is used in `r Biocpkg('snapcount')`'s PSI function 
 ## Load library
 library('snapcount')
 
-#shadow for testing against the snaptron client
-#inc_left<-inc_left$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr19:45297955-45298142&exact=1&rfilter=strand:+")
-#inc_right<-inc_right$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr19:45298223-45299810&exact=1&rfilter=strand:+")
-#ex<-ex$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr19:45297955-45299810&exact=1&rfilter=strand:+")
-
 #Build new query against GTEx
 inc_left <- SnaptronQueryBuilder$new(compilation="gtex", genes_or_intervals="chr19:45297955-45298142", range_filters="strand=+", coordinate_modifier=Coordinates$Exact)
 inc_right <- SnaptronQueryBuilder$new(compilation="gtex", genes_or_intervals="chr19:45298223-45299810", range_filters="strand=+", coordinate_modifier=Coordinates$Exact)
@@ -254,49 +248,11 @@ groupA <- SnaptronQueryBuilder$new(compilation="gtex", genes_or_intervals="chr4:
 
 groupB <- SnaptronQueryBuilder$new(compilation="gtex", genes_or_intervals="chr4:20763098-20763098", range_filters="strand=-", coordinate_modifier=Coordinates$StartIsExactOrWithin)
 
-#inclusion_group1<-SnaptronQueryBuilder$new()
-#inclusion_group1<-inclusion_group1$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr4:20763023-20763023&either=2&rfilter=strand:-")
-#inclusion_group2<-SnaptronQueryBuilder$new()
-#inclusion_group2<-inclusion_group2$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr4:20763098-20763098&either=1&rfilter=strand:-")
-#ts2<-tissue_specificity(list(inclusion_group1, inclusion_group2), group_names = c("groupA","groupB"))
 
 ts<-tissue_specificity(list(groupA, groupB))
 head(ts)
 ```
 
-
-## Merge
-
-Merge is primarily useful for combining the results of two basic queries against two different compilations which share the same reference version (e.g. HG38).
-
-A specific use case would be to get a list of unique splice junctions and their counts in both the TCGA and GTEx compilations to look for differential expression of a specific junction in cancer versus normal tissues.
-
-Merge takes the resulting coverage tables from two basic queries from two different compilations 
-and combines the rows where the mapped element is the same (e.g. the same splice junction) by concatenating the per-sample coverage count columns.
-
-```{r 'merge', eval = FALSE}
-## Load library
-library('snapcount')
-
-#Build new query against TCGA
-sb1 <- SnaptronQueryBuilder$new()
-sb1$compilation("tcga")
-sb1$genes_or_intervals("chr1:1879786-1879786")
-sb1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-sb1$range_filters("strand:-")
-
-#use same query, but just on GTEx
-sb2<-sb1$clone(deep=TRUE)
-sb2$compilation("gtex")
-
-merged <- junction_union(sb1, sb2)
-head(merged)
-```
-
-Merge will currently return a *data frame* of the results.
-
-This was originally chosen to avoid the expense of materializing the full maxtrix of counts for all samples in both compilations 
-which would be computationally expensive when many of the counts will be 0 (for splice junctions).
 
 
 
