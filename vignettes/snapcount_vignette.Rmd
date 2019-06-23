@@ -27,15 +27,14 @@ startTime <- Sys.time()
 
 # Basics
 
-## Install `r Biocpkg('snapcount')`
+## Install snapcount
 
 `R` is an open-source statistical environment which can be easily modified to enhance its functionality via packages. 
-`r Biocpkg('recount')` is a `R` package available via the [Bioconductor](http://bioconductor/packages/recount) repository for packages. 
-`R` can be installed on any operating system from [CRAN](https://cran.r-project.org/) after which you can install `r Biocpkg('recount')` 
+`R` can be installed on any operating system from [CRAN](https://cran.r-project.org/) after which you can install snapcount 
 by using the following commands in your `R` session:
 
 ```{r 'installDer', eval = FALSE}
-#Snapcount is not yet in BioConfuctor, temporarily, 
+#Snapcount is not yet in BioConfuctor, 
 #you can install it from the GitHub repository directly using devtools
 devtools::install_github("langmead-lab/snapr")
 
@@ -43,7 +42,7 @@ devtools::install_github("langmead-lab/snapr")
 
 ## Required knowledge
 
-`r Biocpkg('snapcount')` is based on other packages and in particular in those that have implemented the infrastructure needed for dealing with RNA-seq data. That is, packages like `r Biocpkg('GenomicFeatures')` and `r Biocpkg('recount')` that allow you to import the data. A `r Biocpkg('snapcount')` user is not expected to deal with those packages directly but will need to be familiar with `r Biocpkg('SummarizedExperiment')` to understand the results `r Biocpkg('snapcount')` generates.  This vignette is based partially on the [recount2 quick start guide](https://bioconductor.org/packages/release/bioc/vignettes/recount/inst/doc/recount-quickstart.html).
+snapcount is based on other packages and in particular in those that have implemented the infrastructure needed for dealing with RNA-seq data. That is, packages like `r Biocpkg('GenomicFeatures')` and `r Biocpkg('recount')` that allow you to import the data. A snapcount user is not expected to deal with those packages directly but will need to be familiar with `r Biocpkg('SummarizedExperiment')` to understand the results snapcount generates.  This vignette is based partially on the [recount2 quick start guide](https://bioconductor.org/packages/release/bioc/vignettes/recount/inst/doc/recount-quickstart.html).
 
 If you are asking yourself the question "Where do I start using Bioconductor?" you might be interested in [this blog post](http://lcolladotor.github.io/2014/10/16/startbioc/).
 
@@ -51,12 +50,12 @@ If you are asking yourself the question "Where do I start using Bioconductor?" y
 
 As package developers, we try to explain clearly how to use our packages and in which order to use the functions. But `R` and `Bioconductor` have a steep learning curve so it is critical to learn where to ask for help. The blog post quoted above mentions some but we would like to highlight the [Bioconductor support site](https://support.bioconductor.org/) as the main resource for getting help: remember to use the `snapcount` tag and check [the older posts](https://support.bioconductor.org/t/snapcount/). Other alternatives are available such as creating GitHub issues and tweeting. However, please note that if you want to receive help you should adhere to the [posting guidelines](http://www.bioconductor.org/help/support/posting-guide/). It is particularly critical that you provide a small reproducible example and your session information so package developers can track down the source of the error.
 
-`r Biocpkg('snapcount')` is an interface to the Snaptron webservices and data.
+snapcount is an interface to the Snaptron webservices and data.
 For questions regarding Snaptron itself and/or its data, please use the [Gitter channel](https://gitter.im/snaptron/Lobby).
 
-## Citing `r Biocpkg('snapcount')`
+## Citing snapcount
 
-We hope that `r Biocpkg('snapcount')` will be useful for your research. Please use the following information to cite the package specifically, thank you!
+We hope that snapcount will be useful for your research. Please use the following information to cite the package specifically, thank you!
 
 ```
 Christopher Wilks, Rone Charles, Ben Langmead (2019). 
@@ -73,28 +72,28 @@ of thousands of RNA-seq samples.
 Bioinformatics, 34, 1:114-116.
 ```
 
-# Quick start to using `r Biocpkg('snapcount')`
+# Quick start to using snapcount
 
 Similar to the `r Biocpkg('recount')` all coverage counts in Snaptron/snapcount are stored/retrieved as raw, un-normalized counts.
 
 
 # Introduction
 
-`r Biocpkg('snapcount')` is an R package that provides an interface to the [Snaptron web services](http://snaptron.cs.jhu.edu/). 
+snapcount is an R package that provides an interface to the [Snaptron web services](http://snaptron.cs.jhu.edu/). 
 This package allows you to query and download coverage counts for genes, exons, and exon-exon splice junctions from all (or a subset) of RNA-seq studies.
 These RNA-seq studies are organized into compilations (e.g. srav2) that include the same sets of studies that the `r Biocpkg('recount')`  organizes.
 
-The RNA-seq reads from these studies was analyzed through the [Rail-RNA](http://rail.bio) aligner producing the coverage counts used by both `r Biocpkg('recount')` and `r Biocpkg('snapcount')`.
+The RNA-seq reads from these studies was analyzed through the [Rail-RNA](http://rail.bio) aligner producing the coverage counts used by both `r Biocpkg('recount')` and snapcount.
 
-`r Biocpkg('snapcount')` complements `r Biocpkg('recount')` in that it allows searching by a specific gene/exon/splice-junction's coordinates or by a HUGO gene across all studies in a specific compilation (e.g. all SRA Human RNA-seq studies in `r Biocpkg('recount')`).
+snapcount complements `r Biocpkg('recount')` in that it allows searching by a specific gene/exon/splice-junction's coordinates or by a HUGO gene across all studies in a specific compilation (e.g. all SRA Human RNA-seq studies in `r Biocpkg('recount')`).
 
-In short, `r Biocpkg('snapcount')` is gene/region centric whereas `r Biocpkg('recount')` is study centric.
+In short, snapcount is gene/region centric whereas `r Biocpkg('recount')` is study centric.
 
-If getting the counts for *all* the genes, exons, and/or splice junctions in an annotation from a particular study is your goal, then we suggest you use the `r Biocpkg('recount')` package instead of `r Biocpkg('snapcount')`.  
+If getting the counts for *all* the genes, exons, and/or splice junctions in an annotation from a particular study is your goal, then we suggest you use the `r Biocpkg('recount')` package instead of snapcount.  
 
-Alternatively, if you're interested in the counts from one or a few genes, but across all (or most) studies/samples in recount2/Snaptron, then you should try `r Biocpkg('snapcount')`.
+Alternatively, if you're interested in the counts from one or a few genes, but across all (or most) studies/samples in recount2/Snaptron, then you should try snapcount.
 
-This vignette will walk you through examples using the two main areas of the `r Biocpkg('snapcount')`  package:
+This vignette will walk you through examples using the two main areas of the snapcount  package:
 
 * Basic queries to get raw counts from genes, exons, and splice junctions
 * High level queries which utilize the basic queries but then do additional summarization (e.g. percent-spliced-in [PSI])
@@ -167,7 +166,7 @@ head(cd99.jx.all$InsertSize)
 
 # High level queries
 
-`r Biocpkg('snapcount')` can be used to summarize the raw results of the basic queries 
+snapcount can be used to summarize the raw results of the basic queries 
 into a more relevant form for downstream analyses via its high level queries.
 
 High level queries include the following:
@@ -183,12 +182,12 @@ The results of high level queries are data frames unless otherwise specified.
 
 PSI is a relative measure of usage of a particular splicing variant.
 
-`r Biocpkg('snapcount')`'s version of PSI is currently limited to the common case 
+snapcount's version of PSI is currently limited to the common case 
 of cassette exons which have two inclusion junctions and one exclusion junction.
 
 The original PSI's values range from 0 to 1 where 0 represents no inclusion coverage for that sample.
 
-Additionally the value of -1 is used in `r Biocpkg('snapcount')`'s PSI function to represent 
+Additionally the value of -1 is used in snapcount's PSI function to represent 
 samples where either one or the other inclusion groups had 0 coverage or the total raw coverage 
 across groups was < min_count (defaults to 20).
 
