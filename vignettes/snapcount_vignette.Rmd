@@ -119,15 +119,19 @@ Also, metadata within a compilation can be incomplete or formatted inconsistentl
 library('snapcount')
 
 ##Query all exon-exon splice junctions within the region of gene CD99 from GTEx v6 sample compilation
-##CD99 is chosen to be an example for its limited size, no specific functional elements are being highlighted.
+##CD99 is chosen to be an example for its manageable size, no specific functional elements are being highlighted.
 cd99.jx.all <- query_jx(compilation='gtex', genes_or_intervals='CD99')
+head(cd99.jx.all)
 
 ##Query coverage for gene, exon, and annotated junctions across all GTEx samples that are labeled with tissue type "Brain" in the region of the CD99 gene
 
 cd99.gene <- query_gene(compilation='gtex', genes_or_intervals='CD99', sample_filters='SMTS:Brain')
+head(cd99.gene)
 cd99.exon <- query_exon(compilation='gtex', genes_or_intervals='CD99', sample_filters='SMTS:Brain')
+head(cd99.exon)
 ###Only query junctions which are fully annotated---both left and right splice sites are found together in one or more of the Snaptron sourced annotations
 cd99.jx <- query_jx(compilation='gtex', genes_or_intervals='CD99', range_filters='annotated:1', sample_filters='SMTS:Brain')
+head(cd99.jx)
 
 ##Full compilation metadata (in this case for GTEx) per sample is stored directly in the RangedSummarizedExperient objects returned for each query above.
 ###For example the library insert size can be retrieved across all runs  in the RSE
@@ -145,6 +149,8 @@ High level queries include the following:
 * Junction Inclusion Ratio (JIR)
 * Shared sample count (SSC)
 * Tissue specificity
+
+The results of high level queries are data frames unless otherwise specified.
 
 ## Percent spliced in (PSI)
 
@@ -231,7 +237,7 @@ TAP2_left <- SnaptronQueryBuilder$new(compilation="gtex", genes_or_intervals="ch
 TAP2_right <- SnaptronQueryBuilder$new(compilation="gtex", genes_or_intervals="chr6:32831182-32831182", range_filters="strand:-", coordinate_modifier=Coordinates$StartIsExactOrWithin)
 
 
-ssc<-shared_sample_counts(list(GNB1_left, GNB1_right), list(PIK3CD_left, PIK3CD_right), list(TAP2_left, TAP2_right))
+ssc<-shared_sample_counts(list(GNB1_left, GNB1_right), list(PIK3CD_left, PIK3CD_right), list(TAP2_left, TAP2_right), group_names=c("validated", "not validated", "validated"))
 ssc
 
 ```
@@ -294,8 +300,10 @@ merged <- junction_union(sb1, sb2)
 head(merged)
 ```
 
-Merge will return a *DataFrame* of the results.
+Merge will currently return a *data frame* of the results.
 
-This avoids the expense of materializing the full maxtrix of counts for all samples in both compilations 
+This was originally chosen to avoid the expense of materializing the full maxtrix of counts for all samples in both compilations 
 which would be computationally expensive when many of the counts will be 0 (for splice junctions).
+
+
 
