@@ -1,5 +1,5 @@
 ---
-title: "snapcount vigette"
+title: "snapcount vignette"
 author: 
   - name: Christopher Wilks
     affiliation:
