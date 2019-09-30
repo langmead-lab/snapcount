@@ -1,14 +1,18 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# snapr
+# snapcount
 
 [![Build
 Status](https://travis-ci.com/langmead-lab/snapr.svg?token=vEUBb2QKjox3PdRAssp8&branch=master)](https://travis-ci.com/langmead-lab/snapr)
 
 ## Overview
 
-`snapr` is a package for interfacing with Snaptron’s REST API.
+`snapcount` is a package for interfacing with Snaptron’s REST API.
+
+## Vignette
+
+http://snaptron.cs.jhu.edu/snapcount_vignette.html
 
 ## Installation
 
@@ -23,7 +27,7 @@ devtools::install_github("langmead-lab/snapr")
 ##### snapr can be used with either a procedural interface
 
 ``` r
-library(snapr)
+library(snapcount)
 
 query_jx(compilation = "gtex", genes_or_intervals = "CD99")
 #> class: RangedSummarizedExperiment 
