@@ -1,14 +1,22 @@
 `%>%` <- magrittr::`%>%`
 
-Registry <- NULL
+pkg_globals <- new.env(parent = emptyenv())
 
 .onLoad <- function(...) {
-    registry <- httr::GET("http://snaptron.cs.jhu.edu/snaptron/registry")
+    json_data <- httr::GET("http://snaptron.cs.jhu.edu/snaptron/registry")
+    if (httr::http_error(json_data)) {
+        return()
+    }
     start <- 8
-    end <- length(registry$content)
-    Registry <<- registry$content[start:end] %>%
+    end <- length(json_data$content)
+    registry <- json_data$content[start:end] %>%
         rawToChar() %>% jsonlite::fromJSON()
-    variants <- names(Registry) %>% as.list()
+    compilation_names <- names(registry) %>% as.list()
 
-    Compilation <<- do.call(enum, variants)
+    if (length(compilation_names) == 0) {
+        return()
+    }
+    assign("registry", registry, pkg_globals)
+    assign("metadata", list(), pkg_globals)
+    Compilation <<- do.call(enum, compilation_names)
 }

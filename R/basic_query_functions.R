@@ -1,43 +1,17 @@
-#' @import data.table
-
-pkg_env <- new.env(parent = emptyenv())
-
-pkg_env$URI <- NULL
-
-`!!` <- rlang::`!!`
-
-
-# Compilations <- enum(a, b, c, d)
-
-# Compilations
-
 #' A Reference Class for building Snaptron queries
 #'
-#'
-#' @section Usage:
-#' \preformatted{
-#' sb <- SnaptronQueryBuilder$new()
-#'
-#' sb$compilation("tcga")
-#' sb$range_filters(exprs(samples_count <= 10))$sids(500:600)
-#'
-#' sb$from_url("http://snaptron.cs.jhu.edu/tcga/snaptron?region=CD99")$query_jx()
-#'
-#' print(sb)
-#'}
-#'
 #' @section Methods:
-#' \code{compilation} Get/set snaptron
+#' \code{compilation} Get or set snaptron compilation
 #'
-#' \code{genes_or_intervals} Get/set genes or intervals
+#' \code{genes_or_intervals} Get or set either genes or intervals
 #'
 #' \code{range_filters} Get or set range filters
 #'
 #' \code{sample_filters} Get or set sample filters
 #'
-#' \code{sids} Get or set sample ids
+#' \code{sids} Get or set Snaptron sample ids
 #'
-#' \code{query_jx} call query_jx function
+#' \code{query_jx} call \code{\link{query_jx}} function
 #'
 #' \code{query_gene} call \code{\link{query_gene}} function
 #'
@@ -45,17 +19,15 @@ pkg_env$URI <- NULL
 #'
 #' \code{query_coverage} call \code{\link{query_coverage}} function
 #'
-#' \code{print} print output the state of the object
+#' \code{print} print query builder object
 #'
-#' \code{from_url} set attributes from url
-#'
-#' @seealso \code{\link{query_jx}}
+#' \code{from_url} use URL to instantiate SnaptronQueryBuilder object
 #'
 #' @export
-#'
 #' @examples
 #' sb <- SnaptronQueryBuilder$new()
-#' sb$compilation("srav2")$genes_or_intervals("CD99")$query_jx()
+#' sb$compilation("srav2")$regions("CD99")$query_jx()
+#' sb$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1-100000&rfilter=samples_count>:20&sfilter=SMTS:Brain")
 SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
     public = list(
         initialize = function(...) {
@@ -69,17 +41,18 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
                 private$query$compilation
             }
         },
-        genes_or_intervals = function(genes_or_intervals = NULL) {
-            if (!missing(genes_or_intervals)) {
-                private$query$genes_or_intervals <- genes_or_intervals
+        regions = function(regions = NULL) {
+            if (!missing(regions)) {
+                private$query$regions <- regions
                 invisible(self)
             } else {
-                private$query$genes_or_intervals
+                private$query$regions
             }
         },
         range_filters = function(range_filters = NULL) {
             if (!missing(range_filters)) {
-                private$query$range_filters <- range_filters
+                private$query$range_filters <- bool_expressions_to_strings(
+                    rlang::enexpr(range_filters))
                 invisible(self)
             } else {
                 private$query$range_filters
@@ -87,7 +60,8 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
         },
         sample_filters = function(sample_filters = NULL) {
             if (!missing(sample_filters)) {
-                private$query$sample_filters <- sample_filters
+                private$query$sample_filters <- bool_expressions_to_strings(
+                    rlang::enexpr(sample_filters))
                 invisible(self)
             } else {
                 private$query$sample_filters
@@ -124,22 +98,22 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
         from_url = function(url) {
             url <- httr::parse_url(url)
             if (url$hostname != "snaptron.cs.jhu.edu") {
-                stop("URL does not point to Snaptron server")
+                stop("URL does not point to Snaptron server", stop. = FALSE)
             }
 
             if (is.null(getOption("test_ctx"))) {
                 resp <- httr::HEAD(url)
                 if (resp$status_code != 200 || httr::http_type(resp) != "text/plain") {
-                    stop(sprintf("%s: is not a valid URL", url))
+                    stop(sprintf("%s: is not a valid URL", url), call. = FALSE)
                 }
             }
 
             query <- list()
-            for (i in 1:(length(url$query))) {
+            for (i in seq_along(url$query)) {
                 name <- switch(n <- names(url$query[i]),
                     rfilter = "range_filters",
                     sfilter = "sample_filters",
-                    regions = "genes_or_intervals",
+                    regions = "regions",
                     n)
 
                 if (name == "sids") {
@@ -173,9 +147,11 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
             for (param in names(private$query)) {
                 if (is.null(private$query[[param]])) {
                     next
-                }
-
-                if (param == "coordinate_modifier") {
+                } else if (rlang::is_call(private$query[[param]])) {
+                    desc <-
+                        bool_expressions_to_strings(private$query[[param]]) %>%
+                        paste(collapse = ",")
+                } else if (param == "coordinate_modifier") {
                     desc <- switch(private$query[[param]],
                                    Exact = "exact",
                                    Within = "contains",
@@ -206,50 +182,74 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
 #' intervals it will return a list of 0 or more genes, junctions, or exons
 #' (depending on which query form is used) which overlap the ranges.
 #' @param compilation A single string containing the name of the Snaptron datasource
-#' @param genes_or_intervals Either a list of >=1 `HUGO` gene names `(e.g. "BRCA1")` or a
+#'
+#' @param regions Either a list of 1 or more `HUGO` gene names `(e.g. "BRCA1")` or a
 #'   GRanges-class object containing one or more genomic intervals `(e.g. "chr1:1-1000")`.
 #'   Strand information is ignored.
+#'
 #' @param range_filters A list of strings defining range-related contraints
+#'
 #' @param sample_filters A list of strings defining sample-related contraints
+#'
 #' @param sids A list of rail_ids (integer sample IDs) to filter results on. Only
 #'   records which have been found in at least one of these samples will be returned.
-#' @param either Contraints the results so that the start (either=1) or end
-#'   (either=2) coordinate matches or is within the boundaries of the specified range.
-#' @param contains Constraints the results so that the coordinates within (inclusive)
-#'   the specified range.
-#' @param exact Constraints the results so that the start/end coordinates
-#'   match the start/end of the specified range.
+#'
+#' @param coordinate_modifier Snaptron coordinate modifier enum. Invariants include:
+#'
+#'   Coordinate$Exact - Contraints the results so that the start/end coordinates
+#'              match the start/end of the specifiied range.
+#'
+#'   Coordinate$Within - Contraints the results so that the coordinates are
+#'              within (inclusive) the specified range.
+#'
+#'   Coordinate$StartIsExactOrWithin - Constraints the results so that the start
+#'              coorindate matches or is within the boundaries of the specified range.
+#'
+#'   Coorindate$EndIsExactOrWithin - Contraints the results so that that the end.
+#'              coordinate matches or is within the boundaries of the specified range.
+#'
+#'   Coordinate$Overlaps - Contraints the results so that the coorindates overlaps the
+#'              specified range.
+#'
 #' @param return_rse Should the query data be returned as a simple data frame or
-#    converted to a RangeSummarizedExperiment.
+#'   converted to a RangeSummarizedExperiment.
+#'
+#' @examples
+#' query_jx(Compilation$gtex, "chr1:1-100000", range_filters = "samples_count >= 20")
+#'
+#' @return Functions will return either a RangeSummarizedexperiment or data.table depending
+#'   on whether the \code{return_rse} parameter is set to \code{TRUE} or \code{FALSE}.
 
 #' @export
-query_jx <- function(compilation, genes_or_intervals, range_filters = NULL,
-                sample_filters = NULL, sids = NULL, coordinate_modifier = NULL, return_rse = TRUE, split_by_region = FALSE)
+query_jx <- function(compilation, regions, range_filters = NULL,
+                     sample_filters = NULL, sids = NULL,
+                     coordinate_modifier = NULL, return_rse = TRUE,
+                     split_by_region = FALSE)
 {
-    regions <- genes_or_intervals
     strands <- NULL
+    range_filters <- bool_expressions_to_strings(rlang::enexpr(range_filters))
+    sample_filters <- bool_expressions_to_strings(rlang::enexpr(sample_filters))
 
-    if (class(genes_or_intervals) == "GRanges") {
-        regions <- extract_intervals(genes_or_intervals)
-        strands <- extract_strands(genes_or_intervals)
+    if (class(regions) == "GRanges") {
+        strands <- extract_strands(regions)
+        regions <- extract_intervals(regions)
 
-        stopifnot(length(regions) == length(strands))
+        assert_that(length(regions) == length(strands))
     }
 
     should_bind <- length(regions) > 1 && !split_by_region
-
-    res <- lapply(1:length(regions), function(i) {
-        if (!is.null(strands) && (strands[i] == "+" || strands[i] == "-")) {
+    res <- lapply(seq_along(regions), function(i) {
+        if (!is.null(strands) && (strands[[i]] == "+" || strands[[i]] == "-")) {
             pos <- grep("strand", range_filters)
             if (!identical(pos, integer(0))) {
-                range_filters[pos] <- paste0("strand:", strands[i])
+                range_filters[[pos]] <- paste0("strand:", strands[[i]])
             } else {
-                range_filters <- c(range_filters, paste0("strand:", strands[i]))
+                range_filters <- c(range_filters, paste0("strand:", strands[[i]]))
             }
         }
 
         run_query(compilation = compilation,
-                  genes_or_intervals = regions[i],
+                  regions = regions[[i]],
                   range_filters = range_filters,
                   sample_filters = sample_filters,
                   coordinate_modifier = coordinate_modifier,
@@ -260,7 +260,6 @@ query_jx <- function(compilation, genes_or_intervals, range_filters = NULL,
     if (length(res) == 1) {
         res <- res[[1]]
     }
-
     if (should_bind) {
         rbind_func <- if (return_rse) SummarizedExperiment::rbind else rbind
         res <- do.call(rbind_func, res)
@@ -271,21 +270,23 @@ query_jx <- function(compilation, genes_or_intervals, range_filters = NULL,
 
 #' @rdname query_jx
 #' @export
-query_gene <- function(compilation, genes_or_intervals,
-    range_filters = NULL, sample_filters = NULL, sids = NULL, coordinate_modifier = NULL, return_rse = TRUE, split_by_region = FALSE)
+query_gene <- function(compilation, regions,
+                       range_filters = NULL, sample_filters = NULL,
+                       sids = NULL, coordinate_modifier = NULL,
+                       return_rse = TRUE, split_by_region = FALSE)
 {
-    regions <- genes_or_intervals
     strands <- NULL
+    range_filters <- bool_expressions_to_strings(rlang::enexpr(range_filters))
+    sample_filters <- bool_expressions_to_strings(rlang::enexpr(sample_filters))
 
-    if (class(genes_or_intervals) == "GRanges") {
-        regions <- extract_intervals(genes_or_intervals)
-        strands <- extract_strands(genes_or_intervals)
+    if (class(regions) == "GRanges") {
+        strands <- extract_strands(regions)
+        regions <- extract_intervals(regions)
 
-        stopifnot(length(regions) == length(regions))
+        assert_that(length(regions) == length(strands))
     }
 
-    should_bind = length(regions) > 1 && !split_by_region
-
+    should_bind <- length(regions) > 1 && !split_by_region
     res <- lapply(1:length(regions), function(i) {
         if (!is.null(strands) && (strands[i] == "+" || strands[i] == "-")) {
             pos <- grep("strand", range_filters)
@@ -297,7 +298,7 @@ query_gene <- function(compilation, genes_or_intervals,
         }
 
         run_query(compilation = compilation,
-                  genes_or_intervals = regions[i],
+                  regions = regions[i],
                   range_filters = range_filters,
                   sample_filters = sample_filters,
                   coordinate_modifier = coordinate_modifier,
@@ -305,11 +306,9 @@ query_gene <- function(compilation, genes_or_intervals,
                   endpoint = "genes",
                   return_rse = return_rse)
     })
-
     if (length(res) == 1) {
         res <- res[[1]]
     }
-
     if (should_bind) {
         rbind_func <- if (return_rse) SummarizedExperiment::rbind else rbind
         res <- do.call(rbind_func, res)
@@ -320,22 +319,24 @@ query_gene <- function(compilation, genes_or_intervals,
 
 #' @rdname query_jx
 #' @export
-query_exon <- function(compilation, genes_or_intervals,
-    range_filters = NULL, sample_filters = NULL, sids = NULL, coordinate_modifier = NULL, return_rse = TRUE, split_by_region = FALSE)
+query_exon <- function(compilation, regions,
+                       range_filters = NULL, sample_filters = NULL,
+                       sids = NULL, coordinate_modifier = NULL,
+                       return_rse = TRUE, split_by_region = FALSE)
 {
-    regions <- genes_or_intervals
     strands <- NULL
+    range_filters <- bool_expressions_to_strings(rlang::enexpr(range_filters))
+    sample_filters <- bool_expressions_to_strings(rlang::enexpr(sample_filters))
 
-    if (class(genes_or_intervals) == "GRanges") {
-        regions <- extract_intervals(genes_or_intervals)
-        strands <- extract_strands(genes_or_intervals)
+    if (class(regions) == "GRanges") {
+        strands <- extract_strands(regions)
+        regions <- extract_intervals(regions)
 
-        stopifnot(length(regions) == length(regions))
+        assert_that(length(regions) == length(strands))
     }
 
-    should_bind = length(regions) > 1 && !split_by_region
-
-    res <- lapply(1:length(regions), function(i) {
+    should_bind <- length(regions) > 1 && !split_by_region
+    res <- lapply(seq_along(regions), function(i) {
         if (!is.null(strands) && (strands[i] == "+" || strands[i] == "-")) {
             pos <- grep("strand", range_filters)
             if (!identical(pos, integer(0))) {
@@ -346,7 +347,7 @@ query_exon <- function(compilation, genes_or_intervals,
         }
 
         run_query(compilation = compilation,
-                  genes_or_intervals = regions[i],
+                  regions = regions[i],
                   range_filters = range_filters,
                   sample_filters = sample_filters,
                   coordinate_modifier = coordinate_modifier,
@@ -354,11 +355,9 @@ query_exon <- function(compilation, genes_or_intervals,
                   endpoint = "exons",
                   return_rse = return_rse)
     })
-
     if (length(res) == 1) {
         res <- res[[1]]
     }
-
     if (should_bind) {
         rbind_func <- if (return_rse) SummarizedExperiment::rbind else rbind
         res <- do.call(rbind_func, res)
@@ -378,7 +377,7 @@ query_exon <- function(compilation, genes_or_intervals,
 #' coordinate starts at 0 while the right coordinate starts at 1.
 #' @inheritParams query_jx
 #' @param group_names A list of one or more labels of the same length as the list of
-#'   `genes_or_intervals`. These labels serve as demarcation sentinels for the output
+#'   `regions`. These labels serve as demarcation sentinels for the output
 #'   list of the bases since any one query will split over many output records `(typically)`.
 #'   Not required, but highly recommended.
 #' @param bulk Use the `Snaptron` bulk query interface. This will perform better when
@@ -394,11 +393,12 @@ query_exon <- function(compilation, genes_or_intervals,
 #' @export
 #' @examples
 #' query_coverage("gtex", "BRCA1", sids = c(50099,50102,50113))
-query_coverage <- function(compilation, genes_or_intervals, group_names = NULL,
-    sids = NULL, bulk = FALSE, split_by_region = FALSE)
-{
-    data <- run_query(compilation = compilation, genes_or_intervals = genes_or_intervals,
-        endpoint = "bases", sids = sids, construct_rse = FALSE)
+query_coverage <- function(compilation, regions, group_names = NULL,
+                           sids = NULL, bulk = FALSE, split_by_region = FALSE) {
+    data <- run_query(compilation = compilation,
+                      regions = regions,
+                      endpoint = "bases", sids = sids,
+                      construct_rse = FALSE)
 
     if (is.null(getOption("test_ctx"))) {
         rse(
@@ -409,6 +409,7 @@ query_coverage <- function(compilation, genes_or_intervals, group_names = NULL,
         )
     }
 }
+
 #' Return the URI of the last successful request to Snaptron
 #'
 #' @description
@@ -421,92 +422,23 @@ query_coverage <- function(compilation, genes_or_intervals, group_names = NULL,
 #'
 #' @export
 #' @examples
-#' query_jx(compilation = "gtex", genes_or_intervals = "CD99")
+#' query_jx(compilation = "gtex", regions = "CD99")
 #' uri_of_last_successful_request()
 uri_of_last_successful_request <- function() {
-    pkg_env$URI
+    pkg_globals$last_uri_accessed
 }
 
 get_compilation_metadata <- function(compilation) {
-    stopifnot(compilation %in% names(Compilation))
+    assert_that(compilation %in% names(Compilation),
+                msg = "Invalid compilation")
 
-    if (is.null(pkg_env$metadata[[compilation]])) {
+    if (is.null(pkg_globals$metadata[[compilation]])) {
         uri <- sprintf("http://snaptron.cs.jhu.edu/%s/samples?all=1", compilation)
         tsv <- submit_query(uri)
-        pkg_env$metadata[[compilation]] <- data.table::fread(tsv, sep = "\t", quote = "")
+        pkg_globals$metadata[[compilation]] <- data.table::fread(tsv, sep = "\t", quote = "")
     }
 
-    pkg_env$metadata[[compilation]]
-}
-
-#' Utility function for formatting range and sample filters
-#'
-#' @description
-#' This function makes it easier to compose sample and range filters for Snaptron queries.
-#' Each expression is expected to be a boolean expression.
-#'
-#' @param ... A list of expression to be converted to strings
-#' @param frame An environment or list object
-#'
-#' @export
-#' @examples
-#' a <- 10
-#' exprs(sample_filters < a)
-#' exprs(samples_count == a + 10)
-exprs <- function(..., frame = as.list(parent.frame())) {
-    filters <- lapply(rlang::exprs(...),
-        function(e) {
-            if (length(e) != 3) {
-                err_msg <- paste0(deparse(e), ": is not a valid expression")
-                stop(err_msg)
-            }
-
-            stopifnot(is_logical_op(e[[1]]))
-
-            if (is.character(e[[3]])) {
-                e[[3]] <- as.symbol(e[[3]])
-            } else {
-                e[[3]] <- eval(methods::substituteDirect(e[[3]], frame = frame))
-            }
-
-            deparse(e, backtick = FALSE)
-        }
-    )
-    simplify2array(filters)
-}
-
-sample_filters_to_bool_expression <- function(sample_filters) {
-    sample_filters <- gsub("<:", "<=", sample_filters)
-    sample_filters <- gsub(">:", ">=", sample_filters)
-    sample_filters <- gsub(":", "==", sample_filters)
-
-    filter_expressions <- rlang::parse_exprs(sample_filters)
-    filter_expressions <- lapply(filter_expressions, function(e) {
-        if (!rlang::is_syntactic_literal(e[[3]])) {
-            e[[3]] <- rlang::as_string(e[[3]])
-        }
-
-        e
-    })
-
-    create_conjunction(filter_expressions)
-}
-
-create_conjunction <- function(expressions) {
-    if (length(expressions) == 0) {
-        return(NULL)
-    }
-
-    if (length(expressions) == 1) {
-        return(expressions[[1]])
-    }
-
-    res <- expressions[[1]]
-    for (i in 2:length(expressions)) {
-        res <- rlang::expr(!!res & !!expressions[[i]])
-    }
-
-    res
+    pkg_globals$metadata[[compilation]]
 }
 
 is_logical_op <- function(op) {
@@ -529,13 +461,14 @@ tidy_filters <- function(filters) {
     filters
 }
 
-run_query <- function(compilation, genes_or_intervals, endpoint = "snaptron", range_filters = NULL,
-    sample_filters = NULL, sids = NULL, coordinate_modifier = NULL, construct_rse = TRUE, return_rse = TRUE) {
-
+run_query <- function(compilation, regions, endpoint = "snaptron",
+                      range_filters = NULL, sample_filters = NULL, sids = NULL,
+                      coordinate_modifier = NULL, construct_rse = TRUE,
+                      return_rse = TRUE) {
     uri <-
         generate_snaptron_uri(
             compilation = compilation,
-            genes_or_intervals = genes_or_intervals,
+            regions = regions,
             endpoint = endpoint,
             range_filters = range_filters,
             sample_filters = sample_filters,
@@ -544,16 +477,16 @@ run_query <- function(compilation, genes_or_intervals, endpoint = "snaptron", ra
         )
 
     if (!is.null(getOption("test_ctx"))) {
-        pkg_env$URI <- uri
+        assign("last_uri_accessed", uri, pkg_globals)
         return(NULL)
     } else {
         tsv <- submit_query(uri)
-        pkg_env$URI <- uri
+        assign("last_uri_accessed", uri, pkg_globals)
     }
 
     query_data <- data.table::fread(tsv, sep = "\t")
     if (nrow(query_data) == 0) {
-        stop("Query returned 0 rows", call. = FALSE)
+        return(NULL)
     }
 
     if (!return_rse) {
@@ -573,38 +506,50 @@ run_query <- function(compilation, genes_or_intervals, endpoint = "snaptron", ra
     rse(query_data, metadata, sample_filters)
 }
 
-generate_snaptron_uri <- function(compilation, genes_or_intervals, endpoint = "snaptron", range_filters = NULL,
-                     sample_filters = NULL, coordinate_modifier = NULL, sids = NULL)
-{
+generate_snaptron_uri <- function(compilation, regions,
+                                  endpoint = "snaptron", range_filters = NULL,
+                                  sample_filters = NULL,
+                                  coordinate_modifier = NULL, sids = NULL) {
     url <- "http://snaptron.cs.jhu.edu/"
 
-    if (missing(compilation)) {
-        stop("compilation is a required argument")
-    }
+    assert_that(compilation %in% names(Compilation),
+                msg = "Invalid compilation")
 
-    stopifnot(compilation %in% names(Compilation))
-
-    path <- paste(compilation, paste0(endpoint, "?"), sep = "/")
     query <- ""
+    path <- paste(compilation, paste0(endpoint, "?"), sep = "/")
 
-    if (!missing(genes_or_intervals)) {
-        query <- paste("regions", genes_or_intervals, sep = "=")
+    assert_that(is_hugo_gene(regions) ||
+                is_chromsome_interval(regions))
+    if (!missing(regions)) {
+        query <- paste("regions", regions, sep = "=")
     } else {
-        stop("please specify either a gene or an interval")
+        stop("please specify either a gene or an interval", call. = FALSE)
     }
 
+    ## range_filters <- bool_expressions_to_strings(range_filters)
     if (!is.null(range_filters)) {
-        stopifnot(is.character(range_filters))
-
-        query <- c(query, paste("rfilter", tidy_filters(range_filters), sep = "="))
+        query <- c(query, paste("rfilter",
+                                tidy_filters(range_filters), sep = "="))
     }
 
+    ## sample_filters <- bool_expressions_to_strings(rlang::enexpr(sample_filters))
     if (!is.null(sample_filters)) {
-        stopifnot(is.character(sample_filters))
+        sample_filters <- tidy_filters(sample_filters)
+        errors <- lapply(sample_filters, function(filter) {
+            c(name, value) %<-% stringr::str_split(filter, "\\W", n = 2)[[1]]
+            validate_sample_filter(compilation, name, value)
+        }) %>% purrr::compact()
 
+        if (length(errors) > 0) {
+            if (!interactive()) {
+                stop("Invalid sample filter(s)", stop. = FALSE)
+            } else {
+                error_string <- paste(errors, collapse = "\n")
+                stop(error_string, call. = FALSE)
+            }
+        }
         query <- c(query, paste("sfilter", tidy_filters(sample_filters), sep = "="))
     }
-
     if (!is.null(coordinate_modifier)) {
         if (coordinate_modifier == Coordinates$Exact) {
             query <- c(query, paste("exact", "1", sep = "="))
@@ -615,23 +560,22 @@ generate_snaptron_uri <- function(compilation, genes_or_intervals, endpoint = "s
         } else if (coordinate_modifier == Coordinates$EndIsExactOrWithin) {
             query <- c(query, paste("either", "2", sep = "="))
         } else {
-            stop("Invalid coordinate filter")
+            stop("Invalid coordinate filter", stop. = FALSE)
         }
     }
-
     if (!is.null(sids)) {
-        stopifnot(is.wholenumber(sids))
+        assert_that(is.wholenumber(sids))
         query <- c(query, paste("sids", paste(sids, collapse = ","), sep = "="))
     }
 
-    paste0(url, path, paste(query, collapse = "&"))
+    res <- paste0(url, path, paste(query, collapse = "&"))
+    res
 }
 
 extract_intervals <- function(g) {
     chr <- GenomicRanges::seqnames(g)
     beg <- GenomicRanges::start(g)
     end <- GenomicRanges::end(g)
-
     chr <- as.vector(rep(chr@values, chr@lengths))
 
     paste0(chr, ":", beg, "-", end)
@@ -653,13 +597,9 @@ submit_query <- function(uri) {
     rawToChar(resp$content)
 }
 
-extract_samples <- function(query_data) {
-    unlist(lapply(strsplit(query_data$samples, ","), `[`, -1))
-}
-
-convert_to_sparse_matrix <- function(samples, samples_count, snaptron_ids, compilation_rail_ids) {
+convert_to_sparse_matrix <- function(samples, samples_count, snaptron_ids,
+                                     compilation_rail_ids) {
     rail_ids_and_counts <- strsplit(samples, ":", fixed = TRUE)
-
     rail_ids <- as.numeric(vapply(rail_ids_and_counts, `[`, 1, FUN.VALUE = ""))
 
     i <- rep(seq_along(samples_count), samples_count)
@@ -667,13 +607,14 @@ convert_to_sparse_matrix <- function(samples, samples_count, snaptron_ids, compi
     x <- as.numeric(vapply(rail_ids_and_counts, `[`, 2, FUN.VALUE = ""))
 
     dims <- c(length(snaptron_ids), length(compilation_rail_ids))
-
-    Matrix::sparseMatrix(i = i, j = j, x = x, dimnames = list(snaptron_ids, compilation_rail_ids), dims = dims)
+    Matrix::sparseMatrix(i = i, j = j, x = x, dims = dims,
+                         dimnames = list(snaptron_ids, compilation_rail_ids))
 }
 
 counts <- function(query_data, metadata) {
     samples <- extract_samples(query_data)
-    convert_to_sparse_matrix(samples, query_data$samples_count, query_data$snaptron_id, metadata$rail_id)
+    convert_to_sparse_matrix(samples, query_data$samples_count,
+                             query_data$snaptron_id, metadata$rail_id)
 }
 
 col_data <- function(metadata, sids = NULL) {
@@ -715,14 +656,17 @@ coverage_counts <- function(query_data, metadata) {
 
     m <- base::as.matrix(data)
     dim(m) <- c(nrow(m) * ncol(m), 1)
-
     dims <- c(nrow(query_data), length(metadata$rail_id))
-    Matrix::sparseMatrix(i = i, j = j, x = as.numeric(m[, 1]), dimnames = list(NULL, metadata$rail_id), dims = dims)
+
+    Matrix::sparseMatrix(i = i, j = j, x = as.numeric(m[, 1]),
+                         dimnames = list(NULL, metadata$rail_id), dims = dims)
 }
 
-rse <- function(query_data, metadata, sample_filters = NULL, extract_counts = counts, extract_row_ranges = row_ranges, extract_col_data = col_data) {
+rse <- function(query_data, metadata, sample_filters = NULL,
+                extract_counts = counts, extract_row_ranges = row_ranges,
+                extract_col_data = col_data) {
     if (!is.null(sample_filters)) {
-        predicate_expression <- sample_filters_to_bool_expression(sample_filters)
+        predicate_expression <- string_to_bool_expression(sample_filters)
         metadata <- eval(rlang::expr(metadata[!!predicate_expression]))
     }
 
@@ -735,8 +679,4 @@ rse <- function(query_data, metadata, sample_filters = NULL, extract_counts = co
         rowRanges = row_ranges,
         colData = col_data
     )
-}
-
-is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) {
-    abs(x - round(x)) < tol
 }

@@ -9,9 +9,10 @@ enum <- function(...) {
 
     res
 }
-
+#' Snaptron Coordinate modifiers enum
 #' @export
 Coordinates <- enum(Exact, Within, StartIsExactOrWithin, EndIsExactOrWithin, Overlaps)
 
+#' Snaptron compilation enum
 #' @export
 Compilation <- enum(gtex, tcga, srav2, sra)

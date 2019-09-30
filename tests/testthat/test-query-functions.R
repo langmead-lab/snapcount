@@ -1,47 +1,45 @@
 context("Test query functions")
 
-options(test_ctx = TRUE)
-
-test_that("genes_or_intervals and compilations are mandatory args", {
-    expect_error(query_jx(compilation = "tcga"), "please specify either a gene or an interval")
-    expect_error(query_jx(genes_or_intervals = "CD99"), "compilation is a required argument")
+test_that("regions and compilations are mandatory args", {
+    expect_error(query_jx(compilation = "tcga"), "argument \"regions\" is missing, with no default")
+    expect_error(query_jx(regions = "CD99"), "argument \"compilation\" is missing, with no default")
 })
 
 test_that("simple junction query", {
-    query_jx(compilation = "srav2", genes_or_intervals = "CD99")
+    query_jx(compilation = "srav2", regions = "CD99")
     expect_equal(uri_of_last_successful_request(), "http://snaptron.cs.jhu.edu/srav2/snaptron?regions=CD99")
 })
 
-test_that("junction query with one sample filter", {
-    query_jx(compilation = "gtex", genes_or_intervals = "CD99", sample_filters = exprs(SMTS == "Brain"))
+test_that("junction query with NSE sample filter", {
+    query_jx(compilation = "gtex", regions = "CD99", sample_filters = SMTS == "Brain")
     expect_equal(uri_of_last_successful_request(),
         "http://snaptron.cs.jhu.edu/gtex/snaptron?regions=CD99&sfilter=SMTS:Brain")
 })
 
-test_that("junction query with mutiple sample filters", {
-    query_jx(compilation = "gtex", genes_or_intervals = "CD99", sample_filters = exprs(description == "Cortex", library_strategy == "RNA-Seq"))
+test_that("junction query with mutiple NSE sample filters", {
+    query_jx(compilation = "srav2", regions = "CD99", sample_filters = c(library_name == "HG00115.6", study_accession == "ERP001942"))
     expect_equal(uri_of_last_successful_request(),
-        "http://snaptron.cs.jhu.edu/gtex/snaptron?regions=CD99&sfilter=description:Cortex&sfilter=library_strategy:RNA-Seq")
+        "http://snaptron.cs.jhu.edu/srav2/snaptron?regions=CD99&sfilter=library_name:HG00115.6&sfilter=study_accession:ERP001942")
 })
 
-test_that("junction query with one range filter", {
-    query_jx(compilation = "gtex", genes_or_intervals = "CD99", range_filters = exprs(samples_count >= 5))
+test_that("junction query with one NSE range filter", {
+    query_jx(compilation = "gtex", regions = "CD99", range_filters = samples_count >= 5)
     expect_equal(uri_of_last_successful_request(),
         "http://snaptron.cs.jhu.edu/gtex/snaptron?regions=CD99&rfilter=samples_count>:5")
 })
 
-test_that("junction query with mutiple range filters", {
-    query_jx(compilation = "gtex", genes_or_intervals = "CD99", range_filters = exprs(samples_count <= 10, coverage_sum < 3))
+test_that("junction query with mutiple NSE range filters", {
+    query_jx(compilation = "gtex", regions = "CD99", range_filters = list(samples_count <= 10, coverage_sum < 3))
     expect_equal(uri_of_last_successful_request(),
         "http://snaptron.cs.jhu.edu/gtex/snaptron?regions=CD99&rfilter=samples_count<:10&rfilter=coverage_sum<3")
 })
 
 test_that("junction query with sids", {
-    query_jx(compilation = "gtex", genes_or_intervals = "CD99", sids = 1:3)
+    query_jx(compilation = "gtex", regions = "CD99", sids = 1:3)
     expect_equal(uri_of_last_successful_request(),
         "http://snaptron.cs.jhu.edu/gtex/snaptron?regions=CD99&sids=1,2,3")
 })
 
-test_that("sids must be integers", {
-    expect_error(query_jx(compilation = "tcga", genes_or_intervals = "CD99", sids = c("1", "2", "3")))
+test_that("query with non-numeric sids", {
+    expect_error(query_jx(compilation = "tcga", regions = "CD99", sids = c("1", "2", "3")))
 })

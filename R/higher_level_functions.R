@@ -1,34 +1,124 @@
-#' @import data.table
-
-`%>%` <- magrittr::`%>%`
-
+#' Get the union of junctions from 2 or more compilations
+#' which are on the same reference
+#'
+#' This function queries 2 or more compilations which are on the same
+#' reference version (e.g. hg38) and merges the resulting junctions
+#' into a single output table, unioning the sample coverage columns
+#' and the snaptron_id (jx ID) columns (the latter delimiter should
+#' be ":").  All sample IDs will be disjoint between compilations.
+#'
+#' Union is based on the following fields (combined into a comparison key):
+#' \preformatted{
+#'      * group
+#'      * chromosome
+#'      * start
+#'      * end
+#'      * strand
+#' }
+#'
+#' The goal is to have a single list of junctions where every junction
+#' occurs in at least one compilation and a junction occurs in > 1
+#' compilation it still only has a single row representing all the
+#' samples across compilations that it appears in.
+#' Sample aggregate statistics should recalculated for junctions which
+#' are merged across *all* samples from all compilations:
+#'
+#'
+#' * sample_count
+#' * coverage_sum
+#' * coverage_avg
+#' * coverage_median
+#'
+#'
+#' @param ... One or more SnaptronQueryBuilder objects
+#' @return A RangedSummarizedExperiment of junctions appearing in at least
+#' one compilation
+#' @seealso [junction_intersection()]
 #' @export
+#' @examples
+#' sb1 <- SnaptronQueryBuilder$new()
+#' sb1$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
+#'
+#' sb2 <- SnaptronQueryBuilder$new()
+#' sb2$from_url("http://snaptron.cs.jhu.edu/tcga/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
+#'
+#' junction_union(sb1, sb2)
 junction_union <- function(...) {
+    assert_that(is_list_of_query_builders(list(...)),
+                msg = "junction_union expects 1 or more SnaptronQueryBuilder objects")
     merge_compilations(..., all = TRUE)
 }
 
+#' Get the intersection of junctions from 2 or more compilations
+#' which are on the same reference
+#'
+#' This function should operate similar to the `junction_union()` function, i.e
+#' it’s cross compilation and merging of the same junction from multiple
+#' compilations should be handled exactly the same way. But instead
+#' of every junction which appears in at least one compilation, only
+#' return the junctions which appear in *every* compilation.
+#'
+#' @param ... One or more SnaptronQueryBuilder objects
+#' @return A RangedSummarizedExperiment of junctions common across compilations
+#' @seealso [junction_union()]
 #' @export
+#' @examples
+#' #' sb1 <- SnaptronQueryBuilder$new()
+#' sb1$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
+#'
+#' sb2 <- SnaptronQueryBuilder$new()
+#' sb2$from_url("http://snaptron.cs.jhu.edu/tcga/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
+#'
+#' junction_intersection(sb1, sb2)
 junction_intersection <- function(...) {
+    assert_that(is_list_of_query_builders(list(...)),
+                msg = "junction_intersection expects 1 or more SnaptronQueryBuilder objects")
     merge_compilations(..., all = FALSE)
 }
 
 merge_compilations <- function(..., all) {
-    compilations <- lapply(list(...), function(sb) {
-        sb$query_jx(return_rse = FALSE)
+    metadata_list <- list()
+    datasets <- lapply(list(...), function(sb) {
+        df <- sb$query_jx(return_rse = FALSE)
+        compilation <- sb$compilation()
+        compilation_metadata <- get_compilation_metadata(sb$compilation()) %>%
+            apply_sample_filters_to_metadata(sb$sample_filters())
+
+        if (is.null(metadata_list[[compilation]])) {
+            metadata_list[[compilation]] <<- compilation_metadata
+        } else if (all.equal(metadata_list[[compilation]], compilation_metadata)) {
+            next
+        } else {
+            metadata_list[[compilation]] <<-
+                merge(metadata_list[[compilation]],
+                      compilation_metadata, by = "rail_id")
+        }
+        return(df)
     })
 
-    if (length(compilations) == 1) {
-        return(compilations[[1]])
+    if (length(datasets) == 1) {
+        return(rse(datasets[[1]], metadata_list[[1]]))
     }
 
-    res <- compilations[[1]]
-    for (i in 2:length(compilations)) {
-        res <- merge(res, compilations[[i]], all = all,
-                     by = c("chromosome", "start", "end", "strand")) %>%
-            finalize_merge(col_names = names(compilations[[1]]))
+    for (i in seq_along(datasets)) {
+        if (i == 1) {
+            res <- datasets[[1]]
+        } else {
+            res <- merge(res, datasets[[i]], all = all,
+                         by = c("chromosome", "start", "end", "strand")) %>%
+                finalize_merge(col_names = names(datasets[[1]]))
+        }
     }
 
-    res
+    for (i in seq_along(metadata_list)) {
+        if (i == 1) {
+            metadata <- metadata_list[[1]]
+        } else {
+            metadata <- merge(metadata, metadata_list[[i]], by = "rail_id", all = TRUE)
+        }
+    }
+
+    rse(res, metadata)
 }
 
 finalize_merge <- function(dt, col_names) {
@@ -60,9 +150,7 @@ finalize_merge <- function(dt, col_names) {
 }
 
 str_cat <- function(..., sep = "") {
-    args <- list(...)
-    strings <- lapply(args, stringr::str_replace_na, replacement = "")
-
+    strings <- lapply(list(...), stringr::str_replace_na, replacement = "")
     paste(strings[[1]], strings[[2]], sep = sep)
 }
 
@@ -74,11 +162,43 @@ calculate_coverage_median <- function(samples) {
     samples[c(FALSE, TRUE)] %>% as.numeric() %>% median()
 }
 
+#' Relative measure of splice variant usage similar to PSI that allows
+#' for 2 arbitrarily defined groups of junctions (not limited to
+#' cassette exons)
+#'
+#' Calculates a coverage summary statistic per sample of the normalized
+#' coverage difference between two sets of separate junctions (defined
+#' by at least two basic queries) organized into two groups.
+#'
+#' The summary statistic is as follows:
+#' If the coverage of the first group is "A" and the second is "B":
+#'
+#' `JIR(A,B)=(A - B) / (A+B+1)`
+#'
+#' This is calculated for every sample that occurs in one or the other
+#' (or both) groups’ results.
+#'
+#' @param group1,group2 List of 1 or more SnaptronQueryBuilder objects
+#' @param group_names Optional vector of strings representing the group names
+#'
+#' @examples
+#' sb1 <- SnaptronQueryBuilder$new()
+#' sb1$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=chr2:29446395-30142858&contains=1&rfilter=strand:-")
+#' sb2 <- SnaptronQueryBuilder$new()
+#' sb2$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=chr2:29416789-29446394&contains=1&rfilter=strand:-")
+#' junction_inclusion_ratio(list(sb1), list(sb2))
 #' @export
 junction_inclusion_ratio <- function(group1, group2, group_names = NULL) {
-    stopifnot(is.list(group1), is.list(group2))
+    assert_that(is_list_of_query_builders(group1),
+                is_list_of_query_builders(group2))
 
     c(s1, s2) %<-% run_queries(group1, group2)
+    if (is.null(s1)) {
+        stop("Unable to calculate JIR: group1 returned no results")
+    }
+    if (is.null(s2)) {
+        stop("Unable to calculate JIR: group2 returned no results")
+    }
 
     jir <- merge(s1, s2, by = "sample_id", all = TRUE) %>%
         replace_na(0)
@@ -102,13 +222,57 @@ calc_jir <- function(a, b) {
     (a - b)/(a + b + 1)
 }
 
+#' Relative measure of splice variant usage, limited currently to
+#' cassette exon splice variants
+#'
+#' Similar to the JIR, this calculates Percent Spliced In statistics
+#' for the definition of 2 different groups: inclusion and exclusion.
+#' Currently this function only supports the cassette exon use case.
+#'
+#' Inclusion typically defines 2 basic queries, one for the junction
+#' preceding the cassette exon, and the second for the junction following
+#' the cassette exon.  The exclusion group contains one basic query
+#' which defines the junction which skips the cassette exon.
+#'
+#' The PSI itself is implemented as:
+#'
+#' ```PSI(inclusion1, inclusion2, exclusion) =
+#' mean(inclusion1, inclusion2) / (mean(inclusion1, inclusion2) + exclusion)```
+#'
+#' where each term denotes the coverage of junctions that resulted
+#' from the basic queries in that group in the current sample
+#'
+#' @param inclusion_group1,inclusion_group2,exclusion_group A list of 1 or
+#'   more SnaptronQueryBuilder objects
+#' @param min_count TODO: add description for min_count
+#' @param group_names Optional vector of strings representing the group names
+#'
+#' @examples
+#' inclusion_group1 <- SnaptronQueryBuilder$new()
+#' inclusion_group1 <- inclusion_group1$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=chr1:94468008-94472172&exact=1&rfilter=strand:+")
+#' inclusion_group2 <- SnaptronQueryBuilder$new()
+#' inclusion_group2 <- inclusion_group2$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=	&exact=1&rfilter=strand:+")
+#' exclusion_group <- SnaptronQueryBuilder$new()
+#' exclusion_group <- exclusion_group$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=chr1:94468008-94475142&exact=1&rfilter=strand:+")
+#' percent_spliced_in(list(inclusion_group1), list(inclusion_group2), list(exclusion_group))
 #' @export
-percent_spliced_in <- function(inclusion_group1, inclusion_group2, exclusion_group, min_count = 20, group_names = NULL) {
+percent_spliced_in <- function(inclusion_group1, inclusion_group2,
+                               exclusion_group, min_count = 20, group_names = NULL)
+{
     c(g1, g2, ex) %<-% run_queries(inclusion_group1, inclusion_group2, exclusion_group)
+    if (is.null(g1)) {
+        stop("Unable to calculate PSI: inclusion_group1 returned no results")
+    }
+    if (is.null(g2)) {
+        stop("Unable to calculate PSI: inclusion_group2 returned no results")
+    }
+    if (is.null(ex)) {
+        stop("Unable to calculate PSI: exclusion_group returned no results")
+    }
 
     psi <- merge(g1, g2, by = "sample_id", all = TRUE) %>%
         merge(ex, by = "sample_id", all = TRUE) %>%
-        replace_na(0L)
+        replace_na(0)
 
     psi[, psi := calc_psi(coverage.x, coverage.y, coverage, min_count)][]
 }
@@ -121,16 +285,50 @@ calc_psi <- function(inclusion1, inclusion2, exclusion, min_count) {
     ifelse(inclusion1 == 0 | inclusion2 == 0 | total < min_count, -1, psi)
 }
 
+#' Tissue Specificity (TS): produces a list of samples with their tissues
+#' marked which either contain queried junctions (1) or not (0); can be used
+#' as input to significance testing methods such as Kruskal-Wallis to look for
+#' tissue enrichment (currently only works for GTEx)
+#'
+#' Lists the number of samples labeled with a specific tissue type.
+
+#' Samples are filtered for ones which have junctions across all the
+#' user-specified groups. That is, if a sample only appears in the results of
+#' some of the groups (from their basic queries) it will be assigned a 0,
+#' otherwise if it’s in all of the groups’ results it will be assigned a 1.
+#' This is similar to the SSC high level query type, but doesn’t sum the
+#' coverage.
+#'
+#' The samples are then grouped by their tissue type (e.g. Brain).
+#' This is useful for determining if there’s an enrichment for a specific
+#' tissue in the set of junctions queried.  Results from this can be fed to a
+#' statistical test, such as the Kruskal-wallis non-parametric rank test.
+
+#' This query is limited to GTEx only due to the fact that GTEx is one of the
+#' few compilations that have consistent and complete tissue metadata.
+#'
+#' @param ... One or more SnaptronQueryBuilder objects
+#' @param group_names Optional vector of strings representing the group names
+#'
+#' @examples
+#' inclusion_group1 <- SnaptronQueryBuilder$new()
+#' inclusion_group1 <- inclusion_group1$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr4:20763023-20763023&either=2&rfilter=strand:-")
+#' inclusion_group2 <- SnaptronQueryBuilder$new()
+#' inclusion_group2 <- inclusion_group2$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr4:20763098-20763098&either=1&rfilter=strand:-")
+#'
+#' tissue_specificity(list(inclusion_group1, inclusion_group2))
 #' @export
 tissue_specificity <- function(..., group_names = NULL) {
     list_of_groups <- list(...)
+    assert_that(is_list_of_query_builder_groups(list_of_groups),
+                msg = "tissue_specificity expects 1 or more list of SnaptronQueryBuilder objects")
     num_groups <- length(list_of_groups)
 
     if (is.null(group_names)) {
-        group_names <- paste0("g", 1:num_groups)
+        group_names <- paste0("g", seq_along(num_groups))
     }
 
-    dfs <- lapply(1:num_groups, function(i) {
+    dfs <- lapply(seq_along(num_groups), function(i) {
         g <- list_of_groups[[i]]
         name <- group_names[[i]]
         tissue_specificity_per_group(g[[1]], g[[2]], name)
@@ -150,6 +348,13 @@ tissue_specificity_per_group <- function(group1, group2, group_name) {
 
     stopifnot(is.list(group1), is.list(group2))
     c(res1, res2) %<-% run_queries(group1, group2, summarize = FALSE)
+    if (is.null(res1)) {
+        stop("Unable to calculate TS: group1 returned no results")
+    }
+    if (is.null(res2)) {
+        stop("Unable to calculate TS: group2 returned no results")
+    }
+
     res <- merge(res1, res2, by = "sample_id", all = TRUE) %>%
         replace_na(0)
     res <- res[, shared := shared(coverage.x, coverage.y)][, !c("coverage.x", "coverage.y")]
@@ -170,9 +375,37 @@ shared <- function(cov1, cov2) {
     as.integer(cov1 != 0 & cov2 != 0)
 }
 
+#' Shared Sample Count (SSC): counts total number of samples in which 2
+#' different junctions both occur in.
+#'
+#' This produces a list of user-specified groups and the read coverage of the
+#' junctions in all the samples which were shared across all the basic queries
+#' occurring in each group.
+#'
+#' Example: User defines a single group of junctions "GroupA" made up of 2
+#' separate regions (so 2 basic queries).
+#'
+#' An SSC query will return a single line for GroupA which will have the total
+#' number of samples which had at least one junction which matched both basic
+#' queries. It will also report a summary statistic of the total number of
+#' groups which had one or more samples that were shared across the basic
+#' queries, in this case it would be 1.  Also, it will report the number of
+#' groups which had at least one shared sample and which had matching
+#' junctions (from the query) which were fully annotated*.
+
+#' This function can be used to determine how much cross-sample support there
+#' is for a particular junction configuration (typically a cassette exon).
+#'
+#' @param ... One or more lists of SnaptronQueryBuilder objects
+#' @param group_names Optional vector of character strings representing group names
+#'
+#' @examples
+#'
 #' @export
 shared_sample_counts <- function(..., group_names = NULL) {
     list_of_groups <- list(...)
+    assert_that(is_list_of_query_builder_groups(list_of_groups),
+                msg = "shared_sample_counts expects 1 or more list of SnaptronQueryBuilder objects")
     num_groups <- length(list_of_groups)
 
     counts <- lapply(list_of_groups, function(g) {
@@ -198,6 +431,12 @@ shared_sample_count <- function(group1, group2) {
     stopifnot(is.list(group1), is.list(group2))
 
     c(g1, g2) %<-% run_queries(group1, group2)
+    if (is.null(g1)) {
+        stop("Unable to calculate SSC: group1 returned no results")
+    }
+    if (is.null(g2)) {
+        stop("Unable to calculate SSC: group2 returned no results")
+    }
     intersect(g1$sample_id, g2$sample_id) %>% length()
 }
 
@@ -208,6 +447,9 @@ run_queries <- function(..., summarize = TRUE) {
 count_samples <- function(group, summarize = TRUE) {
     dfs <- lapply(group, function(e) {
         q <- e$query_jx(return_rse = FALSE)
+        if (is.null(q)) {
+            return()
+        }
 
         data.table::data.table(sample = extract_samples(q)) %>%
             tidyr::separate("sample", into = c("sample_id", "coverage"), convert = TRUE)
@@ -215,37 +457,21 @@ count_samples <- function(group, summarize = TRUE) {
 
     res <- do.call(rbind, dfs)
 
-    if (summarize) {
+    if (summarize && !is.null(res)) {
         res[, .(coverage = sum(coverage)), by = .(sample_id)]
     } else {
         res
     }
 }
 
-`%<-%` <- function(bindings, values) {
-    values <- force(values)
-    bindings <- substitute(bindings)
-
-    stopifnot(length(bindings) == length(values) + 1)
-
-    for (i in 1:length(values)) {
-        var_name <- deparse(bindings[[i+1]])
-        assign(var_name, values[[i]], pos = parent.frame())
-    }
-}
-
-is_query_builder <- function(object) {
-    return("SnaptronQueryBuilder" %in% class(object))
-}
-
 replace_na <- function(dt, replacement, colnames = NULL) {
     if (!is.null(colnames)) {
         for (name in colnames) {
-            set(dt, which(is.na(dt[[name]])), name, 0)
+            set(dt, which(is.na(dt[[name]])), name, replacement)
         }
     } else {
         for (i in seq_along(dt)) {
-            set(dt, which(is.na(dt[[i]])), i, 0)
+            set(dt, which(is.na(dt[[i]])), i, replacement)
         }
     }
 

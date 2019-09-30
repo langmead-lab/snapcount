@@ -4,18 +4,18 @@
 \alias{query_coverage}
 \title{Query Coverage data}
 \usage{
-query_coverage(compilation, genes_or_intervals, group_names = NULL,
-  sids = NULL, bulk = FALSE, split_by_region = FALSE)
+query_coverage(compilation, regions, group_names = NULL, sids = NULL,
+  bulk = FALSE, split_by_region = FALSE)
 }
 \arguments{
 \item{compilation}{A single string containing the name of the Snaptron datasource}
 
-\item{genes_or_intervals}{Either a list of >=1 \code{HUGO} gene names \code{(e.g. "BRCA1")} or a
+\item{regions}{Either a list of 1 or more \code{HUGO} gene names \code{(e.g. "BRCA1")} or a
 GRanges-class object containing one or more genomic intervals \code{(e.g. "chr1:1-1000")}.
 Strand information is ignored.}
 
 \item{group_names}{A list of one or more labels of the same length as the list of
-\code{genes_or_intervals}. These labels serve as demarcation sentinels for the output
+\code{regions}. These labels serve as demarcation sentinels for the output
 list of the bases since any one query will split over many output records \code{(typically)}.
 Not required, but highly recommended.}
 

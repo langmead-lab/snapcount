@@ -10,7 +10,7 @@ Description: snapcount is a client interface to the Snaptron webservices
     and/or various summarized measures of expression across one or more regions/genes
     per-sample (e.g. percent spliced in).
 Depends:
-    R (>= 3.1)
+    R (>= 3.2.0)
 Imports:
     R6,
     httr,
@@ -18,6 +18,7 @@ Imports:
     tidyr,
     purrr,
     jsonlite,
+    assertthat,
     testthat,
     data.table,
     Matrix,
@@ -26,11 +27,13 @@ Imports:
     IRanges,
     GenomicRanges,
     SummarizedExperiment
+Suggets:
+    bit64
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
-Roxygen: list(markdown = TRUE)
+Roxygen: list(markdown = TRUE, roclets = c("rd", "namespace", "collate"))
 URL: https://github.com/langmead-lab/snapr
 BugReports: https://github.com/langmead-lab/snapr/issues
 ByteCompile: true
