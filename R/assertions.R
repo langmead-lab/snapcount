@@ -5,7 +5,7 @@ is_hugo_gene <- function(str) {
 
 is_chromosome_interval <- function(str) {
     assert_that(is.character(str))
-    stringr::str_detect(str, "chr[1-22XYM]:\\d+-\\d+")
+    stringr::str_detect(str, "chr([0-9]|1[0-9]|2[0-2]|[XYM]):\\d+-\\d+")
 }
 
 is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) {
