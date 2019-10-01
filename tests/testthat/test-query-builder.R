@@ -34,23 +34,22 @@ test_that("get/set methods", {
 })
 
 test_that("query methods", {
-    options(test_ctx = TRUE)
+    orig.options <- options(test_context = TRUE)
     sb <- SnaptronQueryBuilder$new()
-    sb$compilation("gtex")$regions("CD99")$sample_filters(SMTS == "Brain")$range_filters(samples_count <= 10)$sids(1:5)
+    sb$compilation("gtex")$regions("CD99")$sample_filters(SMTS == "Brain")$range_filters(samples_count <= 10)$sids(c(50099,50102))
 
     sb$query_jx()
-    expect_equal(uri_of_last_successful_request(), "http://snaptron.cs.jhu.edu/gtex/snaptron?regions=CD99&rfilter=samples_count<:10&sfilter=SMTS:Brain&sids=1,2,3,4,5")
+    expect_equal(uri_of_last_successful_request(), "http://snaptron.cs.jhu.edu/gtex/snaptron?regions=CD99&rfilter=samples_count<:10&sfilter=SMTS:Brain&sids=50099,50102")
 
     sb$query_gene()
-    expect_equal(uri_of_last_successful_request(), "http://snaptron.cs.jhu.edu/gtex/genes?regions=CD99&rfilter=samples_count<:10&sfilter=SMTS:Brain&sids=1,2,3,4,5")
+    expect_equal(uri_of_last_successful_request(), "http://snaptron.cs.jhu.edu/gtex/genes?regions=CD99&rfilter=samples_count<:10&sfilter=SMTS:Brain&sids=50099,50102")
 
     sb$query_exon()
-    expect_equal(uri_of_last_successful_request(), "http://snaptron.cs.jhu.edu/gtex/exons?regions=CD99&rfilter=samples_count<:10&sfilter=SMTS:Brain&sids=1,2,3,4,5")
+    expect_equal(uri_of_last_successful_request(), "http://snaptron.cs.jhu.edu/gtex/exons?regions=CD99&rfilter=samples_count<:10&sfilter=SMTS:Brain&sids=50099,50102")
 
     sb$query_coverage()
-    expect_equal(uri_of_last_successful_request(), "http://snaptron.cs.jhu.edu/gtex/bases?regions=CD99&sids=1,2,3,4,5")
-
-    options(test_ctx = NULL)
+    expect_equal(uri_of_last_successful_request(), "http://snaptron.cs.jhu.edu/gtex/bases?regions=CD99&sids=50099,50102")
+    options(orig.options)
 })
 
 test_that("test building from invalid url", {
@@ -59,16 +58,12 @@ test_that("test building from invalid url", {
 })
 
 test_that("test building from url", {
-    options(test_ctx = TRUE)
-
     sb <- SnaptronQueryBuilder$new()
-    sb$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=CD99&rfilter=samples_count<:10&sfilter=SMTS:Brain&sids=1,2,3,4,5")
+    sb$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=CD99&rfilter=samples_count<:10&sfilter=SMTS:Brain&sids=50099,50102")
 
     expect_equal(sb$compilation(), "gtex")
     expect_equal(sb$regions(), "CD99")
     expect_equal(sb$range_filters(), "samples_count<:10")
     expect_equal(sb$sample_filters(), "SMTS:Brain")
-    expect_equal(sb$sids(), 1:5)
-
-    options(test_ctx = NULL)
+    expect_equal(sb$sids(), c(50099,50102))
 })

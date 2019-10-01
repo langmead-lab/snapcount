@@ -100,14 +100,10 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
             if (url$hostname != "snaptron.cs.jhu.edu") {
                 stop("URL does not point to Snaptron server", stop. = FALSE)
             }
-
-            if (is.null(getOption("test_ctx"))) {
-                resp <- httr::HEAD(url)
-                if (resp$status_code != 200 || httr::http_type(resp) != "text/plain") {
-                    stop(sprintf("%s: is not a valid URL", url), call. = FALSE)
-                }
+            resp <- httr::HEAD(url)
+            if (resp$status_code != 200 || httr::http_type(resp) != "text/plain") {
+                stop(sprintf("%s: is not a valid URL", url), call. = FALSE)
             }
-
             query <- list()
             for (i in seq_along(url$query)) {
                 name <- switch(n <- names(url$query[i]),
@@ -287,18 +283,18 @@ query_gene <- function(compilation, regions,
     }
 
     should_bind <- length(regions) > 1 && !split_by_region
-    res <- lapply(1:length(regions), function(i) {
-        if (!is.null(strands) && (strands[i] == "+" || strands[i] == "-")) {
+    res <- lapply(seq_along(regions), function(i) {
+        if (!is.null(strands) && (strands[i] == "+" || strands[[i]] == "-")) {
             pos <- grep("strand", range_filters)
             if (!identical(pos, integer(0))) {
-                range_filters[pos] <- paste0("strand:", strands[i])
+                range_filters[pos] <- paste0("strand:", strands[[i]])
             } else {
-                range_filters <- c(range_filters, paste0("strand:", strands[i]))
+                range_filters <- c(range_filters, paste0("strand:", strands[[i]]))
             }
         }
 
         run_query(compilation = compilation,
-                  regions = regions[i],
+                  regions = regions[[i]],
                   range_filters = range_filters,
                   sample_filters = sample_filters,
                   coordinate_modifier = coordinate_modifier,
@@ -400,7 +396,7 @@ query_coverage <- function(compilation, regions, group_names = NULL,
                       endpoint = "bases", sids = sids,
                       construct_rse = FALSE)
 
-    if (is.null(getOption("test_ctx"))) {
+    if (is.null(getOption("test_context"))) {
         rse(
             data$query_data,
             data$metadata,
@@ -476,7 +472,7 @@ run_query <- function(compilation, regions, endpoint = "snaptron",
             sids = sids
         )
 
-    if (!is.null(getOption("test_ctx"))) {
+    if (!is.null(getOption("test_context"))) {
         assign("last_uri_accessed", uri, pkg_globals)
         return(NULL)
     } else {
@@ -484,7 +480,7 @@ run_query <- function(compilation, regions, endpoint = "snaptron",
         assign("last_uri_accessed", uri, pkg_globals)
     }
 
-    query_data <- data.table::fread(tsv, sep = "\t")
+    query_data <- data.table::fread(tsv, sep = "\t", header = TRUE)
     if (nrow(query_data) == 0) {
         return(NULL)
     }
@@ -526,13 +522,11 @@ generate_snaptron_uri <- function(compilation, regions,
         stop("please specify either a gene or an interval", call. = FALSE)
     }
 
-    ## range_filters <- bool_expressions_to_strings(range_filters)
     if (!is.null(range_filters)) {
         query <- c(query, paste("rfilter",
                                 tidy_filters(range_filters), sep = "="))
     }
 
-    ## sample_filters <- bool_expressions_to_strings(rlang::enexpr(sample_filters))
     if (!is.null(sample_filters)) {
         sample_filters <- tidy_filters(sample_filters)
         errors <- lapply(sample_filters, function(filter) {
