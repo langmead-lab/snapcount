@@ -4,7 +4,7 @@
 #' This function queries 2 or more compilations which are on the same
 #' reference version (e.g. hg38) and merges the resulting junctions
 #' into a single output table, unioning the sample coverage columns
-#' and the snaptron_id (jx ID) columns (the latter delimiter should
+#' and the snaptron_id (jx ID) columns (the latter delimiter will
 #' be ":").  All sample IDs will be disjoint between compilations.
 #'
 #' Union is based on the following fields (combined into a comparison key):
@@ -17,10 +17,10 @@
 #' }
 #'
 #' The goal is to have a single list of junctions where every junction
-#' occurs in at least one compilation and a junction occurs in > 1
-#' compilation it still only has a single row representing all the
+#' occurs in at least one compilation and if a junction occurs in > 1
+#' compilations it still only has a single row representing all the
 #' samples across compilations that it appears in.
-#' Sample aggregate statistics should recalculated for junctions which
+#' Sample aggregate statistics will be recalculated for junctions which
 #' are merged across *all* samples from all compilations:
 #'
 #'
@@ -52,11 +52,11 @@ junction_union <- function(...) {
 #' Get the intersection of junctions from 2 or more compilations
 #' which are on the same reference
 #'
-#' This function should operate similar to the `junction_union()` function, i.e
+#' This function operates similar to the `junction_union()` function, i.e
 #' it’s cross compilation and merging of the same junction from multiple
-#' compilations should be handled exactly the same way. But instead
+#' compilations will be handled exactly the same way. But instead
 #' of every junction which appears in at least one compilation, only
-#' return the junctions which appear in *every* compilation.
+#' the junctions which appear in *every* compilation will be returned.
 #'
 #' @param ... One or more SnaptronQueryBuilder objects
 #' @return A RangedSummarizedExperiment of junctions common across compilations
@@ -164,11 +164,11 @@ calculate_coverage_median <- function(samples) {
 
 #' Relative measure of splice variant usage similar to PSI that allows
 #' for 2 arbitrarily defined groups of junctions (not limited to
-#' cassette exons)
+#' cassette exons).
 #'
 #' Calculates a coverage summary statistic per sample of the normalized
-#' coverage difference between two sets of separate junctions (defined
-#' by at least two basic queries) organized into two groups.
+#' coverage difference between two sets of separate junctions defined
+#' by at least two basic queries and organized into two groups.
 #'
 #' The summary statistic is as follows:
 #' If the coverage of the first group is "A" and the second is "B":
@@ -178,7 +178,7 @@ calculate_coverage_median <- function(samples) {
 #' This is calculated for every sample that occurs in one or the other
 #' (or both) groups’ results.
 #'
-#' @param group1,group2 List of 1 or more SnaptronQueryBuilder objects
+#' @param group1,group2 Each group is a list of 1 or more SnaptronQueryBuilder objects
 #' @param group_names Optional vector of strings representing the group names
 #'
 #' @examples
@@ -225,7 +225,7 @@ calc_jir <- function(a, b) {
 #' Relative measure of splice variant usage, limited currently to
 #' cassette exon splice variants
 #'
-#' Similar to the JIR, this calculates Percent Spliced In statistics
+#' Similar to the JIR, this calculates Percent Spliced In (PSI) statistics
 #' for the definition of 2 different groups: inclusion and exclusion.
 #' Currently this function only supports the cassette exon use case.
 #'
@@ -240,11 +240,11 @@ calc_jir <- function(a, b) {
 #' mean(inclusion1, inclusion2) / (mean(inclusion1, inclusion2) + exclusion)```
 #'
 #' where each term denotes the coverage of junctions that resulted
-#' from the basic queries in that group in the current sample
+#' from the basic queries in that group in the current sample.
 #'
-#' @param inclusion_group1,inclusion_group2,exclusion_group A list of 1 or
+#' @param inclusion_group1,inclusion_group2,exclusion_group Where each is a list of 1 or
 #'   more SnaptronQueryBuilder objects
-#' @param min_count TODO: add description for min_count
+#' @param min_count minimum total count (denominator) required to not be assigned -1
 #' @param group_names Optional vector of strings representing the group names
 #'
 #' @examples
@@ -288,7 +288,7 @@ calc_psi <- function(inclusion1, inclusion2, exclusion, min_count) {
 #' Tissue Specificity (TS): produces a list of samples with their tissues
 #' marked which either contain queried junctions (1) or not (0); can be used
 #' as input to significance testing methods such as Kruskal-Wallis to look for
-#' tissue enrichment (currently only works for GTEx)
+#' tissue enrichment (currently only works for the GTEx compilation).
 #'
 #' Lists the number of samples labeled with a specific tissue type.
 
@@ -305,7 +305,7 @@ calc_psi <- function(inclusion1, inclusion2, exclusion, min_count) {
 #' statistical test, such as the Kruskal-wallis non-parametric rank test.
 
 #' This query is limited to GTEx only due to the fact that GTEx is one of the
-#' few compilations that have consistent and complete tissue metadata.
+#' few compilations that has consistent and complete tissue metadata.
 #'
 #' @param ... One or more SnaptronQueryBuilder objects
 #' @param group_names Optional vector of strings representing the group names
@@ -383,15 +383,15 @@ shared <- function(cov1, cov2) {
 #' occurring in each group.
 #'
 #' Example: User defines a single group of junctions "GroupA" made up of 2
-#' separate regions (so 2 basic queries).
+#' separate regions (two basic queries).
 #'
 #' An SSC query will return a single line for GroupA which will have the total
-#' number of samples which had at least one junction which matched both basic
+#' number of samples which had at least one junction which was returned from both basic
 #' queries. It will also report a summary statistic of the total number of
 #' groups which had one or more samples that were shared across the basic
 #' queries, in this case it would be 1.  Also, it will report the number of
 #' groups which had at least one shared sample and which had matching
-#' junctions (from the query) which were fully annotated*.
+#' junctions (from the query) which were fully annotated.
 
 #' This function can be used to determine how much cross-sample support there
 #' is for a particular junction configuration (typically a cassette exon).
@@ -400,7 +400,11 @@ shared <- function(cov1, cov2) {
 #' @param group_names Optional vector of character strings representing group names
 #'
 #' @examples
-#'
+#' group1 <- SnaptronQueryBuilder$new()
+#' group1 <- group1$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
+#' group2 <- SnaptronQueryBuilder$new()
+#' group2 <- group2$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1879903-1879903&either=1&rfilter=strand:-")
+#' ssc<-shared_sample_counts(list(group1, group2))
 #' @export
 shared_sample_counts <- function(..., group_names = NULL) {
     list_of_groups <- list(...)
