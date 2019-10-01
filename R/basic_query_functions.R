@@ -515,7 +515,7 @@ generate_snaptron_uri <- function(compilation, regions,
     path <- paste(compilation, paste0(endpoint, "?"), sep = "/")
 
     assert_that(is_hugo_gene(regions) ||
-                is_chromsome_interval(regions))
+                is_chromosome_interval(regions))
     if (!missing(regions)) {
         query <- paste("regions", regions, sep = "=")
     } else {
