@@ -23,6 +23,7 @@ Imports:
     data.table,
     Matrix,
     magrittr,
+    stringr,
     methods,
     IRanges,
     GenomicRanges,
