@@ -18,7 +18,7 @@ one compilation
 This function queries 2 or more compilations which are on the same
 reference version (e.g. hg38) and merges the resulting junctions
 into a single output table, unioning the sample coverage columns
-and the snaptron_id (jx ID) columns (the latter delimiter should
+and the snaptron_id (jx ID) columns (the latter delimiter will
 be ":").  All sample IDs will be disjoint between compilations.
 }
 \details{
@@ -32,10 +32,10 @@ Union is based on the following fields (combined into a comparison key):
 }
 
 The goal is to have a single list of junctions where every junction
-occurs in at least one compilation and a junction occurs in > 1
-compilation it still only has a single row representing all the
+occurs in at least one compilation and if a junction occurs in > 1
+compilations it still only has a single row representing all the
 samples across compilations that it appears in.
-Sample aggregate statistics should recalculated for junctions which
+Sample aggregate statistics will be recalculated for junctions which
 are merged across \emph{all} samples from all compilations:
 \itemize{
 \item sample_count

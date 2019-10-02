@@ -1,5 +1,7 @@
 context("SnaptronQueryBuilder")
 
+orig.options <- options()
+
 test_that("empty query builder object", {
     sb <- SnaptronQueryBuilder$new()
     expect_output(sb$print(), "<SnaptronQueryBuilder>")
@@ -34,7 +36,7 @@ test_that("get/set methods", {
 })
 
 test_that("query methods", {
-    orig.options <- options(test_context = TRUE)
+    options(test_context = TRUE)
     sb <- SnaptronQueryBuilder$new()
     sb$compilation("gtex")$regions("CD99")$sample_filters(SMTS == "Brain")$range_filters(samples_count <= 10)$sids(c(50099,50102))
 
@@ -67,3 +69,8 @@ test_that("test building from url", {
     expect_equal(sb$sample_filters(), "SMTS:Brain")
     expect_equal(sb$sids(), c(50099,50102))
 })
+
+## do this again in case there are any test failures and
+## we are not able to restore the original env before
+## failure
+options(orig.options)

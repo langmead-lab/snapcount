@@ -1,5 +1,5 @@
 
-This will serve for now for smoke testing the output of `snapr` against Snaptron directly.  
+This will serve for now for smoke testing the output of `snapcount` against Snaptron directly.  
 
 It takes ~1m to run (on Stingray at least):
 

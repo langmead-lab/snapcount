@@ -38,7 +38,7 @@ A Reference Class for building Snaptron queries
 
 \examples{
 sb <- SnaptronQueryBuilder$new()
-sb$compilation("srav2")$regions("CD99")$query_jx()
+sb$compilation("gtex")$regions("CD99")$query_jx()
 sb$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1-100000&rfilter=samples_count>:20&sfilter=SMTS:Brain")
 }
 \keyword{datasets}

@@ -2,7 +2,7 @@ enum <- function(...) {
     variants <- rlang::ensyms(...)
     values <- purrr::map(variants, rlang::as_string)
 
-    res <- setNames(values, values)
+    res <- stats::setNames(values, values)
     res <- as.environment(as.list(res))
 
     lockEnvironment(res, bindings = TRUE)

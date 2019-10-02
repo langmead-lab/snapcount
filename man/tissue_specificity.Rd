@@ -5,7 +5,7 @@
 \title{Tissue Specificity (TS): produces a list of samples with their tissues
 marked which either contain queried junctions (1) or not (0); can be used
 as input to significance testing methods such as Kruskal-Wallis to look for
-tissue enrichment (currently only works for GTEx)}
+tissue enrichment (currently only works for the GTEx compilation).}
 \usage{
 tissue_specificity(..., group_names = NULL)
 }
@@ -29,7 +29,7 @@ This is useful for determining if there’s an enrichment for a specific
 tissue in the set of junctions queried.  Results from this can be fed to a
 statistical test, such as the Kruskal-wallis non-parametric rank test.
 This query is limited to GTEx only due to the fact that GTEx is one of the
-few compilations that have consistent and complete tissue metadata.
+few compilations that has consistent and complete tissue metadata.
 }
 \examples{
 inclusion_group1 <- SnaptronQueryBuilder$new()

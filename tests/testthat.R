@@ -1,4 +1,4 @@
 library(testthat)
-library(snapr)
+library(snapcount)
 
-test_check("snapr")
+test_check("snapcount")

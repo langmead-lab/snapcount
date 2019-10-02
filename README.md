@@ -24,7 +24,7 @@ devtools::install_github("langmead-lab/snapr")
 
 ## Usage
 
-##### snapr can be used with either a procedural interface
+##### snapcount can be used with either a procedural interface
 
 ``` r
 library(snapcount)

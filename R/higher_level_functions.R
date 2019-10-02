@@ -63,7 +63,7 @@ junction_union <- function(...) {
 #' @seealso [junction_union()]
 #' @export
 #' @examples
-#' #' sb1 <- SnaptronQueryBuilder$new()
+#' sb1 <- SnaptronQueryBuilder$new()
 #' sb1$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
 #'
 #' sb2 <- SnaptronQueryBuilder$new()
@@ -251,7 +251,7 @@ calc_jir <- function(a, b) {
 #' inclusion_group1 <- SnaptronQueryBuilder$new()
 #' inclusion_group1 <- inclusion_group1$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=chr1:94468008-94472172&exact=1&rfilter=strand:+")
 #' inclusion_group2 <- SnaptronQueryBuilder$new()
-#' inclusion_group2 <- inclusion_group2$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=	&exact=1&rfilter=strand:+")
+#' inclusion_group2 <- inclusion_group2$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=chr1:94468008-94472172&exact=1&rfilter=strand:+")
 #' exclusion_group <- SnaptronQueryBuilder$new()
 #' exclusion_group <- exclusion_group$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=chr1:94468008-94475142&exact=1&rfilter=strand:+")
 #' percent_spliced_in(list(inclusion_group1), list(inclusion_group2), list(exclusion_group))

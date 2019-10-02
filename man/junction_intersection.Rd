@@ -14,14 +14,14 @@ junction_intersection(...)
 A RangedSummarizedExperiment of junctions common across compilations
 }
 \description{
-This function should operate similar to the \code{junction_union()} function, i.e
+This function operates similar to the \code{junction_union()} function, i.e
 it’s cross compilation and merging of the same junction from multiple
-compilations should be handled exactly the same way. But instead
+compilations will be handled exactly the same way. But instead
 of every junction which appears in at least one compilation, only
-return the junctions which appear in \emph{every} compilation.
+the junctions which appear in \emph{every} compilation will be returned.
 }
 \examples{
-#' sb1 <- SnaptronQueryBuilder$new()
+sb1 <- SnaptronQueryBuilder$new()
 sb1$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
 
 sb2 <- SnaptronQueryBuilder$new()

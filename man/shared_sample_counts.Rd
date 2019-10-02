@@ -19,18 +19,22 @@ occurring in each group.
 }
 \details{
 Example: User defines a single group of junctions "GroupA" made up of 2
-separate regions (so 2 basic queries).
+separate regions (two basic queries).
 
 An SSC query will return a single line for GroupA which will have the total
-number of samples which had at least one junction which matched both basic
+number of samples which had at least one junction which was returned from both basic
 queries. It will also report a summary statistic of the total number of
 groups which had one or more samples that were shared across the basic
 queries, in this case it would be 1.  Also, it will report the number of
 groups which had at least one shared sample and which had matching
-junctions (from the query) which were fully annotated*.
+junctions (from the query) which were fully annotated.
 This function can be used to determine how much cross-sample support there
 is for a particular junction configuration (typically a cassette exon).
 }
 \examples{
-
+group1 <- SnaptronQueryBuilder$new()
+group1 <- group1$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
+group2 <- SnaptronQueryBuilder$new()
+group2 <- group2$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1879903-1879903&either=1&rfilter=strand:-")
+ssc<-shared_sample_counts(list(group1, group2))
 }

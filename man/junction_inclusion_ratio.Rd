@@ -4,19 +4,19 @@
 \alias{junction_inclusion_ratio}
 \title{Relative measure of splice variant usage similar to PSI that allows
 for 2 arbitrarily defined groups of junctions (not limited to
-cassette exons)}
+cassette exons).}
 \usage{
 junction_inclusion_ratio(group1, group2, group_names = NULL)
 }
 \arguments{
-\item{group1, group2}{List of 1 or more SnaptronQueryBuilder objects}
+\item{group1, group2}{Each group is a list of 1 or more SnaptronQueryBuilder objects}
 
 \item{group_names}{Optional vector of strings representing the group names}
 }
 \description{
 Calculates a coverage summary statistic per sample of the normalized
-coverage difference between two sets of separate junctions (defined
-by at least two basic queries) organized into two groups.
+coverage difference between two sets of separate junctions defined
+by at least two basic queries and organized into two groups.
 }
 \details{
 The summary statistic is as follows:

@@ -22,10 +22,6 @@ Not required, but highly recommended.}
 \item{sids}{A list of rail_ids (integer sample IDs) to filter results on. Only
 records which have been found in at least one of these samples will be returned.}
 
-\item{bulk}{Use the \code{Snaptron} bulk query interface. This will perform better when
-running many queries at once. There is a limit of 50 queries per unit. More than 50
-queries can be submitted but they will be broken up into units of 50.}
-
 \item{split_by_region}{By default the results from multiple queries will be returned
 in \code{RangedSummarizedExperiment} object with a \code{rowData} entry for each labeling each
 result row according to the query it resulted from. However, if this is set to \code{TRUE},

@@ -26,7 +26,7 @@
 #' @export
 #' @examples
 #' sb <- SnaptronQueryBuilder$new()
-#' sb$compilation("srav2")$regions("CD99")$query_jx()
+#' sb$compilation("gtex")$regions("CD99")$query_jx()
 #' sb$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1-100000&rfilter=samples_count>:20&sfilter=SMTS:Brain")
 SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
     public = list(
@@ -376,9 +376,6 @@ query_exon <- function(compilation, regions,
 #'   `regions`. These labels serve as demarcation sentinels for the output
 #'   list of the bases since any one query will split over many output records `(typically)`.
 #'   Not required, but highly recommended.
-#' @param bulk Use the `Snaptron` bulk query interface. This will perform better when
-#'   running many queries at once. There is a limit of 50 queries per unit. More than 50
-#'   queries can be submitted but they will be broken up into units of 50.
 #' @param split_by_region By default the results from multiple queries will be returned
 #'   in `RangedSummarizedExperiment` object with a `rowData` entry for each labeling each
 #'   result row according to the query it resulted from. However, if this is set to `TRUE`,
@@ -391,19 +388,35 @@ query_exon <- function(compilation, regions,
 #' query_coverage("gtex", "BRCA1", sids = c(50099,50102,50113))
 query_coverage <- function(compilation, regions, group_names = NULL,
                            sids = NULL, bulk = FALSE, split_by_region = FALSE) {
-    data <- run_query(compilation = compilation,
-                      regions = regions,
-                      endpoint = "bases", sids = sids,
-                      construct_rse = FALSE)
+    if (class(regions) == "GRanges") {
+        regions <- extract_intervals(regions)
 
-    if (is.null(getOption("test_context"))) {
+    }
+    should_bind <- length(regions) > 1 && !split_by_region
+    res <- lapply(seq_along(regions), function(i) {
+        data <- run_query(compilation = compilation,
+                          regions = regions,
+                          endpoint = "bases", sids = sids,
+                          construct_rse = FALSE)
+        if (is.null(data)) {
+            return()
+        }
         rse(
             data$query_data,
             data$metadata,
             extract_row_ranges = coverage_row_ranges,
             extract_counts = coverage_counts
         )
+    })
+
+    if (length(res) == 1) {
+        res <- res[[1]]
     }
+    if (should_bind) {
+        res <- do.call(SummarizedExperiment::rbind, res)
+    }
+
+    res
 }
 
 #' Return the URI of the last successful request to Snaptron
@@ -554,11 +567,12 @@ generate_snaptron_uri <- function(compilation, regions,
         } else if (coordinate_modifier == Coordinates$EndIsExactOrWithin) {
             query <- c(query, paste("either", "2", sep = "="))
         } else {
-            stop("Invalid coordinate filter", stop. = FALSE)
+            stop("Invalid coordinate modifier", stop. = FALSE)
         }
     }
     if (!is.null(sids)) {
-        assert_that(is.wholenumber(sids))
+        assert_that(is.wholenumber(sids),
+                    msg = "sids should be whole numbers")
         query <- c(query, paste("sids", paste(sids, collapse = ","), sep = "="))
     }
 

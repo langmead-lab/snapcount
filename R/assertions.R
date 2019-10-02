@@ -5,12 +5,12 @@ is_hugo_gene <- function(str) {
 
 is_chromosome_interval <- function(str) {
     assert_that(is.character(str))
-    stringr::str_detect(str, "chr([0-9]|1[0-9]|2[0-2]|[XYM]):\\d+-\\d+")
+    stringr::str_detect(str, "chr([1-9]|1[0-9]|2[0-2]|[XYM]):\\d+-\\d+")
 }
 
 is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) {
     assert_that(is.numeric(x))
-    all(abs(x - round(x)) < tol)
+    all(x >= 0 & (abs(x - round(x)) < tol))
 }
 
 is_query_builder <- function(object) {
