@@ -7,8 +7,10 @@ is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) {
     all(abs(x - round(x)) < tol)
 }
 
-`%<-%` <- function(bindings, values) {
-    values <- force(values)
+## renaming second arg from values to value to
+## appease R checks
+`%<-%` <- function(bindings, value) {
+    values <- force(value)
     bindings <- substitute(bindings)
 
     assert_that(length(bindings) == length(values) + 1)
