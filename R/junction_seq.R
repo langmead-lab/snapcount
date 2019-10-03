@@ -20,7 +20,7 @@ FormatForJunctionSeq <-
             get_gff_filename = function() {
                 if (is.null(private$gff_filename)) {
                     stop(
-                        "GFF flat file has not been saved to disk, please run 'write_gff_file' with an opitional filename"
+                        "GFF flat file has not been saved to disk, please run 'write_gff_file' with an optional filename"
                     )
                 }
                 private$gff_filename
