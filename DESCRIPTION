@@ -29,7 +29,9 @@ Imports:
     GenomicRanges,
     SummarizedExperiment
 Suggets:
-    bit64
+    bit64,
+    knitr,
+    rmarkdown
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
