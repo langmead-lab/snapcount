@@ -87,7 +87,7 @@ merge_compilations <- function(..., all) {
         if (is.null(metadata_list[[compilation]])) {
             metadata_list[[compilation]] <<- compilation_metadata
         } else if (all.equal(metadata_list[[compilation]], compilation_metadata)) {
-            next
+            return(df)
         } else {
             metadata_list[[compilation]] <<-
                 merge(metadata_list[[compilation]],
