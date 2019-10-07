@@ -27,7 +27,10 @@
 #' @examples
 #' sb <- SnaptronQueryBuilder$new()
 #' sb$compilation("gtex")$regions("CD99")$query_jx()
-#' sb$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1-100000&rfilter=samples_count>:20&sfilter=SMTS:Brain")
+#' sb$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1-100000")
+#' sb$sample_filters(SMTS == "Brain")
+#' sb$range_filters(samples_count >= 20)
+#' sb$query_jx(return_rse = FALSE)
 SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
     public = list(
         initialize = function(...) {
@@ -210,7 +213,13 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
 #' @param return_rse Should the query data be returned as a simple data frame or
 #'   converted to a RangeSummarizedExperiment.
 #'
-#' @examples
+#' @param split_by_region By default the results from multiple queries will be returned
+#'   in `RangedSummarizedExperiment` object with a `rowData` entry for each labeling each
+#'   result row according to the query it resulted from. However, if this is set to `TRUE`,
+#'   the result will be a list of RangedSummarizedExperiment objects, one per original
+#'   interval/gene. This latter option may be useful but reqires metadata for each original
+#'   interval/gene.
+#'  @examples
 #' query_jx(Compilation$gtex, "chr1:1-100000", range_filters = "samples_count >= 20")
 #'
 #' @return Functions will return either a RangeSummarizedexperiment or data.table depending
@@ -387,7 +396,7 @@ query_exon <- function(compilation, regions,
 #' @examples
 #' query_coverage("gtex", "BRCA1", sids = c(50099,50102,50113))
 query_coverage <- function(compilation, regions, group_names = NULL,
-                           sids = NULL, bulk = FALSE, split_by_region = FALSE) {
+                           sids = NULL, split_by_region = FALSE) {
     if (class(regions) == "GRanges") {
         regions <- extract_intervals(regions)
 

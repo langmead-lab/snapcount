@@ -37,10 +37,16 @@
 #' @export
 #' @examples
 #' sb1 <- SnaptronQueryBuilder$new()
-#' sb1$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
+#' sb1$compilation(Compilation$gtex)
+#' sb1$regions("chr1:1879786-1879786")
+#' sb1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+#' sb1$range_filters(strand == "-")
 #'
 #' sb2 <- SnaptronQueryBuilder$new()
-#' sb2$from_url("http://snaptron.cs.jhu.edu/tcga/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
+#' sb2$compilation("tcga")
+#' sb2$regions("chr1:1879786-1879786")
+#' sb2$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+#' sb2$range_filters(strand == "-")
 #'
 #' junction_union(sb1, sb2)
 junction_union <- function(...) {
@@ -64,10 +70,16 @@ junction_union <- function(...) {
 #' @export
 #' @examples
 #' sb1 <- SnaptronQueryBuilder$new()
-#' sb1$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
+#' sb1$compilation("gtex")
+#' sb1$regions("chr1:1879786-1879786")
+#' sb1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+#' sb1$range_filters(strand == "-")
 #'
 #' sb2 <- SnaptronQueryBuilder$new()
-#' sb2$from_url("http://snaptron.cs.jhu.edu/tcga/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
+#' sb2$compilation("tcga")
+#' sb2$regions("chr1:1879786-1879786")
+#' sb2$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+#' sb2$range_filters(strand == "-")
 #'
 #' junction_intersection(sb1, sb2)
 junction_intersection <- function(...) {
@@ -183,9 +195,17 @@ calculate_coverage_median <- function(samples) {
 #'
 #' @examples
 #' sb1 <- SnaptronQueryBuilder$new()
-#' sb1$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=chr2:29446395-30142858&contains=1&rfilter=strand:-")
+#' sb1$compilation("srav2")
+#' sb1$regions("chr2:29446395-30142858")
+#' sb1$coordinate_modifier(Coordinates$Within)
+#' sb1$range_filters(strand == "-")
+#'
 #' sb2 <- SnaptronQueryBuilder$new()
-#' sb2$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=chr2:29416789-29446394&contains=1&rfilter=strand:-")
+#' sb2$compilation("srav2")
+#' sb2$regions("chr2:29416789-29446394")
+#' sb2$coordinate_modifier(Coordinates$Within)
+#' sb2$range_filters(strand == "-")
+#'
 #' junction_inclusion_ratio(list(sb1), list(sb2))
 #' @export
 junction_inclusion_ratio <- function(group1, group2, group_names = NULL) {
@@ -236,6 +256,7 @@ calc_jir <- function(a, b) {
 #'
 #' The PSI itself is implemented as:
 #'
+#' Fix this
 #' ```PSI(inclusion1, inclusion2, exclusion) =
 #' mean(inclusion1, inclusion2) / (mean(inclusion1, inclusion2) + exclusion)```
 #'
@@ -249,11 +270,23 @@ calc_jir <- function(a, b) {
 #'
 #' @examples
 #' inclusion_group1 <- SnaptronQueryBuilder$new()
-#' inclusion_group1 <- inclusion_group1$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=chr1:94468008-94472172&exact=1&rfilter=strand:+")
+#' inclusion_group1$compilation("srav2")
+#' inclusion_group1$regions("chr1:94468008-94472172")
+#' inclusion_group1$coordinate_modifier(Coordinates$Exact)
+#' inclusion_group1$range_filters(strand == "+")
+#'
 #' inclusion_group2 <- SnaptronQueryBuilder$new()
-#' inclusion_group2 <- inclusion_group2$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=chr1:94468008-94472172&exact=1&rfilter=strand:+")
+#' inclusion_group2$compilation("srav2")
+#' inclusion_group2$regions("chr1:94468008-94472172")
+#' inclusion_group2$coordinate_modifier(Coordinates$Exact)
+#' inclusion_group2$range_filters(strand == "+")
+#'
 #' exclusion_group <- SnaptronQueryBuilder$new()
-#' exclusion_group <- exclusion_group$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=chr1:94468008-94475142&exact=1&rfilter=strand:+")
+#' exclusion_group$compilation("srav2")
+#' exclusion_group$regions("chr1:94468008-94475142")
+#' exclusion_group$coordinate_modifier(Coordinates$Exact)
+#' exclusion_group$range_filters(strand == "+")
+#'
 #' percent_spliced_in(list(inclusion_group1), list(inclusion_group2), list(exclusion_group))
 #' @export
 percent_spliced_in <- function(inclusion_group1, inclusion_group2,
@@ -312,9 +345,16 @@ calc_psi <- function(inclusion1, inclusion2, exclusion, min_count) {
 #'
 #' @examples
 #' inclusion_group1 <- SnaptronQueryBuilder$new()
-#' inclusion_group1 <- inclusion_group1$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr4:20763023-20763023&either=2&rfilter=strand:-")
+#' inclusion_group1$compilation("gtex")
+#' inclusion_group1$regions("chr4:20763023-20763023")
+#' inclusion_group1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+#' inclusion_group1$range_filters(strand == "-")
+#'
 #' inclusion_group2 <- SnaptronQueryBuilder$new()
-#' inclusion_group2 <- inclusion_group2$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr4:20763098-20763098&either=1&rfilter=strand:-")
+#' inclusion_group2$compilation("gtex")
+#' inclusion_group2$regions("chr4:20763098-20763098")
+#' inclusion_group2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
+#' inclusion_group2$range_filters(strand == "-")
 #'
 #' tissue_specificity(list(inclusion_group1, inclusion_group2))
 #' @export
@@ -401,9 +441,17 @@ shared <- function(cov1, cov2) {
 #'
 #' @examples
 #' group1 <- SnaptronQueryBuilder$new()
-#' group1 <- group1$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
+#' group1$compilation("gtex")
+#' group1$regions("chr1:1879786-1879786")
+#' group1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+#' group1$range_filters(strand == "-")
+#'
 #' group2 <- SnaptronQueryBuilder$new()
-#' group2 <- group2$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1879903-1879903&either=1&rfilter=strand:-")
+#' group2$compilation("gtex")
+#' group2$regions("chr1:1879903-1879903")
+#' group2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
+#' group2$range_filters(strand == "-")
+#'
 #' ssc<-shared_sample_counts(list(group1, group2))
 #' @export
 shared_sample_counts <- function(..., group_names = NULL) {

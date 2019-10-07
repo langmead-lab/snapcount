@@ -32,6 +32,7 @@ Suggets:
     bit64,
     knitr,
     rmarkdown
+    JunctionSeq
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

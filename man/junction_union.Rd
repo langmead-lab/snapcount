@@ -46,10 +46,16 @@ are merged across \emph{all} samples from all compilations:
 }
 \examples{
 sb1 <- SnaptronQueryBuilder$new()
-sb1$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
+sb1$compilation(Compilation$gtex)
+sb1$regions("chr1:1879786-1879786")
+sb1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+sb1$range_filters(strand == "-")
 
 sb2 <- SnaptronQueryBuilder$new()
-sb2$from_url("http://snaptron.cs.jhu.edu/tcga/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
+sb2$compilation("tcga")
+sb2$regions("chr1:1879786-1879786")
+sb2$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+sb2$range_filters(strand == "-")
 
 junction_union(sb1, sb2)
 }

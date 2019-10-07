@@ -5,7 +5,7 @@
 \title{Query Coverage data}
 \usage{
 query_coverage(compilation, regions, group_names = NULL, sids = NULL,
-  bulk = FALSE, split_by_region = FALSE)
+  split_by_region = FALSE)
 }
 \arguments{
 \item{compilation}{A single string containing the name of the Snaptron datasource}

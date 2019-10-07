@@ -29,8 +29,16 @@ This is calculated for every sample that occurs in one or the other
 }
 \examples{
 sb1 <- SnaptronQueryBuilder$new()
-sb1$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=chr2:29446395-30142858&contains=1&rfilter=strand:-")
+sb1$compilation("srav2")
+sb1$regions("chr2:29446395-30142858")
+sb1$coordinate_modifier(Coordinates$Within)
+sb1$range_filters(strand == "-")
+
 sb2 <- SnaptronQueryBuilder$new()
-sb2$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=chr2:29416789-29446394&contains=1&rfilter=strand:-")
+sb2$compilation("srav2")
+sb2$regions("chr2:29416789-29446394")
+sb2$coordinate_modifier(Coordinates$Within)
+sb2$range_filters(strand == "-")
+
 junction_inclusion_ratio(list(sb1), list(sb2))
 }

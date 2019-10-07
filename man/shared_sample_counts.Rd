@@ -33,8 +33,16 @@ is for a particular junction configuration (typically a cassette exon).
 }
 \examples{
 group1 <- SnaptronQueryBuilder$new()
-group1 <- group1$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
+group1$compilation("gtex")
+group1$regions("chr1:1879786-1879786")
+group1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+group1$range_filters(strand == "-")
+
 group2 <- SnaptronQueryBuilder$new()
-group2 <- group2$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1879903-1879903&either=1&rfilter=strand:-")
+group2$compilation("gtex")
+group2$regions("chr1:1879903-1879903")
+group2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
+group2$range_filters(strand == "-")
+
 ssc<-shared_sample_counts(list(group1, group2))
 }
