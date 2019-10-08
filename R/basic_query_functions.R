@@ -1,15 +1,27 @@
 #' A Reference Class for building Snaptron queries
 #'
 #' @section Methods:
-#' \code{compilation} Get or set snaptron compilation
+#' \code{compilation} Get or set query compilation. See
+#'   \code{\link{Compilation}} for details.
 #'
-#' \code{genes_or_intervals} Get or set either genes or intervals
+#' \code{regions} Get or set query region which can be either a chromosome
+#'   range or HUGO gene.
 #'
-#' \code{range_filters} Get or set range filters
+#' \code{range_filters} Get or set query range filters. Range filters can be
+#'   set to a list or vector of either strings or R boolean expressions. If
+#'   filters are R boolean expressions then the right-hand-side of the R
+#'   expression should evaluate to either a string, float or whole number.
+#'   The expression will then be converted to a string before being sent out
+#'   to Snaptron.
 #'
-#' \code{sample_filters} Get or set sample filters
+#' \code{sample_filters} Get or set query sample filters. When setting sample
+#'   filters the argument is expected to follow the sample rules as described
+#'   for \code{range_filters}.
 #'
-#' \code{sids} Get or set Snaptron sample ids
+#' \code{sids} Get or set query sample ids.
+#'
+#' \code{coordinate_modifier} Get or coordinate modifiers for query. See
+#'   \code{\link{Coordinates}} for details.
 #'
 #' \code{query_jx} call \code{\link{query_jx}} function
 #'
@@ -29,7 +41,12 @@
 #' sb$compilation("gtex")$regions("CD99")$query_jx()
 #' sb$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1-100000")
 #' sb$sample_filters(SMTS == "Brain")
-#' sb$range_filters(samples_count >= 20)
+#'
+#' # The RHS of an R boolean expression can itself be an expression,
+#' # but the expression has to evaluate to either a String, Float or Integer.
+#' a <- 10
+#' b <- 10
+#' sb$range_filters(samples_count >= (a + b))
 #' sb$query_jx(return_rse = FALSE)
 SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
     public = list(

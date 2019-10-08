@@ -23,12 +23,12 @@ be ":").  All sample IDs will be disjoint between compilations.
 }
 \details{
 Union is based on the following fields (combined into a comparison key):
-\preformatted{
-     * group
-     * chromosome
-     * start
-     * end
-     * strand
+\itemize{
+\item group
+\item chromosome
+\item start
+\item end
+\item strand
 }
 
 The goal is to have a single list of junctions where every junction
@@ -37,6 +37,7 @@ compilations it still only has a single row representing all the
 samples across compilations that it appears in.
 Sample aggregate statistics will be recalculated for junctions which
 are merged across \emph{all} samples from all compilations:
+
 \itemize{
 \item sample_count
 \item coverage_sum

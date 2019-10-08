@@ -12,6 +12,14 @@
 #' @field gene The name of the gene to match with the exon and gene query results.
 #' @field sample_names A vector of strings representing sample names.
 #'
+#' @section Important methods:
+#' \code{write_gff}: This method takes an optional file name and attempts to
+#'   write the generated GFF data to disk. This method must be called before
+#'   \code{format_for_junction_seq}.
+#'
+#' \code{format_for_junction_seq}: This method will output two function calls
+#'   needed to produce the junction plot for the requested gene.
+#'
 #' @examples
 #' sb1 <- SnaptronQueryBuilder$new()
 #' sb1$compilation("gtex")
@@ -30,15 +38,12 @@
 #' js <- FormatForJunctionSeq$new(query_builders = list(sb1, sb2, sb3),
 #'                                group_names = list("Brain", "Pituitary", "Spleen"),
 #'                                gene = "IMPDH1")
-#' # getters
-#' js$get_count_data()
-#' js$get_gff_data()
-#' js$get_design()
-#'
 #' # write gff file to disk
 #' js$write_gff_file()
 #'
-#' # output
+#' # output the necessary JunctionSeq function calls needed
+#' # to produce plot
+#' js$format_for_junction_seq()
 #' @export
 FormatForJunctionSeq <-
     R6::R6Class(

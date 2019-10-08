@@ -27,11 +27,13 @@ preceding the cassette exon, and the second for the junction following
 the cassette exon.  The exclusion group contains one basic query
 which defines the junction which skips the cassette exon.
 
-The PSI itself is implemented as:\preformatted{mean(inclusion1, inclusion2) / (mean(inclusion1, inclusion2) + exclusion)```
+The PSI itself is implemented as:
+
+\code{PSI(inclusion1, inclusion2, exclusion) =
+  mean(inclusion1, inclusion2) / (mean(inclusion1, inclusion2) + exclusion)}
 
 where each term denotes the coverage of junctions that resulted
 from the basic queries in that group in the current sample.
-}
 }
 \examples{
 inclusion_group1 <- SnaptronQueryBuilder$new()

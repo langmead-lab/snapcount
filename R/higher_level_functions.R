@@ -8,12 +8,12 @@
 #' be ":").  All sample IDs will be disjoint between compilations.
 #'
 #' Union is based on the following fields (combined into a comparison key):
-#' \preformatted{
-#'      * group
-#'      * chromosome
-#'      * start
-#'      * end
-#'      * strand
+#' \itemize{
+#'   \item group
+#'   \item chromosome
+#'   \item start
+#'   \item end
+#'   \item strand
 #' }
 #'
 #' The goal is to have a single list of junctions where every junction
@@ -24,10 +24,12 @@
 #' are merged across *all* samples from all compilations:
 #'
 #'
-#' * sample_count
-#' * coverage_sum
-#' * coverage_avg
-#' * coverage_median
+#' \itemize{
+#'   \item sample_count
+#'   \item coverage_sum
+#'   \item coverage_avg
+#'   \item coverage_median
+#' }
 #'
 #'
 #' @param ... One or more SnaptronQueryBuilder objects
@@ -256,9 +258,9 @@ calc_jir <- function(a, b) {
 #'
 #' The PSI itself is implemented as:
 #'
-#' Fix this
-#' ```PSI(inclusion1, inclusion2, exclusion) =
-#' mean(inclusion1, inclusion2) / (mean(inclusion1, inclusion2) + exclusion)```
+#'
+#' \code{PSI(inclusion1, inclusion2, exclusion) =
+#'   mean(inclusion1, inclusion2) / (mean(inclusion1, inclusion2) + exclusion)}
 #'
 #' where each term denotes the coverage of junctions that resulted
 #' from the basic queries in that group in the current sample.

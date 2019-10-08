@@ -1,11 +1,11 @@
 ---
 title: "snapcount vignette"
-author: 
+author:
   - name: Christopher Wilks
     affiliation:
     - &jhucs Johns Hopkins University Computer Science
     email: chris.wilks@jhu.edu
-output: 
+output:
   BiocStyle::html_document:
     self_contained: yes
     toc: true
@@ -29,12 +29,12 @@ startTime <- Sys.time()
 
 ## Install snapcount
 
-`R` is an open-source statistical environment which can be easily modified to enhance its functionality via packages. 
-`R` can be installed on any operating system from [CRAN](https://cran.r-project.org/) after which you can install snapcount 
+`R` is an open-source statistical environment which can be easily modified to enhance its functionality via packages.
+`R` can be installed on any operating system from [CRAN](https://cran.r-project.org/) after which you can install snapcount
 by using the following commands in your `R` session:
 
 ```{r 'installDer', eval = FALSE}
-#Snapcount is not yet in BioConfuctor, 
+#Snapcount is not yet in BioConductor,
 #you can install it from the GitHub repository directly using devtools
 devtools::install_github("langmead-lab/snapr")
 
@@ -58,17 +58,17 @@ For questions regarding Snaptron itself and/or its data, please use the [Gitter 
 We hope that snapcount will be useful for your research. Please use the following information to cite the package specifically, thank you!
 
 ```
-Christopher Wilks, Rone Charles, Ben Langmead (2019). 
-snapcount: R/Bioconductor Package for interfacing with Snaptron 
+Christopher Wilks, Rone Charles, Ben Langmead (2019).
+snapcount: R/Bioconductor Package for interfacing with Snaptron
 for rapid quering of expression counts.
 https://github.com/langmead-lab/snapr
 ```
 
 The Snaptron project itself is published separately and can be cited with the following:
 ```
-Wilks, C, Gaddipati, P, Nellore, A, Langmead, B (2018). 
-Snaptron: querying splicing patterns across tens 
-of thousands of RNA-seq samples. 
+Wilks, C, Gaddipati, P, Nellore, A, Langmead, B (2018).
+Snaptron: querying splicing patterns across tens
+of thousands of RNA-seq samples.
 Bioinformatics, 34, 1:114-116.
 ```
 
@@ -79,7 +79,7 @@ Similar to the `r Biocpkg('recount')` all coverage counts in Snaptron/snapcount 
 
 # Introduction
 
-snapcount is an R package that provides an interface to the [Snaptron web services](http://snaptron.cs.jhu.edu/). 
+snapcount is an R package that provides an interface to the [Snaptron web services](http://snaptron.cs.jhu.edu/).
 This package allows you to query and download coverage counts for genes, exons, and exon-exon splice junctions from all (or a subset) of RNA-seq studies.
 These RNA-seq studies are organized into compilations (e.g. srav2) that include the same sets of studies that the `r Biocpkg('recount')`  organizes.
 
@@ -89,7 +89,7 @@ snapcount complements `r Biocpkg('recount')` in that it allows searching by a sp
 
 In short, snapcount is gene/region centric whereas `r Biocpkg('recount')` is study centric.
 
-If getting the counts for *all* the genes, exons, and/or splice junctions in an annotation from a particular study is your goal, then we suggest you use the `r Biocpkg('recount')` package instead of snapcount.  
+If getting the counts for *all* the genes, exons, and/or splice junctions in an annotation from a particular study is your goal, then we suggest you use the `r Biocpkg('recount')` package instead of snapcount.
 
 Alternatively, if you're interested in the counts from one or a few genes, but across all (or most) studies/samples in recount2/Snaptron, then you should try snapcount.
 
@@ -123,42 +123,42 @@ Also, metadata within a compilation can be incomplete or formatted inconsistentl
 ## Load library
 library('snapcount')
 
-##Query all exon-exon splice junctions within the region of gene CD99 
+##Query all exon-exon splice junctions within the region of gene CD99
 #from GTEx v6 sample compilation
-#CD99 is chosen to be an example for its manageable size, 
+#CD99 is chosen to be an example for its manageable size,
 #no specific functional elements are being highlighted.
-cd99.jx.all <- query_jx(compilation='gtex', genes_or_intervals='CD99')
+cd99.jx.all <- query_jx(compilation='gtex', regions='CD99')
 head(cd99.jx.all)
 
-##Query coverage for gene, exon, and annotated junctions across all 
-#GTEx samples that are labeled with tissue type "Brain" 
+##Query coverage for gene, exon, and annotated junctions across all
+#GTEx samples that are labeled with tissue type "Brain"
 #in the region of the CD99 gene
 
-cd99.gene <- query_gene(compilation='gtex', 
-                        genes_or_intervals='CD99', 
+cd99.gene <- query_gene(compilation='gtex',
+                        regions='CD99',
                         sample_filters='SMTS:Brain')
 dim(cd99.gene)
 head(cd99.gene)
 
-cd99.exon <- query_exon(compilation='gtex', 
-                        genes_or_intervals='CD99', 
+cd99.exon <- query_exon(compilation='gtex',
+                        regions='CD99',
                         sample_filters='SMTS:Brain')
 dim(cd99.exon)
 head(cd99.exon)
-###Only query junctions which are fully annotated---both left and 
-#right splice sites are found together in one or more of the 
+###Only query junctions which are fully annotated---both left and
+#right splice sites are found together in one or more of the
 #Snaptron sourced annotations
-cd99.jx <- query_jx(compilation='gtex', 
-                    genes_or_intervals='CD99', 
-                    range_filters='annotated:1', 
+cd99.jx <- query_jx(compilation='gtex',
+                    regions='CD99',
+                    range_filters='annotated:1',
                     sample_filters='SMTS:Brain')
 dim(cd99.jx)
 head(cd99.jx)
 
-##Full compilation metadata (in this case for GTEx) 
-#per sample is stored directly in the RangedSummarizedExperient 
+##Full compilation metadata (in this case for GTEx)
+#per sample is stored directly in the RangedSummarizedExperient
 #objects returned for each query above.
-#For example the library insert size can be retrieved 
+#For example the library insert size can be retrieved
 #across all runs  in the RSE
 head(cd99.jx.all$InsertSize)
 ```
@@ -166,7 +166,7 @@ head(cd99.jx.all$InsertSize)
 
 # High level queries
 
-snapcount can be used to summarize the raw results of the basic queries 
+snapcount can be used to summarize the raw results of the basic queries
 into a more relevant form for downstream analyses via its high level queries.
 
 High level queries include the following:
@@ -182,31 +182,31 @@ The results of high level queries are data frames unless otherwise specified.
 
 PSI is a relative measure of usage of a particular splicing variant.
 
-snapcount's version of PSI is currently limited to the common case 
+snapcount's version of PSI is currently limited to the common case
 of cassette exons which have two inclusion junctions and one exclusion junction.
 
 The original PSI's values range from 0 to 1 where 0 represents no inclusion coverage for that sample.
 
-Additionally the value of -1 is used in snapcount's PSI function to represent 
-samples where either one or the other inclusion groups had 0 coverage or the total raw coverage 
+Additionally the value of -1 is used in snapcount's PSI function to represent
+samples where either one or the other inclusion groups had 0 coverage or the total raw coverage
 across groups was < min_count (defaults to 20).
 
 ```{r 'psi', eval = FALSE}
 #Build new query against GTEx
 #left inclusion query
-lq<-SnaptronQueryBuilder$new(compilation="gtex", 
-                             genes_or_intervals="chr19:45297955-45298142", 
-                             range_filters="strand=+", 
+lq<-SnaptronQueryBuilder$new(compilation="gtex",
+                             regions="chr19:45297955-45298142",
+                             range_filters="strand=+",
                              coordinate_modifier=Coordinates$Exact)
 #right inclusion query
-rq<-SnaptronQueryBuilder$new(compilation="gtex", 
-                             genes_or_intervals="chr19:45298223-45299810", 
-                             range_filters="strand=+", 
+rq<-SnaptronQueryBuilder$new(compilation="gtex",
+                             regions="chr19:45298223-45299810",
+                             range_filters="strand=+",
                              coordinate_modifier=Coordinates$Exact)
 #exclusion query
-ex<-SnaptronQueryBuilder$new(compilation="gtex", 
-                             genes_or_intervals="chr19:45297955-45299810", 
-                             range_filters="strand=+", 
+ex<-SnaptronQueryBuilder$new(compilation="gtex",
+                             regions="chr19:45297955-45299810",
+                             range_filters="strand=+",
                              coordinate_modifier=Coordinates$Exact)
 
 psi<-percent_spliced_in(list(lq), list(rq), list(ex))
@@ -225,19 +225,19 @@ However, it allows for more general patterns of splicing to be specified than th
 It simply requires two groups of junctions to be defined, these can be overlapping (can include junctions that appear in both groups).
 
 Its values range from -1.0 to 1.0 where 0 represents no particular specificity for either group for that sample.
-JIR values approaching 1 represent 0 coverage for groupA and approaching -1 represents 0 coverage for groupB.  
+JIR values approaching 1 represent 0 coverage for groupA and approaching -1 represents 0 coverage for groupB.
 Results are sorted by the JIR statistic (descending).
 
 ```{r 'jir', eval = FALSE}
 #groupA
-A<-SnaptronQueryBuilder$new(compilation="srav2", 
-                            genes_or_intervals="chr2:29446395-30142858", 
-                            range_filters="strand=-", 
+A<-SnaptronQueryBuilder$new(compilation="srav2",
+                            regions="chr2:29446395-30142858",
+                            range_filters="strand=-",
                             coordinate_modifier=Coordinates$Within)
 #groupB
-B<-SnaptronQueryBuilder$new(compilation="srav2", 
-                            genes_or_intervals="chr2:29416789-29446394", 
-                            range_filters="strand=-", 
+B<-SnaptronQueryBuilder$new(compilation="srav2",
+                            regions="chr2:29416789-29446394",
+                            range_filters="strand=-",
                             coordinate_modifier=Coordinates$Within)
 
 jir<-junction_inclusion_ratio(list(A),
@@ -248,59 +248,59 @@ head(jir)
 
 ## Shared Sample Count (SSC)
 
-The SSC high level function is designed to support the requirement of many analyses to incorporate multiple splice junctions that are related to the same alternative splicing variant (e.g. an alternatively spliced in cassette exon).  Shared sample count is therefore used to determine if the junctions related to this variant, resulting from the two basic queries the user defines, occur in the same sample.  
+The SSC high level function is designed to support the requirement of many analyses to incorporate multiple splice junctions that are related to the same alternative splicing variant (e.g. an alternatively spliced in cassette exon).  Shared sample count is therefore used to determine if the junctions related to this variant, resulting from the two basic queries the user defines, occur in the same sample.
 
 If one or more junctions in each query's results occur in a specific sample then that sample is considered "shared", otherwise it's not counted.
 
 The output of the SSC function is a count of samples with this shared property, for each group of two basic junction queries that the user defines.
 
 ```{r 'ssc', eval = FALSE}
-## We define the left/right splice junction supports of 3 
+## We define the left/right splice junction supports of 3
 #cassette exons for the following 3 genes:
 
-## "left"/"right" is relative to the forward strand, 
-#reference genome coordinates, 
-#we use this terminology instead of 5' or 3' 
+## "left"/"right" is relative to the forward strand,
+#reference genome coordinates,
+#we use this terminology instead of 5' or 3'
 #since the gene may be on the reverse strand.
 
 sqb<-SnaptronQueryBuilder
 ###GNB1
-GNB1l<-sqb$new(compilation="gtex", 
-               genes_or_intervals="chr1:1879786-1879786", 
-               range_filters="strand:-", 
+GNB1l<-sqb$new(compilation="gtex",
+               regions="chr1:1879786-1879786",
+               range_filters="strand:-",
                coordinate_modifier=Coordinates$EndIsExactOrWithin)
 
-GNB1r<-sqb$new(compilation="gtex", 
-               genes_or_intervals="chr1:1879903-1879903", 
-               range_filters="strand:-", 
+GNB1r<-sqb$new(compilation="gtex",
+               regions="chr1:1879903-1879903",
+               range_filters="strand:-",
                coordinate_modifier=Coordinates$StartIsExactOrWithin)
 
 ###PIK3CD
-PIK3CDl<-sqb$new(compilation="gtex", 
-                 genes_or_intervals="chr1:9664595-9664595", 
-                 range_filters="strand:+", 
+PIK3CDl<-sqb$new(compilation="gtex",
+                 regions="chr1:9664595-9664595",
+                 range_filters="strand:+",
                  coordinate_modifier=Coordinates$EndIsExactOrWithin)
 
-PIK3CDr<-sqb$new(compilation="gtex", 
-                 genes_or_intervals="chr1:9664759-9664759", 
-                 range_filters="strand:+", 
+PIK3CDr<-sqb$new(compilation="gtex",
+                 regions="chr1:9664759-9664759",
+                 range_filters="strand:+",
                  coordinate_modifier=Coordinates$StartIsExactOrWithin)
 
 ###TAP2
-TAP2l<-sqb$new(compilation="gtex", 
-               genes_or_intervals="chr6:32831148-32831148", 
-               range_filters="strand:-", 
+TAP2l<-sqb$new(compilation="gtex",
+               regions="chr6:32831148-32831148",
+               range_filters="strand:-",
                coordinate_modifier=Coordinates$EndIsExactOrWithin)
 
-TAP2r<-sqb$new(compilation="gtex", 
-               genes_or_intervals="chr6:32831182-32831182", 
-               range_filters="strand:-", 
+TAP2r<-sqb$new(compilation="gtex",
+               regions="chr6:32831182-32831182",
+               range_filters="strand:-",
                coordinate_modifier=Coordinates$StartIsExactOrWithin)
 
 ssc_func<-shared_sample_counts
-ssc<-ssc_func(list(GNB1l, GNB1r), 
-              list(PIK3CDl, PIK3CDr), 
-              list(TAP2l, TAP2r), 
+ssc<-ssc_func(list(GNB1l, GNB1r),
+              list(PIK3CDl, PIK3CDr),
+              list(TAP2l, TAP2r),
               group_names=c("validated","not validated","validated"))
 ssc
 
@@ -309,7 +309,7 @@ ssc
 
 ## Tissue Specificity (TS)
 
-The tissue specificity high level function supports the ability to look for enrichment of tissues across two sets of splicing patterns. 
+The tissue specificity high level function supports the ability to look for enrichment of tissues across two sets of splicing patterns.
 GTEx is the primary compilation targeted here, but it could work in  other compilations which have complete tissue metadata (possibly TCGA).
 
 The main output of the TS function is a list of all the samples in the compilation with either a "1" in the *shared* column or a "0".
@@ -321,21 +321,17 @@ that have the "shared" property set to "1".
 A use case of the TS function is to measure the significance of tissue enrichment across junctions which support a cassette exon.
 
 ```{r 'ts', eval = FALSE}
-groupA<-sqb$new(compilation="gtex", 
-                genes_or_intervals="chr4:20763023-20763023", 
-                range_filters="strand=-", 
+groupA<-sqb$new(compilation="gtex",
+                regions="chr4:20763023-20763023",
+                range_filters="strand=-",
                 coordinate_modifier=Coordinates$EndIsExactOrWithin)
 
-groupB<-sqb$new(compilation="gtex", 
-                genes_or_intervals="chr4:20763098-20763098", 
-                range_filters="strand=-", 
+groupB<-sqb$new(compilation="gtex",
+                regions="chr4:20763098-20763098",
+                range_filters="strand=-",
                 coordinate_modifier=Coordinates$StartIsExactOrWithin)
 
 
 ts<-tissue_specificity(list(groupA, groupB))
 head(ts)
 ```
-
-
-
-

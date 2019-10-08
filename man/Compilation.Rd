@@ -3,12 +3,29 @@
 \docType{data}
 \name{Compilation}
 \alias{Compilation}
-\title{Snaptron compilation enum}
+\title{Enum for Snaptron compilations}
 \format{An object of class \code{environment} of length 17.}
 \usage{
 Compilation
 }
 \description{
-Snaptron compilation enum
+The variants for this enum will be populated dynamically after the
+package has been loaded. If the package cannot connect to the internet
+the variants will default to:
+}
+\details{
+\itemize{
+\item{gtex}
+\item{tcga}
+\item{srav2}
+\item{sra}
+}
+}
+\examples{
+query_jx(compilation = Compilation$gtex, regions = "KCNIP4")
+}
+\seealso{
+\url{http://snaptron.cs.jhu.edu/data.html} for more information
+about Snaptron compilations.
 }
 \keyword{datasets}

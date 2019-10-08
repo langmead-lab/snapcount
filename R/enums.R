@@ -9,10 +9,44 @@ enum <- function(...) {
 
     res
 }
-#' Snaptron Coordinate modifiers enum
+#' Enum for Snaptron Coordinate modifiers
+#'
+#' @field Exact Return junctions whose start and end
+#'   coordinates are match the boundaries of the
+#'   region requested.
+#' @field Within Return junctions whose start and end
+#'   coordinates are within the boundaries of the
+#'   region requested.
+#' @field StartIsExactOrWithin Return junctions whose
+#'   start coordinate matches, or is within, the
+#'   boundaries of the region requested.
+#' @field EndIsExactOrWithin Return junctions whose
+#'   end coordinate matches, or is within, the
+#'   boudnaries of the region requested.
+#'
+#' @examples
+#' query_jx(compilation = "gtex", regions = "CD99",
+#'   coordinate_modifier = Coordinates$Exact)
 #' @export
-Coordinates <- enum(Exact, Within, StartIsExactOrWithin, EndIsExactOrWithin, Overlaps)
+Coordinates <- enum(Exact, Within, StartIsExactOrWithin, EndIsExactOrWithin)
 
-#' Snaptron compilation enum
+#' Enum for Snaptron compilations
+#'
+#' The variants for this enum will be populated dynamically after the
+#' package has been loaded. If the package cannot connect to the internet
+#' the variants will default to:
+#'
+#' \itemize{
+#'   \item{gtex}
+#'   \item{tcga}
+#'   \item{srav2}
+#'   \item{sra}
+#' }
+#'
+#' @seealso \url{http://snaptron.cs.jhu.edu/data.html} for more information
+#'   about Snaptron compilations.
+#'
+#' @examples
+#' query_jx(compilation = Compilation$gtex, regions = "KCNIP4")
 #' @export
 Compilation <- enum(gtex, tcga, srav2, sra)

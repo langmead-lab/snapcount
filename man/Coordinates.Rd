@@ -3,12 +3,36 @@
 \docType{data}
 \name{Coordinates}
 \alias{Coordinates}
-\title{Snaptron Coordinate modifiers enum}
-\format{An object of class \code{environment} of length 5.}
+\title{Enum for Snaptron Coordinate modifiers}
+\format{An object of class \code{environment} of length 4.}
 \usage{
 Coordinates
 }
 \description{
-Snaptron Coordinate modifiers enum
+Enum for Snaptron Coordinate modifiers
+}
+\section{Fields}{
+
+\describe{
+\item{\code{Exact}}{Return junctions whose start and end
+coordinates are match the boundaries of the
+region requested.}
+
+\item{\code{Within}}{Return junctions whose start and end
+coordinates are within the boundaries of the
+region requested.}
+
+\item{\code{StartIsExactOrWithin}}{Return junctions whose
+start coordinate matches, or is within, the
+boundaries of the region requested.}
+
+\item{\code{EndIsExactOrWithin}}{Return junctions whose
+end coordinate matches, or is within, the
+boudnaries of the region requested.}
+}}
+
+\examples{
+query_jx(compilation = "gtex", regions = "CD99",
+  coordinate_modifier = Coordinates$Exact)
 }
 \keyword{datasets}
