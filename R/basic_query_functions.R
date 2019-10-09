@@ -5,7 +5,7 @@
 #'   \code{\link{Compilation}} for details.
 #'
 #' \code{regions} Get or set query region which can be either a chromosome
-#'   range or HUGO gene.
+#'   range or HUGO gene name.
 #'
 #' \code{range_filters} Get or set query range filters. Range filters can be
 #'   set to a list or vector of either strings or R boolean expressions. If
@@ -20,7 +20,7 @@
 #'
 #' \code{sids} Get or set query sample ids.
 #'
-#' \code{coordinate_modifier} Get or coordinate modifiers for query. See
+#' \code{coordinate_modifier} Get or set coordinate modifiers for query. See
 #'   \code{\link{Coordinates}} for details.
 #'
 #' \code{query_jx} call \code{\link{query_jx}} function
@@ -234,8 +234,8 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
 #'   in `RangedSummarizedExperiment` object with a `rowData` entry for each labeling each
 #'   result row according to the query it resulted from. However, if this is set to `TRUE`,
 #'   the result will be a list of RangedSummarizedExperiment objects, one per original
-#'   interval/gene. This latter option may be useful but reqires metadata for each original
-#'   interval/gene.
+#'   interval/gene. This latter option may be useful but requires a separate copy of the
+#'   sample metadata for each original interval/gene.
 #'  @examples
 #' query_jx(Compilation$gtex, "chr1:1-100000", range_filters = "samples_count >= 20")
 #'

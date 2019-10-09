@@ -4,7 +4,7 @@
 #' This allows for the visualization of junction counts along with their
 #' associated gene and exon counts in the context of a gene model. Performance
 #' is dependent on the total number of junctions and the length of the gene
-#' model i.e. larger gene regions may either compietely fail to draw or take
+#' model i.e. larger gene regions may either completely fail to draw or take
 #' too long to be visualized.
 #'
 #' @field query_builders A list of 1 of more SnapQueryBuilder objects.

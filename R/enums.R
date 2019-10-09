@@ -12,7 +12,7 @@ enum <- function(...) {
 #' Enum for Snaptron Coordinate modifiers
 #'
 #' @field Exact Return junctions whose start and end
-#'   coordinates are match the boundaries of the
+#'   coordinates match the boundaries of the
 #'   region requested.
 #' @field Within Return junctions whose start and end
 #'   coordinates are within the boundaries of the
