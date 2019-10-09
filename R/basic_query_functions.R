@@ -511,7 +511,7 @@ run_query <- function(compilation, regions, endpoint = "snaptron",
             sids = sids
         )
 
-    if (!is.null(getOption("test_context"))) {
+    if (getOption("test_context") == TRUE) {
         assign("last_uri_accessed", uri, pkg_globals)
         return(NULL)
     } else {
