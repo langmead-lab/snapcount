@@ -15,7 +15,7 @@ Enum for Snaptron Coordinate modifiers
 
 \describe{
 \item{\code{Exact}}{Return junctions whose start and end
-coordinates are match the boundaries of the
+coordinates match the boundaries of the
 region requested.}
 
 \item{\code{Within}}{Return junctions whose start and end

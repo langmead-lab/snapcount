@@ -56,8 +56,8 @@ converted to a RangeSummarizedExperiment.}
 in \code{RangedSummarizedExperiment} object with a \code{rowData} entry for each labeling each
 result row according to the query it resulted from. However, if this is set to \code{TRUE},
 the result will be a list of RangedSummarizedExperiment objects, one per original
-interval/gene. This latter option may be useful but reqires metadata for each original
-interval/gene.
+interval/gene. This latter option may be useful but requires a separate copy of the
+sample metadata for each original interval/gene.
 @examples
 query_jx(Compilation$gtex, "chr1:1-100000", range_filters = "samples_count >= 20")}
 }

@@ -17,7 +17,7 @@ A Reference Class for building Snaptron queries
 \code{\link{Compilation}} for details.
 
 \code{regions} Get or set query region which can be either a chromosome
-range or HUGO gene.
+range or HUGO gene name.
 
 \code{range_filters} Get or set query range filters. Range filters can be
 set to a list or vector of either strings or R boolean expressions. If
@@ -32,7 +32,7 @@ for \code{range_filters}.
 
 \code{sids} Get or set query sample ids.
 
-\code{coordinate_modifier} Get or coordinate modifiers for query. See
+\code{coordinate_modifier} Get or set coordinate modifiers for query. See
 \code{\link{Coordinates}} for details.
 
 \code{query_jx} call \code{\link{query_jx}} function
