@@ -1,9 +1,21 @@
-`%>%` <- magrittr::`%>%`
-
 pkg_globals <- new.env(parent = emptyenv())
 
 .onLoad <- function(...) {
-    json_data <- httr::GET("http://snaptron.cs.jhu.edu/snaptron/registry")
+    snaptron_host <- "http://snaptron.cs.jhu.edu"
+
+    if (!is.null(host <- getOption("snapcount.host"))) {
+        snaptron_host <- host
+    }
+    if (!is.null(port <- getOption("snapcount.port"))) {
+        if (is.wholenumber(port) && port != 80) {
+            snaptron_host <- paste(snaptron_host, port, sep = ":")
+        }
+    }
+    snaptron_host <- paste0(snaptron_host, "/")
+    assign("snaptron_host", snaptron_host, envir = pkg_globals)
+    json_data <-
+        paste(pkg_globals$snaptron_host, "snaptron", "registry", sep = "/") %>%
+        httr::GET()
     if (httr::http_error(json_data)) {
         return()
     }

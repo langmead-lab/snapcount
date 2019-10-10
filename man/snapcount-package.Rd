@@ -4,14 +4,29 @@
 \name{snapcount-package}
 \alias{snapcount}
 \alias{snapcount-package}
-\title{snapcount: R/Bioconductor Package for interfacing with Snaptron for rapid quering of expression counts}
+\title{snapcount: an R package for interfacing with Snaptron}
 \description{
-snapcount is a client interface to the Snaptron webservices
-    which support querying by gene name or genomic region.
-    Results include raw expression counts derived from alignment of RNA-seq samples
-    and/or various summarized measures of expression across one or more regions/genes
-    per-sample (e.g. percent spliced in).
+snapcount is a client interface to the Snaptron webservice which supports
+querying by gene name or genomic region.
 }
+\details{
+Results include raw expression counts derived from alignment of RNA-seq
+samples and/or various summarized measures of expression across one or more
+regions/genes per-sample (e.g. percent spliced in).
+
+To learn more about snapcount, check out the vignette:
+\code{browseVignettes(package = "snapcount")}
+}
+\section{Package options}{
+
+\describe{
+\item{\code{snapcount.host}}{Change the host that snapcount uses when
+connecting to Snaptron. Default: \code{snaptron.cs.jhu.edu}}
+\item{\code{snapcount.port}}{Change the port that snapcount uses when
+connecting to Snaptron. Default: \code{80}}
+}
+}
+
 \seealso{
 Useful links:
 \itemize{

@@ -545,8 +545,6 @@ generate_snaptron_uri <- function(compilation, regions,
                                   endpoint = "snaptron", range_filters = NULL,
                                   sample_filters = NULL,
                                   coordinate_modifier = NULL, sids = NULL) {
-    url <- "http://snaptron.cs.jhu.edu/"
-
     assert_that(compilation %in% names(Compilation),
                 msg = "Invalid compilation")
 
@@ -602,8 +600,7 @@ generate_snaptron_uri <- function(compilation, regions,
         query <- c(query, paste("sids", paste(sids, collapse = ","), sep = "="))
     }
 
-    res <- paste0(url, path, paste(query, collapse = "&"))
-    res
+    paste0(pkg_globals$snaptron_host, path, paste(query, collapse = "&"))
 }
 
 extract_intervals <- function(g) {
