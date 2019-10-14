@@ -95,13 +95,10 @@ merge_compilations <- function(..., all) {
     datasets <- lapply(list(...), function(sb) {
         df <- sb$query_jx(return_rse = FALSE)
         compilation <- sb$compilation()
-        compilation_metadata <- get_compilation_metadata(sb$compilation()) %>%
-            apply_sample_filters_to_metadata(sb$sample_filters())
+        compilation_metadata <- get_compilation_metadata(sb$compilation())
 
         if (is.null(metadata_list[[compilation]])) {
             metadata_list[[compilation]] <<- compilation_metadata
-        } else if (all.equal(metadata_list[[compilation]], compilation_metadata)) {
-            return(df)
         } else {
             metadata_list[[compilation]] <<-
                 merge(metadata_list[[compilation]],

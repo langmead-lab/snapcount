@@ -1,3 +1,4 @@
+# nocov start
 pkg_globals <- new.env(parent = emptyenv())
 
 .onLoad <- function(...) {
@@ -32,3 +33,5 @@ pkg_globals <- new.env(parent = emptyenv())
     assign("metadata", list(), pkg_globals)
     Compilation <<- do.call(enum, compilation_names)
 }
+
+#nocov end

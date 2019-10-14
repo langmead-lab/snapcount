@@ -57,6 +57,13 @@ test_that("shared sample count", {
     load(file = get_full_path_name("test_ssc_output.rda"))
 
     expect_equal(test_ssc_output, result)
+
+    sb0 <- sb5$clone(deep = TRUE)$coordinate_modifier(Coordinates$Within)
+    expect_error(shared_sample_counts(group1, group2, list(sb0, sb6)),
+                 "group1 returned no results")
+
+    expect_error(shared_sample_counts(group1, group2, list(sb5, sb0)),
+                 "group2 returned no results")
 })
 
 test_that("junction inclusion ratio", {
@@ -73,6 +80,13 @@ test_that("junction inclusion ratio", {
     load(file = get_full_path_name("test_jir_output.rda"))
 
     expect_equal(test_jir_output, result)
+
+    sb0 <- sb1$clone(deep = TRUE)$regions("CD99")$coordinate_modifier(Coordinates$Exact)
+    expect_error(junction_inclusion_ratio(list(sb0), list(sb2)),
+                 "group1 returned no results")
+
+    expect_error(junction_inclusion_ratio(list(sb1), list(sb0)),
+                 "group2 returned no results")
 })
 
 test_that("percent spliced in", {
@@ -95,6 +109,16 @@ test_that("percent spliced in", {
     load(file = get_full_path_name("test_psi_output.rda"))
 
     expect_equal(test_psi_output, result)
+
+    sb0 <- sb1$clone(deep = TRUE)$regions("CD99")
+    expect_error(percent_spliced_in(list(sb0), list(sb2), list(sb3)),
+                 "inclusion_group1 returned no results")
+
+    expect_error(percent_spliced_in(list(sb1), list(sb0), list(sb3)),
+                 "inclusion_group2 returned no results")
+
+    expect_error(percent_spliced_in(list(sb1), list(sb2), list(sb0)),
+                 "exclusion_group returned no results")
 })
 
 test_that("tissue specificity", {
@@ -112,4 +136,11 @@ test_that("tissue specificity", {
     load(file = get_full_path_name("test_ts_output.rda"))
 
     expect_equal(test_ts_output, result)
+
+    sb0 <- sb1$clone(deep = TRUE)$coordinate_modifier(Coordinates$Within)
+    expect_error(tissue_specificity(list(sb0, sb2)),
+                 "group1 returned no results")
+
+    expect_error(tissue_specificity(list(sb1, sb0)),
+                 "group2 returned no results")
 })

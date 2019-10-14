@@ -12,6 +12,15 @@ test_that("simple junction query", {
     expect_equal(uri_of_last_successful_request(), "http://snaptron.cs.jhu.edu/srav2/snaptron?regions=CD99")
 })
 
+test_that("using genomic ranges", {
+    library(GenomicRanges)
+    x1 <- "chr2:100-200:-"
+    g_range <- as(x1, "GRanges")
+    query_jx(compilation = "gtex", regions = g_range, sample_filters = SMTS == "Brain")
+    expect_equal(uri_of_last_successful_request(),
+                 "http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr2:100-200&rfilter=strand:-&sfilter=SMTS:Brain")
+})
+
 test_that("junction query with NSE sample filter", {
     query_jx(compilation = "gtex", regions = "CD99", sample_filters = SMTS == "Brain")
     expect_equal(uri_of_last_successful_request(),
@@ -34,6 +43,24 @@ test_that("junction query with mutiple NSE range filters", {
     query_jx(compilation = "gtex", regions = "CD99", range_filters = list(samples_count <= 10, coverage_sum < 3))
     expect_equal(uri_of_last_successful_request(),
         "http://snaptron.cs.jhu.edu/gtex/snaptron?regions=CD99&rfilter=samples_count<:10&rfilter=coverage_sum<3")
+})
+
+test_that("invalid sample filter name", {
+    expect_error(
+        query_jx(compilation = "gtex", regions = "CD99", sample_filters = SNTS == "Brain"),
+        "`SNTS' is not a valid sample filter")
+})
+
+test_that("invalid sample filter value", {
+    expect_error(
+        query_jx(compilation = "gtex", regions = "CD99", sample_filters = SMTS == 2),
+        "`SMTS' filter expects value of type String, but got Integer")
+})
+
+test_that("NSE rhs does not evaluate to basic type", {
+    expect_error(
+        query_jx(compilation = "gtex", regions = "CD99", sample_filters = SMTS == c(1,2,3)),
+        "does not evaluate to a basic type")
 })
 
 test_that("junction query with sids", {

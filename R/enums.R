@@ -1,3 +1,4 @@
+# nocov start
 enum <- function(...) {
     variants <- rlang::ensyms(...)
     values <- purrr::map(variants, rlang::as_string)
@@ -50,3 +51,5 @@ Coordinates <- enum(Exact, Within, StartIsExactOrWithin, EndIsExactOrWithin)
 #' query_jx(compilation = Compilation$gtex, regions = "KCNIP4")
 #' @export
 Compilation <- enum(gtex, tcga, srav2, sra)
+
+#nocov end

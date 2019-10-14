@@ -163,10 +163,6 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
             for (param in names(private$query)) {
                 if (is.null(private$query[[param]])) {
                     next
-                } else if (rlang::is_call(private$query[[param]])) {
-                    desc <-
-                        bool_expressions_to_strings(private$query[[param]]) %>%
-                        paste(collapse = ",")
                 } else if (param == "coordinate_modifier") {
                     desc <- switch(private$query[[param]],
                                    Exact = "exact",
@@ -427,12 +423,7 @@ query_coverage <- function(compilation, regions, group_names = NULL,
         if (is.null(data)) {
             return()
         }
-        rse(
-            data$query_data,
-            data$metadata,
-            extract_row_ranges = coverage_row_ranges,
-            extract_counts = coverage_counts
-        )
+        coverage_rse(data$query_data, data$metadata)
     })
 
     if (length(res) == 1) {
@@ -530,15 +521,15 @@ run_query <- function(compilation, regions, endpoint = "snaptron",
 
     metadata <- get_compilation_metadata(compilation)
 
-    if (!is.null(sids)) {
-        metadata <- metadata[metadata$rail_id %in% sids,]
-    }
+    ## if (!is.null(sids)) {
+    ##     metadata <- metadata[metadata$rail_id %in% sids,]
+    ## }
 
     if (construct_rse == FALSE) {
         return(list(query_data = query_data, metadata = metadata))
     }
 
-    rse(query_data, metadata, sample_filters)
+    rse(query_data, metadata)
 }
 
 generate_snaptron_uri <- function(compilation, regions,
@@ -572,12 +563,8 @@ generate_snaptron_uri <- function(compilation, regions,
         }) %>% purrr::compact()
 
         if (length(errors) > 0) {
-            if (!interactive()) {
-                stop("Invalid sample filter(s)", stop. = FALSE)
-            } else {
                 error_string <- paste(errors, collapse = "\n")
                 stop(error_string, call. = FALSE)
-            }
         }
         query <- c(query, paste("sfilter", tidy_filters(sample_filters), sep = "="))
     }
@@ -628,31 +615,39 @@ submit_query <- function(uri) {
     rawToChar(resp$content)
 }
 
-convert_to_sparse_matrix <- function(samples, samples_count, snaptron_ids,
-                                     compilation_rail_ids) {
-    rail_ids_and_counts <- strsplit(samples, ":", fixed = TRUE)
-    rail_ids <- as.numeric(vapply(rail_ids_and_counts, `[`, 1, FUN.VALUE = ""))
-
+convert_to_sparse_matrix <- function(rail_ids, unique_rail_ids, counts,
+                                     samples_count, snaptron_ids) {
     i <- rep(seq_along(samples_count), samples_count)
-    j <- match(rail_ids, compilation_rail_ids)
-    x <- as.numeric(vapply(rail_ids_and_counts, `[`, 2, FUN.VALUE = ""))
+    j <- match(rail_ids, unique_rail_ids)
+    x <- counts
 
-    dims <- c(length(snaptron_ids), length(compilation_rail_ids))
+    dims <- c(length(snaptron_ids), length(unique_rail_ids))
     Matrix::sparseMatrix(i = i, j = j, x = x, dims = dims,
-                         dimnames = list(snaptron_ids, compilation_rail_ids))
+                         dimnames = list(snaptron_ids, unique_rail_ids))
 }
 
-counts <- function(query_data, metadata) {
-    samples <- extract_samples(query_data)
-    convert_to_sparse_matrix(samples, query_data$samples_count,
-                             query_data$snaptron_id, metadata$rail_id)
+get_counts <- function(query_data) {
+    rail_ids_and_counts <- extract_samples(query_data) %>% strsplit(":", fixed = TRUE)
+    rail_ids <- as.numeric(vapply(rail_ids_and_counts, `[`, 1, FUN.VALUE = ""))
+    unique_rail_ids <- sort(rail_ids) %>% unique()
+    counts <- as.numeric(vapply(rail_ids_and_counts, `[`, 2, FUN.VALUE = ""))
+
+    sparse_matrix <-
+        convert_to_sparse_matrix(rail_ids, unique_rail_ids, counts,
+                                 query_data$samples_count, query_data$snaptron_id)
+
+    list(sparse_matrix, unique_rail_ids)
 }
 
-col_data <- function(metadata, sids = NULL) {
-    metadata
+get_col_data <- function(metadata, rail_ids = NULL) {
+    if (!is.null(rail_ids)) {
+        metadata[rail_id %in% rail_ids]
+    } else {
+        metadata
+    }
 }
 
-row_ranges <- function(query_data) {
+get_row_ranges <- function(query_data) {
     cols <- c("chromosome", "start", "end", "length", "strand", "samples")
     mcols <- query_data[, !cols, with = FALSE]
 
@@ -664,14 +659,14 @@ row_ranges <- function(query_data) {
     )
 }
 
-coverage_row_ranges <- function(query_data) {
+get_coverage_row_ranges <- function(query_data) {
     GenomicRanges::GRanges(
         seqnames = query_data$chromosome,
         IRanges::IRanges(query_data$start, query_data$end)
     )
 }
 
-coverage_counts <- function(query_data, metadata) {
+get_coverage_counts <- function(query_data, metadata) {
     data <- query_data[, -c("DataSource:Type", "chromosome", "start", "end")]
     rail_ids <- as.numeric(colnames(data))
     smallest_rail_id <- metadata$rail_id[1]
@@ -693,17 +688,22 @@ coverage_counts <- function(query_data, metadata) {
                          dimnames = list(NULL, metadata$rail_id), dims = dims)
 }
 
-rse <- function(query_data, metadata, sample_filters = NULL,
-                extract_counts = counts, extract_row_ranges = row_ranges,
-                extract_col_data = col_data) {
-    if (!is.null(sample_filters)) {
-        predicate_expression <- string_to_bool_expression(sample_filters)
-        metadata <- eval(rlang::expr(metadata[!!predicate_expression]))
-    }
+rse <- function(query_data, metadata) {
+    row_ranges <- get_row_ranges(query_data)
+    c(counts, unique_rail_ids) %<-% get_counts(query_data)
+    col_data <- get_col_data(metadata, unique_rail_ids)
 
-    row_ranges <- extract_row_ranges(query_data)
-    counts <- extract_counts(query_data, metadata)
-    col_data <- extract_col_data(metadata)
+    SummarizedExperiment::SummarizedExperiment(
+        assays = list(counts = counts),
+        rowRanges = row_ranges,
+        colData = col_data
+    )
+}
+
+coverage_rse <- function(query_data, metadata) {
+    row_ranges <- get_coverage_row_ranges(query_data)
+    counts <- get_coverage_counts(query_data, metadata)
+    col_data <- get_col_data(metadata)
 
     SummarizedExperiment::SummarizedExperiment(
         assays = list(counts = counts),

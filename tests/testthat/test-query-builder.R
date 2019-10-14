@@ -70,6 +70,28 @@ test_that("test building from url", {
     expect_equal(sb$sids(), c(50099,50102))
 })
 
+test_that("test building from url with coordinate modifiers", {
+    url <-
+        "http://snaptron.cs.jhu.edu/gtex/snaptron?regions=CD99"
+    sb <- SnaptronQueryBuilder$new()
+
+    sb$from_url(paste(url, "either=1", sep = "&"))
+    expect_equal(sb$coordinate_modifier(), "StartIsExactOrWithin")
+    expect_output(sb$print(), "<SnaptronQueryBuilder>\\n   regions: CD99\\n   coordinate_modifier: either=1\\n   compilation: gtex")
+
+    sb$from_url(paste(url, "either=2", sep = "&"))
+    expect_equal(sb$coordinate_modifier(), "EndIsExactOrWithin")
+    expect_output(sb$print(), "<SnaptronQueryBuilder>\\n   regions: CD99\\n   coordinate_modifier: either=2\\n   compilation: gtex")
+
+    sb$from_url(paste(url, "exact=1", sep = "&"))
+    expect_equal(sb$coordinate_modifier(), "Exact")
+    expect_output(sb$print(), "<SnaptronQueryBuilder>\\n   regions: CD99\\n   coordinate_modifier: exact\\n   compilation: gtex")
+
+    sb$from_url(paste(url, "contains=1", sep = "&"))
+    expect_equal(sb$coordinate_modifier(), "Within")
+    expect_output(sb$print(), "<SnaptronQueryBuilder>\\n   regions: CD99\\n   coordinate_modifier: contains\\n   compilation: gtex")
+})
+
 ## do this again in case there are any test failures and
 ## we are not able to restore the original env before
 ## failure

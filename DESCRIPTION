@@ -19,7 +19,6 @@ Imports:
     purrr,
     jsonlite,
     assertthat,
-    testthat,
     data.table,
     Matrix,
     magrittr,
@@ -30,8 +29,10 @@ Imports:
     SummarizedExperiment
 Suggets:
     bit64,
+    covr,
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat,
     JunctionSeq
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -40,4 +41,5 @@ RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE, roclets = c("rd", "namespace", "collate"))
 URL: https://github.com/langmead-lab/snapr
 BugReports: https://github.com/langmead-lab/snapr/issues
+VignetteBuilder: knitr
 ByteCompile: true

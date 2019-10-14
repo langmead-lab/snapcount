@@ -21,49 +21,6 @@ is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) {
     }
 }
 
-create_conjunction <- function(expressions) {
-    if (length(expressions) == 0) {
-        return(NULL)
-    }
-    if (length(expressions) == 1) {
-        return(expressions[[1]])
-    }
-    for (i in seq_along(expressions)) {
-        if (i == 1) {
-            predicate <- expressions[[1]]
-        } else {
-            predicate <- rlang::expr(!!predicate & !!expressions[[i]])
-        }
-    }
-
-    predicate
-}
-
-string_to_bool_expression <- function(sample_filters) {
-    sample_filters <- gsub("\\s*<:\\s*:", "<=", sample_filters)
-    sample_filters <- gsub("\\s*>:\\s*:", ">=", sample_filters)
-    sample_filters <- gsub("\\s*:\\s*", "==", sample_filters)
-
-    exprs <- lapply(sample_filters, string_to_expression_helper)
-    create_conjunction(exprs)
-}
-
-string_to_expression_helper <- function(string) {
-    expr <- rlang::parse_expr(string)
-
-    if (!rlang::is_syntactic_literal(expr[[3]])) {
-        if (rlang::is_call(expr[[3]])) {
-            operator <- rlang::as_string(expr[[1]])
-            c(lhs, rhs) %<-% stringr::str_split(string, operator, n = 2)[[1]]
-            expr[[3]] <- rhs
-        } else {
-            expr[[3]] <- rlang::as_string(expr[[3]])
-        }
-    }
-
-    expr
-}
-
 bool_expressions_to_strings <- function(exprs) {
     if (rlang::is_bare_character(exprs)) {
         return(exprs)
@@ -103,13 +60,4 @@ expression_to_string_helper <- function(expr) {
     }
 
     deparse(expr, backtick = FALSE)
-}
-
-apply_sample_filters_to_metadata <- function(metadata, sample_filters) {
-    if (is.null(sample_filters)) {
-        return(metadata)
-    }
-
-    predicate_expression <- string_to_bool_expression(sample_filters)
-    eval(rlang::expr(metadata[!!predicate_expression]))
 }
