@@ -2,28 +2,14 @@
 
 language: R
 sudo: false
+dist: trusty
+cache: packages
 
 r: bioc-devel
 
 branches:
   only:
     - master
-
-r-packages:
-    - rmarkdown
-    - knitr
-    - covr
-    - methods
-    - httr
-    - R6
-    - Matrix
-    - data.table
-    - testthat
-
-bioc_packages:
-    - GenomicRanges
-    - SummarizedExperiment
-    - IRanges
 
 after_success:
   - Rscript -e 'covr::codecov()'
