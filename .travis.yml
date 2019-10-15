@@ -11,5 +11,7 @@ branches:
   only:
     - master
 
+before_script:
+  - Rscript -e 'install.packages(c("knitr, covr"))'
 after_success:
   - Rscript -e 'covr::codecov()'
