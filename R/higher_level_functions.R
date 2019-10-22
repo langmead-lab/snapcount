@@ -370,7 +370,11 @@ tissue_specificity <- function(..., group_names = NULL) {
     dfs <- lapply(seq_along(num_groups), function(i) {
         g <- list_of_groups[[i]]
         name <- group_names[[i]]
-        tissue_specificity_per_group(g[[1]], g[[2]], name)
+        if (length(g) == 1) {
+            tissue_specificity_per_group(g[[1]], g[[1]], name)
+        } else{
+            tissue_specificity_per_group(g[[1]], g[[2]], name)
+        }
     })
 
     do.call(rbind, dfs)
@@ -456,15 +460,14 @@ shared <- function(cov1, cov2) {
 shared_sample_counts <- function(..., group_names = NULL) {
     list_of_groups <- list(...)
     assert_that(is_list_of_query_builder_groups(list_of_groups),
-                msg = "shared_sample_counts expects 1 or more list of SnaptronQueryBuilder objects")
-    num_groups <- length(list_of_groups)
+                msg = "shared_sample_counts expects 1 or more lists of SnaptronQueryBuilder objects")
 
     counts <- lapply(list_of_groups, function(g) {
         shared_sample_count(g[[1]], g[[2]])
     }) %>% unlist()
 
     if (is.null(group_names)) {
-        group_names <- paste0("g", 1:num_groups)
+        group_names <- paste0("g", seq_along(list_of_groups))
     }
 
     data.table(group = group_names, counts = counts)
