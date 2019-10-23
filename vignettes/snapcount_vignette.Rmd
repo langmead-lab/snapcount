@@ -79,61 +79,44 @@ Similar to the `r Biocpkg('recount')` all coverage counts in Snaptron/snapcount 
 
 # Introduction
 
-snapcount is an R package that provides an interface to the [Snaptron web services](http://snaptron.cs.jhu.edu/).
-This package allows you to query and download coverage counts for genes, exons, and exon-exon splice junctions from all (or a subset) of RNA-seq studies.
-These RNA-seq studies are organized into compilations (e.g. srav2) that include the same sets of studies that the `r Biocpkg('recount')`  organizes.
+snapcount makes it easy to query the [Snaptron web services](http://snaptron.cs.jhu.edu/), with results presented as `r Biocpkg('RangedSummarizedExperiment')` objects.
+You can query measurements for **genes**, **exons**, **splice junctions** and **coverage vectors** from the RNA-seq samples indexed in Snaptron.
+Samples are organized into compilations (e.g. `srav2`) that altogether contain the same studies and summaries in the `r Biocpkg('recount')` resource.  Queries can be filtered to narrow the focus to particular genes or genomic intervals, to events with certain prevalence, to events that do or don't appear in gene annotation, or to samples with particular metadata.
 
-The RNA-seq reads from these studies was analyzed through the [Rail-RNA](http://rail.bio) aligner producing the coverage counts used by both `r Biocpkg('recount')` and snapcount.
+snapcount complements the `r Biocpkg('recount')` package, which also allows for searching by coordinates or by HUGO gene names.
+In general, `r Biocpkg('recount')` works best when you are interested in *all* the genes, exons, or splice junctions in a study, whereas snapcount is best for queries over a particular subset of genes or intervals across all or most of the samples in recount2/Snaptron.  The more specific your query, the faster and easier it will be to use snapcount.
 
-snapcount complements `r Biocpkg('recount')` in that it allows searching by a specific gene/exon/splice-junction's coordinates or by a HUGO gene across all studies in a specific compilation (e.g. all SRA Human RNA-seq studies in `r Biocpkg('recount')`).
-
-In short, snapcount is gene/region centric whereas `r Biocpkg('recount')` is study centric.
-
-If getting the counts for *all* the genes, exons, and/or splice junctions in an annotation from a particular study is your goal, then we suggest you use the `r Biocpkg('recount')` package instead of snapcount.
-
-Alternatively, if you're interested in the counts from one or a few genes, but across all (or most) studies/samples in recount2/Snaptron, then you should try snapcount.
-
-This vignette will walk you through examples using the two main areas of the snapcount  package:
-
-* Basic queries to get raw counts from genes, exons, and splice junctions
-* High level queries which utilize the basic queries but then do additional summarization (e.g. percent-spliced-in [PSI])
-
+All the RNA-seq samples in the recount and Snaptron resources were analyzed using the [Rail-RNA](http://rail.bio) aligner.  Rail produces spliced alignments that in turn produce coverage and junction-level summaries that are further processed to obtain the data in recount and Snaptron.
 
 # Basic queries
 
-Basic queries return a *RangedSummarizedExperiment* (RSE) with one or more mapped elements (genes, exons, or splice junctions) as *rowRanges*.
-Their raw coverage counts are returned as the *counts* assay in the RSE object.  Full sample metadata is returned as the  *colData* of the RSE object.
+A basic query returns a *RangedSummarizedExperiment* (RSE) object with one or more features (genes, exons, or splice junctions) as *rowRanges*.
+Raw coverage counts are returned as the *counts* assay in the RSE  Full sample metadata is returned as the  *colData* of the RSE
 
-The following lists the types of basic queries supported.
+Basic queries include:
 
-* exon-exon splice junctions *query_jx*
-* exons *query_exon*
-* genes *query_gene*
+* exon-exon splice junction counts: *query_jx*
+* exon-level quantifications: *query_exon*
+* genes-level quantifications: *query_gene*
 
-The Gencode v25 annotation defines what genes and exons can be queried (this is the same as `r Biocpkg('recount')`).
-For splice junctions, both annotated and novel junctions can be queried.
-
-Basic queries are appropriate for exploratory analysis or for simply getting the raw counts for a specific set of genes/exons/junctions.
+The Gencode v25 annotation defines what genes and exons can be queried (as in `r Biocpkg('recount')`).
+For splice junctions, both annotated and novel junctions are queried at the same time unless one is explicitly filtered.
 
 Metadata columns will vary by compilation (e.g. TCGA vs. GTEx).
-
-Also, metadata within a compilation can be incomplete or formatted inconsistently (e.g. "age" in SRAv2).
+Please be cautious with metadata.  We strive to make it as complete and usable as possible, but it can still be incomplete, incorrect or inconsistently formatted (e.g. "age" in the `srav2` compilation).
 
 ```{r 'basic', eval = FALSE}
-## Load library
 library('snapcount')
 
 ##Query all exon-exon splice junctions within the region of gene CD99
 #from GTEx v6 sample compilation
-#CD99 is chosen to be an example for its manageable size,
-#no specific functional elements are being highlighted.
+#CD99 is chosen for its size
 cd99.jx.all <- query_jx(compilation='gtex', regions='CD99')
 head(cd99.jx.all)
 
 ##Query coverage for gene, exon, and annotated junctions across all
 #GTEx samples that are labeled with tissue type "Brain"
 #in the region of the CD99 gene
-
 cd99.gene <- query_gene(compilation='gtex',
                         regions='CD99',
                         sample_filters='SMTS:Brain')
@@ -145,6 +128,7 @@ cd99.exon <- query_exon(compilation='gtex',
                         sample_filters='SMTS:Brain')
 dim(cd99.exon)
 head(cd99.exon)
+
 ###Only query junctions which are fully annotated---both left and
 #right splice sites are found together in one or more of the
 #Snaptron sourced annotations
@@ -155,41 +139,25 @@ cd99.jx <- query_jx(compilation='gtex',
 dim(cd99.jx)
 head(cd99.jx)
 
-##Full compilation metadata (in this case for GTEx)
-#per sample is stored directly in the RangedSummarizedExperient
-#objects returned for each query above.
+##Metadata is stored directly in the RSE object.
 #For example the library insert size can be retrieved
 #across all runs  in the RSE
 head(cd99.jx.all$InsertSize)
 ```
 
-
 # High level queries
 
-snapcount can be used to summarize the raw results of the basic queries
-into a more relevant form for downstream analyses via its high level queries.
-
-High level queries include the following:
-
-* Percent spliced in (PSI)
-* Junction Inclusion Ratio (JIR)
-* Shared sample count (SSC)
-* Tissue specificity
-
-The results of high level queries are data frames unless otherwise specified.
+"High-level" queries answer more complex questions about splicing patterns.  Results of high level queries are data frames unless otherwise specified.
 
 ## Percent spliced in (PSI)
 
-PSI is a relative measure of usage of a particular splicing variant.
-
-snapcount's version of PSI is currently limited to the common case
-of cassette exons which have two inclusion junctions and one exclusion junction.
-
-The original PSI's values range from 0 to 1 where 0 represents no inclusion coverage for that sample.
-
-Additionally the value of -1 is used in snapcount's PSI function to represent
-samples where either one or the other inclusion groups had 0 coverage or the total raw coverage
-across groups was < min_count (defaults to 20).
+PSI measures how often an exon is included in the surrounding transcript.
+This query considers only the common case
+where a cassette exon has two inclusion junctions (junctions that join the exon to its up- and downstream neighbors) and one exclusion junction (that goes between the neighbors while skipping the exon).
+Normal PSI values range from 0 (never included) to 1 (always included).
+The value -1 is returned for a
+sample where either one or the other inclusion groups had 0 coverage or the total raw coverage
+across groups was less than a specified minimum count (`min_count` defaults to 20).
 
 ```{r 'psi', eval = FALSE}
 #Build new query against GTEx
@@ -218,15 +186,10 @@ head(psi)
 
 ## Junction Inclusion Ratio (JIR)
 
-The JIR is a measurement of relative usage similar to the PSI.
-
-However, it allows for more general patterns of splicing to be specified than the Snapcount version of the PSI.
-
-It simply requires two groups of junctions to be defined, these can be overlapping (can include junctions that appear in both groups).
-
-Its values range from -1.0 to 1.0 where 0 represents no particular specificity for either group for that sample.
-JIR values approaching 1 represent 0 coverage for groupA and approaching -1 represents 0 coverage for groupB.
-Results are sorted by the JIR statistic (descending).
+Junction Inclusion Ratio (JIR) measures the relative prevalence of two splicing patterns.  It is similar to, but more general than the PSI query.
+The query defines two sets of junctions to be compared.  The sets may or may not have some junctions in common.
+JIR ranges from -1.0 to 1.0, where 0 says that the total number of reads supporting the junctions in set A equals the number of reads supporting set-B junctions.  JIR approaches 1 when there are many more reads supporting the set-B junctions compared to the set-A junctions.  JIR approaches -1 when set-A junctions have many more supporting reads than set-B junctions.
+The list of results is presented in descending order by JIR.
 
 ```{r 'jir', eval = FALSE}
 #groupA
@@ -248,11 +211,7 @@ head(jir)
 
 ## Shared Sample Count (SSC)
 
-The SSC high level function is designed to support the requirement of many analyses to incorporate multiple splice junctions that are related to the same alternative splicing variant (e.g. an alternatively spliced in cassette exon).  Shared sample count is therefore used to determine if the junctions related to this variant, resulting from the two basic queries the user defines, occur in the same sample.
-
-If one or more junctions in each query's results occur in a specific sample then that sample is considered "shared", otherwise it's not counted.
-
-The output of the SSC function is a count of samples with this shared property, for each group of two basic junction queries that the user defines.
+SSC reports the number of samples where one or more sets of junctions co-occur.  We say two junctions co-occur in a sample of they both have at least one supporting read in that sample.  The junctions in the set might describe a particular alternative splicing event, but they do not have to.  The sets of junctions are defined using basic queries.
 
 ```{r 'ssc', eval = FALSE}
 ## We define the left/right splice junction supports of 3
@@ -309,14 +268,10 @@ ssc
 
 ## Tissue Specificity (TS)
 
-The tissue specificity high level function supports the ability to look for enrichment of tissues across two sets of splicing patterns.
-GTEx is the primary compilation targeted here, but it could work in  other compilations which have complete tissue metadata (possibly TCGA).
-
-The main output of the TS function is a list of all the samples in the compilation with either a "1" in the *shared* column or a "0".
-The "1" indicates that there was at least one junction from both groups which occurred in that sample, i.e. the sample is shared across the results of the two junction queries.
-
-The output of this function can be passed to an F-test to measure the significance of the specificity (if present) which uses the number of samples for a tissue
-that have the "shared" property set to "1".
+This query asks if a particular set of junctions seems to be associated with tissue type.  This query defaults to using the `gtex` compilation, but it could work with any compilation having a `tissue` metadata field (e.g. `tcga`).  The main output is a list of all the samples in the compilation with either a 0 or a 1 in the *shared* column.  1 indicates that at least one junction from both groups occurred in that sample, i.e. the sample is shared across the results of the two junction queries.
+This output can be passed to a statistical test such as an F-test to assess significance.
+#Uses the number of samples for a tissue
+#that have the "shared" property set to "1".
 
 A use case of the TS function is to measure the significance of tissue enrichment across junctions which support a cassette exon.
 
