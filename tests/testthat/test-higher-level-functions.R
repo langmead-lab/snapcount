@@ -15,11 +15,10 @@ test_that("junction union", {
     sb2 <- sb1$clone(deep = TRUE)
     sb2$compilation("rpc")
 
-    file_name <- get_full_path_name("test_junction_union_output.rda")
-    load(file = file_name)
+    expected <- readRDS(file = get_full_path_name("test_junction_union_output.rds"))
     result <- junction_union(sb1, sb2)
 
-    expect_true(all(result == test_junction_union_output))
+    expect_true(all(expected == result))
 })
 
 test_that("shared sample count", {
@@ -54,9 +53,9 @@ test_that("shared sample count", {
     group3 <- list(sb5, sb6)
 
     result <- shared_sample_counts(group1, group2, group3)
-    load(file = get_full_path_name("test_ssc_output.rda"))
+    expected <- readRDS(file = get_full_path_name("test_ssc_output.rds"))
 
-    expect_equal(test_ssc_output, result)
+    expect_equal(expected, result)
 
     sb0 <- sb5$clone(deep = TRUE)$coordinate_modifier(Coordinates$Within)
     expect_error(shared_sample_counts(group1, group2, list(sb0, sb6)),
@@ -77,9 +76,9 @@ test_that("junction inclusion ratio", {
     sb2$regions("chr2:29416789-29446394")
 
     result <- junction_inclusion_ratio(list(sb1), list(sb2))
-    load(file = get_full_path_name("test_jir_output.rda"))
+    expected <- readRDS(file = get_full_path_name("test_jir_output.rds"))
 
-    expect_equal(test_jir_output, result)
+    expect_equal(expected, result)
 
     sb0 <- sb1$clone(deep = TRUE)$regions("CD99")$coordinate_modifier(Coordinates$Exact)
     expect_error(junction_inclusion_ratio(list(sb0), list(sb2)),
@@ -106,9 +105,9 @@ test_that("percent spliced in", {
     sb3$regions("chr1:94468008-94475142")
 
     result <- percent_spliced_in(list(sb1), list(sb2), list(sb3), min_count = 1)
-    load(file = get_full_path_name("test_psi_output.rda"))
+    expected <- readRDS(file = get_full_path_name("test_psi_output.rds"))
 
-    expect_equal(test_psi_output, result)
+    expect_equal(expected, result)
 
     sb0 <- sb1$clone(deep = TRUE)$regions("CD99")
     expect_error(percent_spliced_in(list(sb0), list(sb2), list(sb3)),
@@ -133,9 +132,9 @@ test_that("tissue specificity", {
     sb2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
 
     result <- tissue_specificity(list(sb1, sb2))
-    load(file = get_full_path_name("test_ts_output.rda"))
+    expected <- readRDS(file = get_full_path_name("test_ts_output.rds"))
 
-    expect_equal(test_ts_output, result)
+    expect_equal(expected, result)
 
     sb0 <- sb1$clone(deep = TRUE)$coordinate_modifier(Coordinates$Within)
     expect_error(tissue_specificity(list(sb0, sb2)),
