@@ -268,8 +268,6 @@ ssc
 
 This query asks if a particular set of junctions seems to be associated with tissue type.  This query defaults to using the `gtex` compilation, but it could work with any compilation having a `tissue` metadata field (e.g. `tcga`).  The main output is a list of all the samples in the compilation with either a 0 or a 1 in the *shared* column.  1 indicates that at least one junction from both groups occurred in that sample, i.e. the sample is shared across the results of the two junction queries.
 This output can be passed to a statistical test such as an F-test to assess significance.
-#Uses the number of samples for a tissue
-#that have the "shared" property set to "1".
 
 A use case of the TS function is to measure the significance of tissue enrichment across junctions which support a cassette exon.
 
@@ -287,4 +285,31 @@ groupB$coordinate_modifier(Coordinates$StartIsExactOrWithin)
 
 ts<-tissue_specificity(list(groupA, groupB))
 head(ts)
+```
+
+## Junction Union (Merge)
+
+This query provides the ability to get a single RangeSummarizedExpression object of non-redundant junctions across multiple compilations which share a common reference (e.g. HG38).
+Junctions which are the same (have the same chromosome coordinates and strand) are merged into a single row.
+
+An example would be search for the same junctions across the human HG38-based compilations, GTEx and TCGA.
+This can be used to efficiently leverage GTEx as a substitute "normal" control, while searching for splicing phenomena specific to the tumor samples in TCGA.
+
+In the following example we query for all junctions that have a specific 5' (donor) coordinate in both compilations, merging the results.
+Note, this query, due to the number of samples involved (approximately 18,000) takes several seconds to complete.
+
+
+```{r 'jm', eval = FALSE}
+gtex <- SnaptronQueryBuilder$new()
+gtex$compilation("gtex")$regions("chr1:1879786-1879786")
+gtex$range_filters(strand == "-")
+gtex$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+
+tcga <- SnaptronQueryBuilder$new()
+tcga$compilation("tcga")$regions("chr1:1879786-1879786")
+tcga$range_filters(strand == "-")
+tcga$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+
+gtex_tcga_jx<-junction_union(gtex,tcga)
+head(gtex_tcga_jx)
 ```
