@@ -159,20 +159,20 @@ across groups was less than a specified minimum count (`min_count` defaults to 2
 ```{r 'psi', eval = FALSE}
 #Build new query against GTEx
 #left inclusion query
-lq<-SnaptronQueryBuilder$new(compilation="gtex",
-                             regions="chr19:45297955-45298142",
-                             range_filters="strand=+",
-                             coordinate_modifier=Coordinates$Exact)
+lq <- SnaptronQueryBuilder$new()
+lq$compilation("gtex")$regions("chr19:45297955-45298142")
+lq$range_filters(strand == "+")
+lq$coordinate_modifier(Coordinates$Exact)
 #right inclusion query
-rq<-SnaptronQueryBuilder$new(compilation="gtex",
-                             regions="chr19:45298223-45299810",
-                             range_filters="strand=+",
-                             coordinate_modifier=Coordinates$Exact)
+rq <- SnaptronQueryBuilder$new()
+rq$compilation("gtex")$regions("chr19:45298223-45299810")
+rq$range_filters(strand == "+")
+rq$coordinate_modifier(Coordinates$Exact)
 #exclusion query
-ex<-SnaptronQueryBuilder$new(compilation="gtex",
-                             regions="chr19:45297955-45299810",
-                             range_filters="strand=+",
-                             coordinate_modifier=Coordinates$Exact)
+ex <- SnaptronQueryBuilder$new()
+ex$compilation("gtex")$regions("chr19:45297955-45299810")
+ex$range_filters(strand == "+")
+ex$coordinate_modifier(Coordinates$Exact)
 
 psi<-percent_spliced_in(list(lq), list(rq), list(ex))
 #order by psi descending
@@ -190,15 +190,16 @@ The list of results is presented in descending order by JIR.
 
 ```{r 'jir', eval = FALSE}
 #groupA
-A<-SnaptronQueryBuilder$new(compilation="srav2",
-                            regions="chr2:29446395-30142858",
-                            range_filters="strand=-",
-                            coordinate_modifier=Coordinates$Within)
+A <- SnaptronQueryBuilder$new()
+A$compilation("srav2")$regions("chr2:29446395-30142858")
+A$range_filters(strand == "-")
+A$coordinate_modifier(Coordinates$Within)
+
 #groupB
-B<-SnaptronQueryBuilder$new(compilation="srav2",
-                            regions="chr2:29416789-29446394",
-                            range_filters="strand=-",
-                            coordinate_modifier=Coordinates$Within)
+B <- SnaptronQueryBuilder$new()
+B$compilation("srav2")$regions("chr2:29416789-29446394")
+B$range_filters(strand == "-")
+B$coordinate_modifier(Coordinates$Within)
 
 jir<-junction_inclusion_ratio(list(A),
                               list(B),
@@ -221,37 +222,37 @@ SSC reports the number of samples where one or more sets of junctions co-occur. 
 
 sqb<-SnaptronQueryBuilder
 ###GNB1
-GNB1l<-sqb$new(compilation="gtex",
-               regions="chr1:1879786-1879786",
-               range_filters="strand:-",
-               coordinate_modifier=Coordinates$EndIsExactOrWithin)
+GNB1l <- SnaptronQueryBuilder$new()
+GNB1l$compilation("gtex")$regions("chr1:1879786-1879786")
+GNB1l$range_filters(strand == "-")
+GNB1l$coordinate_modifier(Coordinates$EndIsExactOrWithin)
 
-GNB1r<-sqb$new(compilation="gtex",
-               regions="chr1:1879903-1879903",
-               range_filters="strand:-",
-               coordinate_modifier=Coordinates$StartIsExactOrWithin)
+GNB1r <- SnaptronQueryBuilder$new()
+GNB1r$compilation("gtex")$regions("chr1:1879903-1879903")
+GNB1r$range_filters(strand == "-")
+GNB1r$coordinate_modifier(Coordinates$StartIsExactOrWithin)
 
 ###PIK3CD
-PIK3CDl<-sqb$new(compilation="gtex",
-                 regions="chr1:9664595-9664595",
-                 range_filters="strand:+",
-                 coordinate_modifier=Coordinates$EndIsExactOrWithin)
+PIK3CDl <- SnaptronQueryBuilder$new()
+PIK3CDl$compilation("gtex")$regions("chr1:9664595-9664595")
+PIK3CDl$range_filters(strand == "+")
+PIK3CDl$coordinate_modifier(Coordinates$EndIsExactOrWithin)
 
-PIK3CDr<-sqb$new(compilation="gtex",
-                 regions="chr1:9664759-9664759",
-                 range_filters="strand:+",
-                 coordinate_modifier=Coordinates$StartIsExactOrWithin)
+PIK3CDr <- SnaptronQueryBuilder$new()
+PIK3CDr$compilation("gtex")$regions("chr1:9664759-9664759")
+PIK3CDr$range_filters(strand == "+")
+PIK3CDr$coordinate_modifier(Coordinates$StartIsExactOrWithin)
 
 ###TAP2
-TAP2l<-sqb$new(compilation="gtex",
-               regions="chr6:32831148-32831148",
-               range_filters="strand:-",
-               coordinate_modifier=Coordinates$EndIsExactOrWithin)
+TAP2l <- SnaptronQueryBuilder$new()
+TAP2l$compilation("gtex")$regions("chr6:32831148-32831148")
+TAP2l$range_filters(strand == "-")
+TAP2l$coordinate_modifier(Coordinates$EndIsExactOrWithin)
 
-TAP2r<-sqb$new(compilation="gtex",
-               regions="chr6:32831182-32831182",
-               range_filters="strand:-",
-               coordinate_modifier=Coordinates$StartIsExactOrWithin)
+TAP2r <- SnaptronQueryBuilder$new()
+TAP2r$compilation("gtex")$regions("chr6:32831182-32831182")
+TAP2r$range_filters(strand == "-")
+TAP2r$coordinate_modifier(Coordinates$StartIsExactOrWithin)
 
 ssc_func<-shared_sample_counts
 ssc<-ssc_func(list(GNB1l, GNB1r),
@@ -273,15 +274,15 @@ This output can be passed to a statistical test such as an F-test to assess sign
 A use case of the TS function is to measure the significance of tissue enrichment across junctions which support a cassette exon.
 
 ```{r 'ts', eval = FALSE}
-groupA<-sqb$new(compilation="gtex",
-                regions="chr4:20763023-20763023",
-                range_filters="strand=-",
-                coordinate_modifier=Coordinates$EndIsExactOrWithin)
+groupA <- SnaptronQueryBuilder$new()
+groupA$compilation("gtex")$regions("chr4:20763023-20763023")
+groupA$range_filters(strand == "-")
+groupA$coordinate_modifier(Coordinates$EndIsExactOrWithin)
 
-groupB<-sqb$new(compilation="gtex",
-                regions="chr4:20763098-20763098",
-                range_filters="strand=-",
-                coordinate_modifier=Coordinates$StartIsExactOrWithin)
+groupB <- SnaptronQueryBuilder$new()
+groupB$compilation("gtex")$regions("chr4:20763098-20763098")
+groupB$range_filters(strand == "-")
+groupB$coordinate_modifier(Coordinates$StartIsExactOrWithin)
 
 
 ts<-tissue_specificity(list(groupA, groupB))
