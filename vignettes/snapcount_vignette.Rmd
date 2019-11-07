@@ -122,36 +122,31 @@ Also, metadata within a compilation can be incomplete or formatted inconsistentl
 ```{r 'basic', eval = FALSE}
 ## Load library
 library('snapcount')
-
 ##Query all exon-exon splice junctions within the region of gene CD99
 #from GTEx v6 sample compilation
 #CD99 is chosen to be an example for its manageable size,
 #no specific functional elements are being highlighted.
-cd99.jx.all <- query_jx(compilation='gtex', regions='CD99')
+sb <- SnaptronQueryBuilder$new()
+sb$compilation("gtex")$regions("CD99")
+cd99.jx.all <- sb$query_jx()
 head(cd99.jx.all)
 
 ##Query coverage for gene, exon, and annotated junctions across all
 #GTEx samples that are labeled with tissue type "Brain"
 #in the region of the CD99 gene
-
-cd99.gene <- query_gene(compilation='gtex',
-                        regions='CD99',
-                        sample_filters='SMTS:Brain')
+sb$sample_filters(SMTS == "Brain")
+cd99.gene <- sb$query_gene()
 dim(cd99.gene)
 head(cd99.gene)
 
-cd99.exon <- query_exon(compilation='gtex',
-                        regions='CD99',
-                        sample_filters='SMTS:Brain')
+cd99.exon <- sb$query_exon()
 dim(cd99.exon)
 head(cd99.exon)
 ###Only query junctions which are fully annotated---both left and
 #right splice sites are found together in one or more of the
 #Snaptron sourced annotations
-cd99.jx <- query_jx(compilation='gtex',
-                    regions='CD99',
-                    range_filters='annotated:1',
-                    sample_filters='SMTS:Brain')
+sb$range_filters(annotated == 1)
+cd99.jx <- sb$query_jx()
 dim(cd99.jx)
 head(cd99.jx)
 
