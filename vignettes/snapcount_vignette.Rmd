@@ -275,7 +275,7 @@ The main output is a list of all the samples in the compilation with either a 0 
 This output can be passed to a statistical test such as an F-test to assess the significance of tissue enrichment.
 
 
-```{r 'ts', eval = FALSE}
+```{r 'ts1', eval = FALSE}
 setA <- SnaptronQueryBuilder$new()
 setA$compilation("gtex")$regions("chr4:20763023-20763023")
 setA$range_filters(strand == "-")
@@ -293,7 +293,7 @@ The main output is a list of all the samples in the compilation with either a 0 
 A use case of the 2-set TS function is to measure the significance of tissue enrichment across junctions which support a cassette exon.
 
 
-```{r 'ts', eval = FALSE}
+```{r 'ts2', eval = FALSE}
 setA <- SnaptronQueryBuilder$new()
 setA$compilation("gtex")$regions("chr4:20763023-20763023")
 setA$range_filters(strand == "-")
@@ -339,7 +339,7 @@ The junction intersection query provides similar functionality but restricting t
 
 Using the same scenario as above, but this time the result set will be reduced.
 
-```{r 'jm', eval = FALSE}
+```{r 'ji', eval = FALSE}
 gtex <- SnaptronQueryBuilder$new()
 gtex$compilation("gtex")$regions("chr1:1879786-1879786")
 gtex$range_filters(strand == "-")
