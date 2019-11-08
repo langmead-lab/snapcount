@@ -26,15 +26,18 @@ Imports:
     methods,
     IRanges,
     GenomicRanges,
-    SummarizedExperiment,
-    knitr
-Suggets:
+    SummarizedExperiment
+Suggests:
+    BiocManager,
     bit64,
     covr,
-    knitr,
-    rmarkdown,
+    knitcitations,
+    knitr (>= 1.6),
     testthat,
-    JunctionSeq
+    JunctionSeq,
+    BiocStyle (>= 2.5.19),
+    rmarkdown (>= 0.9.5),
+    testthat (>= 2.1.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
