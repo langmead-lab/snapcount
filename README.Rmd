@@ -34,16 +34,16 @@ devtools::install_github("langmead-lab/snapr")
 
 ##### snapr can be used with either a procedural interface
 ```{r}
-library(snapr)
+library(snapcount)
 
-query_jx(compilation = "gtex", genes_or_intervals = "CD99")
-query_jx(compilation = "gtex", genes_or_intervals = "CD99", range_filters = exprs(samples_count == 10))
+query_jx(compilation = "gtex", regions = "CD99")
+query_jx(compilation = "gtex", regions = "CD99", range_filters = samples_count == 10)
 ```
 
 ##### Or using the query-builder class
 ```{r}
 sb <- SnaptronQueryBuilder$new()
-sb$compilation("gtex")$genes_or_intervals("CD99")$query_jx()
+sb$compilation("gtex")$regions("CD99")$query_jx()
 
 # sb$from_url("http://snaptron.cs.jhu.edu/gtex/bases?regions=BRCA1&sids=50099,50102,50113")$query_gene()
 ```

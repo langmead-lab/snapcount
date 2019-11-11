@@ -1,22 +1,27 @@
+---
+output:
+  github_document:
+    html_preview: false
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# snapcount
 
-[![Build
-Status](https://travis-ci.com/langmead-lab/snapr.svg?token=vEUBb2QKjox3PdRAssp8&branch=master)](https://travis-ci.com/langmead-lab/snapr)
+```
+## Error in library(snapr): there is no package called 'snapr'
+```
+
+# snapr
+[![Build Status](https://travis-ci.com/langmead-lab/snapr.svg?token=vEUBb2QKjox3PdRAssp8&branch=master)](https://travis-ci.com/langmead-lab/snapr)
+[![Coverage Status](https://img.shields.io/codecov/c/github/langmead-lab/snapr/master.svg)](https://codecov.io/gh/langmead-lab/snapr?branch=master)
 
 ## Overview
-
-`snapcount` is a package for interfacing with Snaptron’s REST API.
-
-## Vignette
-
-http://snaptron.cs.jhu.edu/snapcount_vignette.html
+`snapr` is a package for interfacing with Snaptron's REST API.
 
 ## Installation
 
-``` r
+
+```r
 # Install the development version from GitHub:
 # install.packages("devtools")
 devtools::install_github("langmead-lab/snapr")
@@ -24,12 +29,12 @@ devtools::install_github("langmead-lab/snapr")
 
 ## Usage
 
-##### snapcount can be used with either a procedural interface
+##### snapr can be used with either a procedural interface
 
-``` r
+```r
 library(snapcount)
 
-query_jx(compilation = "gtex", genes_or_intervals = "CD99")
+query_jx(compilation = "gtex", regions = "CD99")
 #> class: RangedSummarizedExperiment 
 #> dim: 3485 9662 
 #> metadata(0):
@@ -40,24 +45,24 @@ query_jx(compilation = "gtex", genes_or_intervals = "CD99")
 #> colnames(9662): 50099 50100 ... 59759 59760
 #> colData names(322): rail_id Run ... junction_coverage
 #>   junction_avg_coverage
-query_jx(compilation = "gtex", genes_or_intervals = "CD99", range_filters = exprs(samples_count == 10))
+query_jx(compilation = "gtex", regions = "CD99", range_filters = samples_count == 10)
 #> class: RangedSummarizedExperiment 
-#> dim: 25 9662 
+#> dim: 25 226 
 #> metadata(0):
 #> assays(1): counts
 #> rownames(25): 28342638 28343346 ... 28352394 28352402
 #> rowData names(12): DataSource:Type snaptron_id ... coverage_median
 #>   source_dataset_id
-#> colnames(9662): 50099 50100 ... 59759 59760
+#> colnames(226): 50117 50145 ... 59629 59713
 #> colData names(322): rail_id Run ... junction_coverage
 #>   junction_avg_coverage
 ```
 
 ##### Or using the query-builder class
 
-``` r
+```r
 sb <- SnaptronQueryBuilder$new()
-sb$compilation("gtex")$genes_or_intervals("CD99")$query_jx()
+sb$compilation("gtex")$regions("CD99")$query_jx()
 #> class: RangedSummarizedExperiment 
 #> dim: 3485 9662 
 #> metadata(0):
@@ -73,6 +78,4 @@ sb$compilation("gtex")$genes_or_intervals("CD99")$query_jx()
 ```
 
 ## Reference
-
-For more information on Snaptron please visit:
-<http://snaptron.cs.jhu.edu/index.html>.
+For more information on Snaptron please visit: http://snaptron.cs.jhu.edu/index.html.
