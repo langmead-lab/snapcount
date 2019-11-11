@@ -1,15 +1,6 @@
----
-output:
-  github_document:
-    html_preview: false
----
-
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 
-```
-## Error in library(snapr): there is no package called 'snapr'
-```
 
 # snapr
 [![Build Status](https://travis-ci.com/langmead-lab/snapr.svg?token=vEUBb2QKjox3PdRAssp8&branch=master)](https://travis-ci.com/langmead-lab/snapr)
