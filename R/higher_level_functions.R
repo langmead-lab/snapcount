@@ -99,10 +99,6 @@ merge_compilations <- function(..., all) {
 
         if (is.null(metadata_list[[compilation]])) {
             metadata_list[[compilation]] <<- compilation_metadata
-        } else {
-            metadata_list[[compilation]] <<-
-                merge(metadata_list[[compilation]],
-                      compilation_metadata, by = "rail_id")
         }
         return(df)
     })
@@ -225,16 +221,15 @@ junction_inclusion_ratio <- function(group1, group2, group_names = NULL) {
     jir[, jir := calc_jir(coverage.y, coverage.x)]
 
     if (is.null(group_names)) {
-        group_names <- c("Group1 Coverage", "Group2 Coverage")
+        group_names <- c("group1_coverage", "group2_coverage")
     } else {
-        group_names <- paste(group_names, "Coverage")
+        group_names <- paste(group_names, "coverage", sep = "_")
     }
 
-    data.table::setnames(jir, old = "jir", new = "JIR")
-    data.table::setnames(jir, old = "coverage.x", new = group_names[1])
-    data.table::setnames(jir, old = "coverage.y", new = group_names[2])
+    data.table::setnames(jir, old = "coverage.x", new = group_names[[1]])
+    data.table::setnames(jir, old = "coverage.y", new = group_names[[2]])
 
-    jir[order(-JIR)]
+    jir[order(-jir)]
 }
 
 calc_jir <- function(a, b) {
@@ -303,10 +298,23 @@ percent_spliced_in <- function(inclusion_group1, inclusion_group2,
     }
 
     psi <- merge(g1, g2, by = "sample_id", all = TRUE) %>%
-        merge(ex, by = "sample_id", all = TRUE) %>%
-        replace_na(0)
+        merge(ex, by = "sample_id", all = TRUE) %>% replace_na(0)
 
-    psi[, psi := calc_psi(coverage.x, coverage.y, coverage, min_count)][]
+    psi[, psi := calc_psi(coverage.x, coverage.y, coverage, min_count)]
+
+    if (is.null(group_names)) {
+        group_names <- c("inclusion_group1_coverage",
+                         "inclusion_group2_coverage",
+                         "exclusion_group_coverage")
+    } else {
+        group_names <- paste(group_names, "coverage", sep = "_")
+    }
+
+    data.table::setnames(psi, old = "coverage.x", new = group_names[[1]])
+    data.table::setnames(psi, old = "coverage.y", new = group_names[[2]])
+    data.table::setnames(psi, old = "coverage", new = group_names[[3]])
+
+    psi
 }
 
 calc_psi <- function(inclusion1, inclusion2, exclusion, min_count) {

@@ -232,8 +232,10 @@ SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
 #'   the result will be a list of RangedSummarizedExperiment objects, one per original
 #'   interval/gene. This latter option may be useful but requires a separate copy of the
 #'   sample metadata for each original interval/gene.
-#'  @examples
+#'
+#' @examples
 #' query_jx(Compilation$gtex, "chr1:1-100000", range_filters = "samples_count >= 20")
+#' query_gene(Compilation$gtex, "CD99", sample_filters = SMTS == "Brain")
 #'
 #' @return Functions will return either a RangeSummarizedexperiment or data.table depending
 #'   on whether the \code{return_rse} parameter is set to \code{TRUE} or \code{FALSE}.
@@ -262,7 +264,8 @@ query_jx <- function(compilation, regions, range_filters = NULL,
             if (!identical(pos, integer(0))) {
                 range_filters[[pos]] <- paste0("strand:", strands[[i]])
             } else {
-                range_filters <- c(range_filters, paste0("strand:", strands[[i]]))
+                range_filters <-
+                    c(range_filters, paste0("strand:", strands[[i]]))
             }
         }
 

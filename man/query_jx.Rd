@@ -57,9 +57,7 @@ in \code{RangedSummarizedExperiment} object with a \code{rowData} entry for each
 result row according to the query it resulted from. However, if this is set to \code{TRUE},
 the result will be a list of RangedSummarizedExperiment objects, one per original
 interval/gene. This latter option may be useful but requires a separate copy of the
-sample metadata for each original interval/gene.
-@examples
-query_jx(Compilation$gtex, "chr1:1-100000", range_filters = "samples_count >= 20")}
+sample metadata for each original interval/gene.}
 }
 \value{
 Functions will return either a RangeSummarizedexperiment or data.table depending
@@ -69,4 +67,9 @@ on whether the \code{return_rse} parameter is set to \code{TRUE} or \code{FALSE}
 Given one or more gene names or genomic range
 intervals it will return a list of 0 or more genes, junctions, or exons
 (depending on which query form is used) which overlap the ranges.
+}
+\examples{
+query_jx(Compilation$gtex, "chr1:1-100000", range_filters = "samples_count >= 20")
+query_gene(Compilation$gtex, "CD99", sample_filters = SMTS == "Brain")
+
 }
