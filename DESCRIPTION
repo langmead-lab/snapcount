@@ -45,5 +45,6 @@ RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE, roclets = c("rd", "namespace", "collate"))
 URL: https://github.com/langmead-lab/snapr
 BugReports: https://github.com/langmead-lab/snapr/issues
+biocViews: Coverage, GeneExpression, RNASeq, Sequencing, Software, DataImport
 VignetteBuilder: knitr
 ByteCompile: true
