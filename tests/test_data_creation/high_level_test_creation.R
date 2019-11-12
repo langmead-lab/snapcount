@@ -24,6 +24,25 @@ write.table(colData(test_junction_union_output),file="test_junction_union_output
 #write out the coordinates (rows), includes extra snaptron row level metadata
 write.table(rowRanges(test_junction_union_output),file="test_junction_union_output.coords.tsv",sep="\t",row.names=FALSE,quote=FALSE)
 
+######Intersection testing
+sb <- SnaptronQueryBuilder$new()
+
+urls1=list("http://snaptron.cs.jhu.edu/encode1159/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-",
+           "http://snaptron.cs.jhu.edu/rpc/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
+
+len<-length(urls1)
+sbs1<-lapply(urls1, function(g) { sb$from_url(g)$clone(deep=TRUE) })
+
+test_junction_intersection_output<-junction_intersectionn(sbs1[[1]],sbs1[[2]])
+saveRDS(test_junction_intersection_output,file="test_junction_intersection_output.rds")
+
+#write out the counts
+write.table(as.matrix(assays(test_junction_intersection_output)$counts),file="test_junction_intersection_output.tsv",sep="\t",row.names=FALSE,quote=FALSE)
+#now write out the metadata
+write.table(colData(test_junction_intersection_output),file="test_junction_intersection_output.md.tsv",sep="\t",row.names=FALSE,quote=FALSE)
+#write out the coordinates (rows), includes extra snaptron row level metadata
+write.table(rowRanges(test_junction_intersection_output),file="test_junction_intersection_output.coords.tsv",sep="\t",row.names=FALSE,quote=FALSE)
+
 
 ####SSC testing
 #Shared Sample Count (SSC) high level function fails

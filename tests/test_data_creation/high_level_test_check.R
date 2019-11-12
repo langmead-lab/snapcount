@@ -17,6 +17,21 @@ test_junction_union_output<-readRDS(file="test_junction_union_output.rds")
 all.equal(test_junction_union_output, check_junction_union_output)
 
 
+######Intersection testing
+sb <- SnaptronQueryBuilder$new()
+
+urls1=list("http://snaptron.cs.jhu.edu/encode1159/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-",
+           "http://snaptron.cs.jhu.edu/rpc/snaptron?regions=chr1:1879786-1879786&either=2&rfilter=strand:-")
+
+len<-length(urls1)
+sbs1<-lapply(urls1, function(g) { sb$from_url(g)$clone(deep=TRUE) })
+
+check_junction_intersection_output<-junction_intersection(sbs1[[1]],sbs1[[2]])
+
+test_junction_intersection_output<-readRDS(file="test_junction_intersection_output.rds")
+all.equal(test_junction_intersection_output, check_junction_intersection_output)
+
+
 
 ####SSC testing
 #Shared Sample Count (SSC) high level function fails
