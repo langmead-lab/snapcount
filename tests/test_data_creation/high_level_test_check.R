@@ -13,7 +13,7 @@ sbs1<-lapply(urls1, function(g) { sb$from_url(g)$clone(deep=TRUE) })
 
 check_junction_union_output<-junction_union(sbs1[[1]],sbs1[[2]])
 
-load(file="test_junction_union_output.rda")
+test_junction_union_output<-readRDS(file="test_junction_union_output.rds")
 all.equal(test_junction_union_output, check_junction_union_output)
 
 
@@ -34,7 +34,7 @@ sbs2<-lapply(urls2, function(g) { sb$from_url(g)$clone(deep=TRUE) })
 ssc_inputs<-lapply(1:length(sbs1), function(g) { list(sbs1[[g]], sbs2[[g]])})
 check_ssc_output <- shared_sample_counts(ssc_inputs[[1]], ssc_inputs[[2]], ssc_inputs[[3]])
 
-load(file="test_ssc_output.rda")
+test_ssc_output<-readRDS(file="test_ssc_output.rds")
 all.equal(test_ssc_output, check_ssc_output)
 
 
@@ -45,7 +45,8 @@ sb2 <- SnaptronQueryBuilder$new()
 sb2<-sb2$from_url("http://snaptron.cs.jhu.edu/srav2/snaptron?regions=chr2:29416789-29446394&contains=1&rfilter=strand:-")
 check_jir_output<-junction_inclusion_ratio(list(sb1),list(sb2))
 
-load(file="test_jir_output.rda")
+#load(file="test_jir_output.rds")
+test_jir_output<-readRDS(file="test_jir_output.rds")
 all.equal(test_jir_output, check_jir_output)
 
 
@@ -59,7 +60,7 @@ exclusion_group <- exclusion_group$from_url("http://snaptron.cs.jhu.edu/srav2/sn
 
 check_psi_output<-percent_spliced_in(list(inclusion_group1), list(inclusion_group2), list(exclusion_group), min_count=1)
 
-load(file="test_psi_output.rda")
+test_psi_output<-readRDS(file="test_psi_output.rds")
 all.equal(test_psi_output, check_psi_output)
 
 
@@ -70,6 +71,6 @@ inclusion_group2 <- SnaptronQueryBuilder$new()
 inclusion_group2<-inclusion_group2$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr4:20763098-20763098&either=1&rfilter=strand:-")
 
 check_ts_output<-tissue_specificity(list(inclusion_group1, inclusion_group2))
-load(file="test_ts_output.rda")
+test_ts_output<-readRDS(file="test_ts_output.rds")
 all.equal(test_ts_output, check_ts_output)
 
