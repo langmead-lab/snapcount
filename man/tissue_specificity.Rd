@@ -14,6 +14,13 @@ tissue_specificity(..., group_names = NULL)
 
 \item{group_names}{Optional vector of strings representing the group names}
 }
+\value{
+A DataFrame of all samples in the compilation with either a 0 or 1
+indicating their occurrence and shared status (if > 1 group passed in).
+Occurrence here is if the sample has at least one result with > 0 coverage,
+and further, if > 1 group passed in, if it occurs in the results of all groups.
+Also includes the sample tissue type and sample_id.
+}
 \description{
 Lists the number of samples labeled with a specific tissue type.
 Samples are filtered for ones which have junctions across all the

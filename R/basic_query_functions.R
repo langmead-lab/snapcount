@@ -29,8 +29,6 @@
 #'
 #' \code{query_exon} call \code{\link{query_exon}} function
 #'
-#' \code{query_coverage} call \code{\link{query_coverage}} function
-#'
 #' \code{print} print query builder object
 #'
 #' \code{from_url} use URL to instantiate SnaptronQueryBuilder object
@@ -111,9 +109,6 @@ SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
         },
         query_gene = function(return_rse = TRUE) {
             private$call("query_gene", c(list(return_rse = return_rse), private$query))
-        },
-        query_coverage = function() {
-            private$call("query_coverage", private$query)
         },
         from_url = function(url) {
             url <- httr::parse_url(url)
@@ -387,58 +382,6 @@ query_exon <- function(compilation, regions,
     res
 }
 
-#' Query Coverage data
-#'
-#' This is the basic coverage query function.  Given one or more
-#' gene names or genomic range intervals it will return a list of 1
-#' or more bases (in 1-base pair intervals) with their list of coverage
-#' counts across all samples `(default)` or a sub-selection of sample
-#' columns.  This form doesn’t support any filters (except sample IDs `sids`) or modifiers.
-#' NOTE: coordinates in this query form always half-open intervals, so their left
-#' coordinate starts at 0 while the right coordinate starts at 1.
-#' @inheritParams query_jx
-#' @param group_names A list of one or more labels of the same length as the list of
-#'   `regions`. These labels serve as demarcation sentinels for the output
-#'   list of the bases since any one query will split over many output records `(typically)`.
-#'   Not required, but highly recommended.
-#' @param split_by_region By default the results from multiple queries will be returned
-#'   in `RangedSummarizedExperiment` object with a `rowData` entry for each labeling each
-#'   result row according to the query it resulted from. However, if this is set to `TRUE`,
-#'   the result will be a list of RangedSummarizedExperiment objects, one per original
-#'   interval/gene. This latter option may be useful but reqires metadata for each original
-#'   interval/gene.
-
-#' @export
-#' @examples
-#' query_coverage("gtex", "BRCA1", sids = c(50099,50102,50113))
-query_coverage <- function(compilation, regions, group_names = NULL,
-                           sids = NULL, split_by_region = FALSE) {
-    if (class(regions) == "GRanges") {
-        regions <- extract_intervals(regions)
-
-    }
-    should_bind <- length(regions) > 1 && !split_by_region
-    res <- lapply(seq_along(regions), function(i) {
-        data <- run_query(compilation = compilation,
-                          regions = regions,
-                          endpoint = "bases", sids = sids,
-                          construct_rse = FALSE)
-        if (is.null(data)) {
-            return()
-        }
-        coverage_rse(data$query_data, data$metadata)
-    })
-
-    if (length(res) == 1) {
-        res <- res[[1]]
-    }
-    if (should_bind) {
-        res <- do.call(SummarizedExperiment::rbind, res)
-    }
-
-    res
-}
-
 #' Return the URI of the last successful request to Snaptron
 #'
 #' @description
@@ -662,51 +605,10 @@ get_row_ranges <- function(query_data) {
     )
 }
 
-get_coverage_row_ranges <- function(query_data) {
-    GenomicRanges::GRanges(
-        seqnames = query_data$chromosome,
-        IRanges::IRanges(query_data$start, query_data$end)
-    )
-}
-
-get_coverage_counts <- function(query_data, metadata) {
-    data <- query_data[, -c("DataSource:Type", "chromosome", "start", "end")]
-    rail_ids <- as.numeric(colnames(data))
-    smallest_rail_id <- metadata$rail_id[1]
-
-    i <- rep(seq_along(data), ncol(data))
-
-    # did the user specify a list of sids?
-    if (nrow(metadata) == ncol(data)) {
-        j <- rep(seq_along(data), each = nrow(data))
-    } else {
-        j <- rep((rail_ids - smallest_rail_id) + 1, each = nrow(data))
-    }
-
-    m <- base::as.matrix(data)
-    dim(m) <- c(nrow(m) * ncol(m), 1)
-    dims <- c(nrow(query_data), length(metadata$rail_id))
-
-    Matrix::sparseMatrix(i = i, j = j, x = as.numeric(m[, 1]),
-                         dimnames = list(NULL, metadata$rail_id), dims = dims)
-}
-
 rse <- function(query_data, metadata) {
     row_ranges <- get_row_ranges(query_data)
     c(counts, unique_rail_ids) %<-% get_counts(query_data)
     col_data <- get_col_data(metadata, unique_rail_ids)
-
-    SummarizedExperiment::SummarizedExperiment(
-        assays = list(counts = counts),
-        rowRanges = row_ranges,
-        colData = col_data
-    )
-}
-
-coverage_rse <- function(query_data, metadata) {
-    row_ranges <- get_coverage_row_ranges(query_data)
-    counts <- get_coverage_counts(query_data, metadata)
-    col_data <- get_col_data(metadata)
 
     SummarizedExperiment::SummarizedExperiment(
         assays = list(counts = counts),

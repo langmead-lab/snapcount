@@ -41,8 +41,6 @@ for \code{range_filters}.
 
 \code{query_exon} call \code{\link{query_exon}} function
 
-\code{query_coverage} call \code{\link{query_coverage}} function
-
 \code{print} print query builder object
 
 \code{from_url} use URL to instantiate SnaptronQueryBuilder object

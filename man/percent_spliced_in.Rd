@@ -16,6 +16,10 @@ more SnaptronQueryBuilder objects}
 
 \item{group_names}{Optional vector of strings representing the group names}
 }
+\value{
+A DataFrame of samples, with their PSI score and metadata, which had > 0 coverage
+in at least one resulting row in at least one of the groups
+}
 \description{
 Similar to the JIR, this calculates Percent Spliced In (PSI) statistics
 for the definition of 2 different groups: inclusion and exclusion.

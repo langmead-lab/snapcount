@@ -13,6 +13,10 @@ junction_inclusion_ratio(group1, group2, group_names = NULL)
 
 \item{group_names}{Optional vector of strings representing the group names}
 }
+\value{
+A DataFrame of samples, with their JIR score and metadata, which had > 0 coverage
+in at least one resulting row in at least one of the groups
+}
 \description{
 Calculates a coverage summary statistic per sample of the normalized
 coverage difference between two sets of separate junctions defined

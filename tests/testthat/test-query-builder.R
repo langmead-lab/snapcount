@@ -48,10 +48,6 @@ test_that("query methods", {
 
     sb$query_exon()
     expect_equal(uri_of_last_successful_request(), "http://snaptron.cs.jhu.edu/gtex/exons?regions=CD99&rfilter=samples_count<:10&sfilter=SMTS:Brain&sids=50099,50102")
-
-    sb$query_coverage()
-    expect_equal(uri_of_last_successful_request(), "http://snaptron.cs.jhu.edu/gtex/bases?regions=CD99&sids=50099,50102")
-    options(test_context = NULL)
 })
 
 test_that("test building from invalid url", {

@@ -12,6 +12,11 @@ shared_sample_counts(..., group_names = NULL)
 
 \item{group_names}{Optional vector of character strings representing group names}
 }
+\value{
+A DataFrame of results based on the list of groups passed in via "group_names".
+Each group is reported with the # of unique samples which occurred in all of its defined set
+of related basic queries (e.g. two inclusion basic queries in a cassette exon scenario).
+}
 \description{
 This produces a list of user-specified groups and the read coverage of the
 junctions in all the samples which were shared across all the basic queries
