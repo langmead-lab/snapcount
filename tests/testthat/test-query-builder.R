@@ -51,7 +51,7 @@ test_that("query methods", {
 
     sb$query_coverage()
     expect_equal(uri_of_last_successful_request(), "http://snaptron.cs.jhu.edu/gtex/bases?regions=CD99&sids=50099,50102")
-    options(orig.options)
+    options(test_context = NULL)
 })
 
 test_that("test building from invalid url", {
@@ -95,4 +95,4 @@ test_that("test building from url with coordinate modifiers", {
 ## do this again in case there are any test failures and
 ## we are not able to restore the original env before
 ## failure
-options(orig.options)
+options(test_context = NULL)
