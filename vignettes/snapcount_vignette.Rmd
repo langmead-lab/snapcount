@@ -33,7 +33,7 @@ startTime <- Sys.time()
 `R` can be installed on any operating system from [CRAN](https://cran.r-project.org/) after which you can install snapcount
 by using the following commands in your `R` session:
 
-```{r 'installDer', eval = FALSE}
+```{r 'installDer', eval = TRUE}
 #Snapcount is not yet in BioConductor,
 #you can install it from the GitHub repository directly using devtools
 devtools::install_github("langmead-lab/snapr")
@@ -105,7 +105,7 @@ For splice junctions, both annotated and novel junctions are queried at the same
 Metadata columns will vary by compilation (e.g. TCGA vs. GTEx).
 Please be cautious with metadata.  We strive to make it as complete and usable as possible, but it can still be incomplete, incorrect or inconsistently formatted (e.g. "age" in the `srav2` compilation).
 
-```{r 'basic', eval = FALSE}
+```{r 'basic', eval = TRUE}
 library('snapcount')
 
 ##Query all exon-exon splice junctions within the region of gene CD99
@@ -156,7 +156,7 @@ The value -1 is returned for a
 sample where either one or the other inclusion groups had 0 coverage or the total raw coverage
 across groups was less than a specified minimum count (`min_count` defaults to 20).
 
-```{r 'psi', eval = FALSE}
+```{r 'psi', eval = TRUE}
 #Build new query against GTEx
 #left inclusion query
 lq <- SnaptronQueryBuilder$new()
@@ -188,7 +188,7 @@ The query defines two sets of junctions to be compared.  The sets may or may not
 JIR ranges from -1.0 to 1.0, where 0 says that the total number of reads supporting the junctions in set A equals the number of reads supporting set-B junctions.  JIR approaches 1 when there are many more reads supporting the set-B junctions compared to the set-A junctions.  JIR approaches -1 when set-A junctions have many more supporting reads than set-B junctions.
 The list of results is presented in descending order by JIR.
 
-```{r 'jir', eval = FALSE}
+```{r 'jir', eval = TRUE}
 #groupA
 A <- SnaptronQueryBuilder$new()
 A$compilation("srav2")$regions("chr2:29446395-30142858")
@@ -211,7 +211,7 @@ head(jir)
 
 SSC reports the number of samples where one or more sets of junctions co-occur.  We say two junctions co-occur in a sample of they both have at least one supporting read in that sample.  The junctions in the set might describe a particular alternative splicing event, but they do not have to.  The sets of junctions are defined using basic queries.
 
-```{r 'ssc', eval = FALSE}
+```{r 'ssc', eval = TRUE}
 ## We define the left/right splice junction supports of 3
 #cassette exons for the following 3 genes:
 
@@ -275,7 +275,7 @@ The main output is a list of all the samples in the compilation with either a 0 
 This output can be passed to a statistical test such as an F-test to assess the significance of tissue enrichment.
 
 
-```{r 'ts1', eval = FALSE}
+```{r 'ts1', eval = TRUE}
 setA <- SnaptronQueryBuilder$new()
 setA$compilation("gtex")$regions("chr4:20763023-20763023")
 setA$range_filters(strand == "-")
@@ -293,7 +293,7 @@ The main output is a list of all the samples in the compilation with either a 0 
 A use case of the 2-set TS function is to measure the significance of tissue enrichment across junctions which support a cassette exon.
 
 
-```{r 'ts2', eval = FALSE}
+```{r 'ts2', eval = TRUE}
 setA <- SnaptronQueryBuilder$new()
 setA$compilation("gtex")$regions("chr4:20763023-20763023")
 setA$range_filters(strand == "-")
@@ -319,7 +319,7 @@ This can be used to efficiently leverage GTEx as a substitute "normal" control, 
 In the following example we query for all junctions that have a specific 5' (donor) coordinate in both compilations, merging the results.
 Note, this query, due to the number of samples involved (approximately 18,000) takes several seconds to complete.
 
-```{r 'jm', eval = FALSE}
+```{r 'jm', eval = TRUE}
 gtex <- SnaptronQueryBuilder$new()
 gtex$compilation("gtex")$regions("chr1:1879786-1879786")
 gtex$range_filters(strand == "-")
@@ -339,7 +339,7 @@ The junction intersection query provides similar functionality but restricting t
 
 Using the same scenario as above, but this time the result set will be reduced.
 
-```{r 'ji', eval = FALSE}
+```{r 'ji', eval = TRUE}
 gtex <- SnaptronQueryBuilder$new()
 gtex$compilation("gtex")$regions("chr1:1879786-1879786")
 gtex$range_filters(strand == "-")

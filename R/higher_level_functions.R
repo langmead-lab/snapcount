@@ -187,6 +187,8 @@ calculate_coverage_median <- function(samples) {
 #'
 #' @param group1,group2 Each group is a list of 1 or more SnaptronQueryBuilder objects
 #' @param group_names Optional vector of strings representing the group names
+#' @return A DataFrame of samples, with their JIR score and metadata, which had > 0 coverage
+#'  in at least one resulting row in at least one of the groups
 #'
 #' @examples
 #' sb1 <- SnaptronQueryBuilder$new()
@@ -262,6 +264,8 @@ calc_jir <- function(a, b) {
 #'   more SnaptronQueryBuilder objects
 #' @param min_count minimum total count (denominator) required to not be assigned -1
 #' @param group_names Optional vector of strings representing the group names
+#' @return A DataFrame of samples, with their PSI score and metadata, which had > 0 coverage
+#'  in at least one resulting row in at least one of the groups
 #'
 #' @examples
 #' inclusion_group1 <- SnaptronQueryBuilder$new()
@@ -351,6 +355,11 @@ calc_psi <- function(inclusion1, inclusion2, exclusion, min_count) {
 #'
 #' @param ... One or more SnaptronQueryBuilder objects
 #' @param group_names Optional vector of strings representing the group names
+#' @return A DataFrame of all samples in the compilation with either a 0 or 1
+#'  indicating their occurrence and shared status (if > 1 group passed in).
+#'  Occurrence here is if the sample has at least one result with > 0 coverage,
+#'  and further, if > 1 group passed in, if it occurs in the results of all groups.
+#'  Also includes the sample tissue type and sample_id.
 #'
 #' @examples
 #' inclusion_group1 <- SnaptronQueryBuilder$new()
@@ -451,6 +460,9 @@ shared <- function(cov1, cov2) {
 #'
 #' @param ... One or more lists of SnaptronQueryBuilder objects
 #' @param group_names Optional vector of character strings representing group names
+#' @return A DataFrame of results based on the list of groups passed in via "group_names".
+#'  Each group is reported with the # of unique samples which occurred in all of its defined set
+#'  of related basic queries (e.g. two inclusion basic queries in a cassette exon scenario).
 #'
 #' @examples
 #' group1 <- SnaptronQueryBuilder$new()
