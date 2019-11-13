@@ -33,7 +33,6 @@ Suggests:
     covr,
     knitcitations,
     knitr (>= 1.6),
-    testthat,
     JunctionSeq,
     devtools,
     BiocStyle (>= 2.5.19),

@@ -23,4 +23,6 @@ test_that("test FormatForJunctionSeq class", {
     expect_output(js$format_for_junction_seq(),
                   'js_counts <- JunctionSeq::readJunctionSeqCounts\\(countdata=js\\$get_count_data\\(\\), samplenames=js\\$get_sample_names\\(\\), design=js\\$get_design\\(\\), flat\\.gff_file=js\\$get_gff_filename\\(\\)\\)\\n\\nJunctionSeq::plotJunctionSeqResultsForGene\\(geneID=js\\$get_gene_name\\(\\), jscs=js_counts, plot\\.type="rawCounts", displayTranscripts=TRUE\\)')
 
+    #clean up side-effect of IMPDH1.gff file being written in the working directory, triggers a check warning otherwise
+    file.remove(js$get_gff_filename())
 })
