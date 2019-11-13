@@ -23,7 +23,7 @@ Imports:
     Matrix,
     magrittr,
     stringr,
-    methods,
+    stats,
     IRanges,
     GenomicRanges,
     SummarizedExperiment

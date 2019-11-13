@@ -31,7 +31,10 @@ pkg_globals <- new.env(parent = emptyenv())
     }
     assign("registry", registry, pkg_globals)
     assign("metadata", list(), pkg_globals)
-    Compilation <<- do.call(enum, compilation_names)
+    if (!is.null(compilation_names)) {
+        compilations <- do.call(enum, compilation_names)
+        assign("Compilation", compilations, parent.env(environment()))
+    }
 }
 
 #nocov end

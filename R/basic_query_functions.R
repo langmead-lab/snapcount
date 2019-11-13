@@ -48,7 +48,7 @@
 #' b <- 10
 #' sb$range_filters(samples_count >= (a + b))
 #' sb$query_jx(return_rse = FALSE)
-SnaptronQueryBuilder <- R6::R6Class("SnaptronQueryBuilder",
+SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
     public = list(
         initialize = function(...) {
             private$query <- list(...)
@@ -674,11 +674,11 @@ get_coverage_counts <- function(query_data, metadata) {
     rail_ids <- as.numeric(colnames(data))
     smallest_rail_id <- metadata$rail_id[1]
 
-    i <- rep(1:nrow(data), ncol(data))
+    i <- rep(seq_along(data), ncol(data))
 
     # did the user specify a list of sids?
     if (nrow(metadata) == ncol(data)) {
-        j <- rep(1:ncol(data), each = nrow(data))
+        j <- rep(seq_along(data), each = nrow(data))
     } else {
         j <- rep((rail_ids - smallest_rail_id) + 1, each = nrow(data))
     }

@@ -23,4 +23,5 @@
 #' @importFrom rlang !!
 #' @importFrom magrittr %>%
 #' @importFrom stats median
+#' @importFrom R6 R6Class
 "_PACKAGE"

@@ -46,7 +46,7 @@
 #' js$format_for_junction_seq()
 #' @export
 FormatForJunctionSeq <-
-    R6::R6Class(
+    R6Class(
         "FormatForJunctionSeq",
         public = list(
             initialize = function(query_builders, group_names, gene,

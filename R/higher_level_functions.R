@@ -218,7 +218,8 @@ junction_inclusion_ratio <- function(group1, group2, group_names = NULL) {
     jir <- merge(s1, s2, by = "sample_id", all = TRUE) %>%
         replace_na(0)
 
-    jir[, jir := calc_jir(coverage.y, coverage.x)]
+    ## jir[, jir := calc_jir(coverage.y, coverage.x)]
+    jir$jir <- calc_jir(jir$coverage.y, jir$coverage.x)
 
     if (is.null(group_names)) {
         group_names <- c("group1_coverage", "group2_coverage")
@@ -300,7 +301,8 @@ percent_spliced_in <- function(inclusion_group1, inclusion_group2,
     psi <- merge(g1, g2, by = "sample_id", all = TRUE) %>%
         merge(ex, by = "sample_id", all = TRUE) %>% replace_na(0)
 
-    psi[, psi := calc_psi(coverage.x, coverage.y, coverage, min_count)]
+    ## psi[, psi := calc_psi(coverage.x, coverage.y, coverage, min_count)]
+    psi$psi <- calc_psi(psi$coverage.x, psi$coverage.y, psi$coverage, min_count)
 
     if (is.null(group_names)) {
         group_names <- c("inclusion_group1_coverage",
@@ -520,7 +522,8 @@ count_samples <- function(group, summarize = TRUE) {
     res <- do.call(rbind, dfs)
 
     if (summarize && !is.null(res)) {
-        res[, .(coverage = sum(coverage)), by = .(sample_id)]
+        ## res[, .(coverage = sum(coverage)), by = .(sample_id)]
+        res[, lapply(.SD, sum), by = .(sample_id), .SDcols = c("coverage")]
     } else {
         res
     }
