@@ -209,16 +209,16 @@ junction_inclusion_ratio <- function(group1, group2, group_names = NULL) {
     assert_that(is_list_of_query_builders(group1),
                 is_list_of_query_builders(group2))
 
-    c(s1, s2) %<-% run_queries(group1, group2)
-    if (is.null(s1)) {
+    query_results <- run_queries(group1, group2)
+    if (is.null(query_results[[1]])) {
         stop("Unable to calculate JIR: group1 returned no results")
     }
-    if (is.null(s2)) {
+    if (is.null(query_results[[2]])) {
         stop("Unable to calculate JIR: group2 returned no results")
     }
 
-    jir <- merge(s1, s2, by = "sample_id", all = TRUE) %>%
-        replace_na(0)
+    jir <- merge(query_results[[1]], query_results[[2]],
+                 by = "sample_id", all = TRUE) %>% replace_na(0)
 
     ## jir[, jir := calc_jir(coverage.y, coverage.x)]
     jir$jir <- calc_jir(jir$coverage.y, jir$coverage.x)
@@ -289,21 +289,26 @@ calc_jir <- function(a, b) {
 #' percent_spliced_in(list(inclusion_group1), list(inclusion_group2), list(exclusion_group))
 #' @export
 percent_spliced_in <- function(inclusion_group1, inclusion_group2,
-                               exclusion_group, min_count = 20, group_names = NULL)
+                               exclusion_group, min_count = 20,
+                               group_names = NULL)
 {
-    c(g1, g2, ex) %<-% run_queries(inclusion_group1, inclusion_group2, exclusion_group)
-    if (is.null(g1)) {
+    query_results <-
+        run_queries(inclusion_group1, inclusion_group2, exclusion_group)
+    if (is.null(query_results[[1]])) {
         stop("Unable to calculate PSI: inclusion_group1 returned no results")
     }
-    if (is.null(g2)) {
+    if (is.null(query_results[[2]])) {
         stop("Unable to calculate PSI: inclusion_group2 returned no results")
     }
-    if (is.null(ex)) {
+    if (is.null(query_results[[3]])) {
         stop("Unable to calculate PSI: exclusion_group returned no results")
     }
 
-    psi <- merge(g1, g2, by = "sample_id", all = TRUE) %>%
-        merge(ex, by = "sample_id", all = TRUE) %>% replace_na(0)
+    psi <-
+        merge(query_results[[1]], query_results[[2]],
+                 by = "sample_id", all = TRUE) %>%
+        merge(query_results[[3]], by = "sample_id", all = TRUE) %>%
+        replace_na(0)
 
     ## psi[, psi := calc_psi(coverage.x, coverage.y, coverage, min_count)]
     psi$psi <- calc_psi(psi$coverage.x, psi$coverage.y, psi$coverage, min_count)
@@ -379,7 +384,8 @@ calc_psi <- function(inclusion1, inclusion2, exclusion, min_count) {
 tissue_specificity <- function(..., group_names = NULL) {
     list_of_groups <- list(...)
     assert_that(is_list_of_query_builder_groups(list_of_groups),
-                msg = "tissue_specificity expects 1 or more list of SnaptronQueryBuilder objects")
+                msg = paste("tissue_specificity expects 1 or",
+                            "more list of SnaptronQueryBuilder objects"))
     num_groups <- length(list_of_groups)
 
     if (is.null(group_names)) {
@@ -409,28 +415,31 @@ tissue_specificity_per_group <- function(group1, group2, group_name) {
     }
 
     stopifnot(is.list(group1), is.list(group2))
-    c(res1, res2) %<-% run_queries(group1, group2, summarize = FALSE)
-    if (is.null(res1)) {
+    query_data <- run_queries(group1, group2, summarize = FALSE)
+    if (is.null(query_data[[1]])) {
         stop("Unable to calculate TS: group1 returned no results")
     }
-    if (is.null(res2)) {
+    if (is.null(query_data[[2]])) {
         stop("Unable to calculate TS: group2 returned no results")
     }
 
-    res <- merge(res1, res2, by = "sample_id", all = TRUE) %>%
-        replace_na(0)
-    res <- res[, shared := shared(coverage.x, coverage.y)][, !c("coverage.x", "coverage.y")]
+    merged_data <-
+        merge(query_data[[1]], query_data[[2]],
+              by = "sample_id", all = TRUE) %>% replace_na(0)
+    merged_data$shared <- shared(merged_data$coverage.x, merged_data$coverage.y)
+    merged_data <- merged_data[, !c("coverage.x", "coverage.y")]
 
     metadata <- get_compilation_metadata(group1[[1]]$compilation())
-    metadata <- metadata[, .(rail_id, SMTS)]
+    metadata <- metadata[, c("rail_id", "SMTS")]
 
-    res <- merge(res, metadata, by.x = "sample_id", by.y = "rail_id", all = TRUE)
-    res <- replace_na(res, 0, colnames = setdiff(names(res), "SMTS"))
+    ts <- merge(merged_data, metadata, by.x = "sample_id",
+                by.y = "rail_id", all = TRUE)
+    ts <- replace_na(ts, 0, colnames = setdiff(names(ts), "SMTS"))
 
-    res$group <- rep(group_name, nrow(res))
-    data.table::setnames(res, old = "SMTS", new = "tissue")
+    ts$group <- rep(group_name, nrow(ts))
+    data.table::setnames(ts, old = "SMTS", new = "tissue")
 
-    unique(res)
+    unique(ts)
 }
 
 shared <- function(cov1, cov2) {
@@ -482,7 +491,8 @@ shared <- function(cov1, cov2) {
 shared_sample_counts <- function(..., group_names = NULL) {
     list_of_groups <- list(...)
     assert_that(is_list_of_query_builder_groups(list_of_groups),
-                msg = "shared_sample_counts expects 1 or more lists of SnaptronQueryBuilder objects")
+                msg = paste("shared_sample_counts expects 1 or",
+                            "more lists of SnaptronQueryBuilder objects"))
 
     counts <- lapply(list_of_groups, function(g) {
         shared_sample_count(g[[1]], g[[2]])
@@ -506,14 +516,15 @@ shared_sample_count <- function(group1, group2) {
 
     stopifnot(is.list(group1), is.list(group2))
 
-    c(g1, g2) %<-% run_queries(group1, group2)
-    if (is.null(g1)) {
+    query_results <- run_queries(group1, group2)
+    if (is.null(query_results[[1]])) {
         stop("Unable to calculate SSC: group1 returned no results")
     }
-    if (is.null(g2)) {
+    if (is.null(query_results[[2]])) {
         stop("Unable to calculate SSC: group2 returned no results")
     }
-    intersect(g1$sample_id, g2$sample_id) %>% length()
+    intersect(query_results[[1]]$sample_id, query_results[[2]]$sample_id) %>%
+        length()
 }
 
 run_queries <- function(..., summarize = TRUE) {
@@ -535,7 +546,7 @@ count_samples <- function(group, summarize = TRUE) {
 
     if (summarize && !is.null(res)) {
         ## res[, .(coverage = sum(coverage)), by = .(sample_id)]
-        res[, lapply(.SD, sum), by = .(sample_id), .SDcols = c("coverage")]
+        res[, lapply(.SD, sum), by = c("sample_id"), .SDcols = c("coverage")]
     } else {
         res
     }

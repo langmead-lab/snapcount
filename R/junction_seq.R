@@ -86,9 +86,8 @@ FormatForJunctionSeq <-
 
             get_gff_filename = function() {
                 if (is.null(private$gff_filename)) {
-                    stop(
-                        "please call 'write_gff_file' method first with an optional filename"
-                    )
+                    stop(paste("please call 'write_gff_file' method",
+                               "first with an optional filename"))
                 }
                 private$gff_filename
             },
@@ -313,15 +312,17 @@ FormatForJunctionSeq <-
                 for (group in private$group_names) {
                     apply(private$genes[[group]], 1, function(row) {
                         gene_name <-
-                            base::strsplit(row[["gene_id:gene_name:gene_type:bp_length"]],
-                                split = ":")[[1]][2]
+                            strsplit(row[["gene_id:gene_name:gene_type:bp_length"]],
+                                     split = ":")[[1]][2]
                         if (gene_name != private$gene) {
                             return()
                         }
 
                         key <-
-                            private$create_key(row[["chromosome"]], row[["start"]],
-                                row[["end"]], row[["strand"]])
+                            private$create_key(row[["chromosome"]],
+                                               row[["start"]],
+                                               row[["end"]],
+                                               row[["strand"]])
                         if (key %in% names(private$key_to_group)) {
                             idx <- private$key_to_index[[key]]
                             type <- private$key_to_type[[key]]

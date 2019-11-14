@@ -69,8 +69,8 @@ SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
         },
         range_filters = function(range_filters = NULL) {
             if (!missing(range_filters)) {
-                private$query$range_filters <- bool_expressions_to_strings(
-                    rlang::enexpr(range_filters))
+                private$query$range_filters <-
+                    bool_expressions_to_strings(rlang::enexpr(range_filters))
                 invisible(self)
             } else {
                 private$query$range_filters
@@ -78,8 +78,8 @@ SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
         },
         sample_filters = function(sample_filters = NULL) {
             if (!missing(sample_filters)) {
-                private$query$sample_filters <- bool_expressions_to_strings(
-                    rlang::enexpr(sample_filters))
+                private$query$sample_filters <-
+                    bool_expressions_to_strings(rlang::enexpr(sample_filters))
                 invisible(self)
             } else {
                 private$query$sample_filters
@@ -102,13 +102,16 @@ SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
             }
         },
         query_jx = function(return_rse = TRUE) {
-            private$call("query_jx", c(list(return_rse = return_rse), private$query))
+            private$call("query_jx",
+                         c(list(return_rse = return_rse), private$query))
         },
         query_exon = function(return_rse = TRUE) {
-            private$call("query_exon", c(list(return_rse = return_rse), private$query))
+            private$call("query_exon",
+                         c(list(return_rse = return_rse), private$query))
         },
         query_gene = function(return_rse = TRUE) {
-            private$call("query_gene", c(list(return_rse = return_rse), private$query))
+            private$call("query_gene",
+                         c(list(return_rse = return_rse), private$query))
         },
         from_url = function(url) {
             url <- httr::parse_url(url)
@@ -116,7 +119,8 @@ SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
                 stop("URL does not point to Snaptron server", stop. = FALSE)
             }
             resp <- httr::HEAD(url)
-            if (resp$status_code != 200 || httr::http_type(resp) != "text/plain") {
+            if (resp$status_code != 200 ||
+                httr::http_type(resp) != "text/plain") {
                 stop(sprintf("%s: is not a valid URL", url), call. = FALSE)
             }
             query <- list()
@@ -128,7 +132,8 @@ SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
                     n)
 
                 if (name == "sids") {
-                    query[[name]] <- scan(textConnection(url$query[[i]]), sep = ",")
+                    query[[name]] <-
+                        scan(textConnection(url$query[[i]]), sep = ",")
                 } else if (name == "contains") {
                     if (url$query[[i]] == "1") {
                         query[["coordinate_modifier"]] <- Coordinates$Within
@@ -139,9 +144,11 @@ SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
                     }
                 } else if (name == "either") {
                     if (url$query[[i]] == "1") {
-                        query[["coordinate_modifier"]] <- Coordinates$StartIsExactOrWithin
+                        query[["coordinate_modifier"]] <-
+                            Coordinates$StartIsExactOrWithin
                     } else if (url$query[[i]] == "2") {
-                        query[["coordinate_modifier"]] <- Coordinates$EndIsExactOrWithin
+                        query[["coordinate_modifier"]] <-
+                            Coordinates$EndIsExactOrWithin
                     }
                 } else {
                     query[[name]] <- c(query[[name]], url$query[[i]])
@@ -405,9 +412,11 @@ get_compilation_metadata <- function(compilation) {
                 msg = "Invalid compilation")
 
     if (is.null(pkg_globals$metadata[[compilation]])) {
-        uri <- sprintf("http://snaptron.cs.jhu.edu/%s/samples?all=1", compilation)
+        uri <- sprintf("%s/%s/samples?all=1",
+                       pkg_globals$snaptron_host, compilation)
         tsv <- submit_query(uri)
-        pkg_globals$metadata[[compilation]] <- data.table::fread(tsv, sep = "\t", quote = "")
+        pkg_globals$metadata[[compilation]] <-
+            data.table::fread(tsv, sep = "\t", quote = "")
     }
 
     pkg_globals$metadata[[compilation]]
@@ -504,16 +513,21 @@ generate_snaptron_uri <- function(compilation, regions,
     if (!is.null(sample_filters)) {
         sample_filters <- tidy_filters(sample_filters)
         errors <- lapply(sample_filters, function(filter) {
-            c(name, value) %<-% stringr::str_split(filter, "\\W", n = 2)[[1]]
-            validate_sample_filter(compilation, name, value)
+            fields <- stringr::str_split(filter, "\\W", n = 2)[[1]]
+            validate_sample_filter(compilation,
+                                   name = fields[[1]],
+                                   value = fields[[2]])
         }) %>% purrr::compact()
 
         if (length(errors) > 0) {
                 error_string <- paste(errors, collapse = "\n")
                 stop(error_string, call. = FALSE)
         }
-        query <- c(query, paste("sfilter", tidy_filters(sample_filters), sep = "="))
+        query <- c(query, paste("sfilter",
+                                tidy_filters(sample_filters),
+                                sep = "="))
     }
+
     if (!is.null(coordinate_modifier)) {
         if (coordinate_modifier == Coordinates$Exact) {
             query <- c(query, paste("exact", "1", sep = "="))
@@ -527,6 +541,7 @@ generate_snaptron_uri <- function(compilation, regions,
             stop("Invalid coordinate modifier", stop. = FALSE)
         }
     }
+
     if (!is.null(sids)) {
         assert_that(is.wholenumber(sids),
                     msg = "sids should be whole numbers")
@@ -573,21 +588,23 @@ convert_to_sparse_matrix <- function(rail_ids, unique_rail_ids, counts,
 }
 
 get_counts <- function(query_data) {
-    rail_ids_and_counts <- extract_samples(query_data) %>% strsplit(":", fixed = TRUE)
+    rail_ids_and_counts <- extract_samples(query_data) %>%
+        strsplit(":", fixed = TRUE)
     rail_ids <- as.numeric(vapply(rail_ids_and_counts, `[`, 1, FUN.VALUE = ""))
     unique_rail_ids <- sort(rail_ids) %>% unique()
     counts <- as.numeric(vapply(rail_ids_and_counts, `[`, 2, FUN.VALUE = ""))
 
     sparse_matrix <-
         convert_to_sparse_matrix(rail_ids, unique_rail_ids, counts,
-                                 query_data$samples_count, query_data$snaptron_id)
+                                 query_data$samples_count,
+                                 query_data$snaptron_id)
 
     list(sparse_matrix, unique_rail_ids)
 }
 
 get_col_data <- function(metadata, rail_ids = NULL) {
     if (!is.null(rail_ids)) {
-        metadata[rail_id %in% rail_ids]
+        metadata[metadata$rail_id %in% rail_ids]
     } else {
         metadata
     }
@@ -607,11 +624,11 @@ get_row_ranges <- function(query_data) {
 
 rse <- function(query_data, metadata) {
     row_ranges <- get_row_ranges(query_data)
-    c(counts, unique_rail_ids) %<-% get_counts(query_data)
-    col_data <- get_col_data(metadata, unique_rail_ids)
+    count_data <- get_counts(query_data)
+    col_data <- get_col_data(metadata, rail_ids = count_data[[2]])
 
     SummarizedExperiment::SummarizedExperiment(
-        assays = list(counts = counts),
+        assays = list(counts = count_data[[1]]),
         rowRanges = row_ranges,
         colData = col_data
     )

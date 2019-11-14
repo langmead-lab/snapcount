@@ -29,8 +29,8 @@ pkg_globals <- new.env(parent = emptyenv())
     if (length(compilation_names) == 0) {
         return()
     }
-    assign("registry", registry, pkg_globals)
-    assign("metadata", list(), pkg_globals)
+    assign("registry", registry, envir = pkg_globals)
+    assign("metadata", list(), envir = pkg_globals)
     if (!is.null(compilation_names)) {
         compilations <- do.call(enum, compilation_names)
         assign("Compilation", compilations, parent.env(environment()))
