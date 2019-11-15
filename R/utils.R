@@ -40,18 +40,28 @@ bool_expressions_to_strings <- function(exprs) {
 }
 
 expression_to_string_helper <- function(expr) {
-    assert_that(length(expr) == 3,
-                msg = paste(deparse(expr), ": is not a valid filter"))
-    assert_that(is_logical_op(expr[[1]]),
-                msg = paste(deparse(expr), ": is not a bool expression"))
-    assert_that(rlang::is_symbol(expr[[2]]),
-                msg = paste(deparse(expr[[2]]), ": is not a valid name"))
+    assert_that(
+        length(expr) == 3,
+        msg = paste(deparse(expr), ": is not a valid filter")
+    )
+    assert_that(
+        is_logical_op(expr[[1]]),
+        msg = paste(deparse(expr), ": is not a bool expression")
+    )
+    assert_that(
+        rlang::is_symbol(expr[[2]]),
+        msg = paste(deparse(expr[[2]]), ": is not a valid name")
+    )
 
     if (rlang::is_call(expr[[3]]) || rlang::is_symbol(expr[[3]])) {
         res <- rlang::eval_tidy(expr[[3]])
-        assert_that(rlang::is_syntactic_literal(res),
-                    msg = paste(deparse(expr[[3]]),
-                                ": does not evaluate to a basic type"))
+        assert_that(
+            rlang::is_syntactic_literal(res),
+            msg = paste(
+                deparse(expr[[3]]),
+                ": does not evaluate to a basic type"
+            )
+        )
         expr[[3]] <- res
     } else if (rlang::is_bare_character(expr[[3]])) {
         ## convert a string a symbol to prevent deparse from

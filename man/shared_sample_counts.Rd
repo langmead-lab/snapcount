@@ -10,31 +10,37 @@ shared_sample_counts(..., group_names = NULL)
 \arguments{
 \item{...}{One or more lists of SnaptronQueryBuilder objects}
 
-\item{group_names}{Optional vector of character strings representing group names}
+\item{group_names}{Optional vector of character strings
+representing group names}
 }
 \value{
-A DataFrame of results based on the list of groups passed in via "group_names".
-Each group is reported with the # of unique samples which occurred in all of its defined set
-of related basic queries (e.g. two inclusion basic queries in a cassette exon scenario).
+A DataFrame of results based on the list of groups passed
+in via "group_names".  Each group is reported with the # of
+unique samples which occurred in all of its defined set of
+related basic queries (e.g. two inclusion basic queries in a
+cassette exon scenario).
 }
 \description{
-This produces a list of user-specified groups and the read coverage of the
-junctions in all the samples which were shared across all the basic queries
-occurring in each group.
+This produces a list of user-specified groups and the read coverage
+of the junctions in all the samples which were shared across all
+the basic queries occurring in each group.
 }
 \details{
 Example: User defines a single group of junctions "GroupA" made up of 2
 separate regions (two basic queries).
 
-An SSC query will return a single line for GroupA which will have the total
-number of samples which had at least one junction which was returned from both basic
-queries. It will also report a summary statistic of the total number of
-groups which had one or more samples that were shared across the basic
-queries, in this case it would be 1.  Also, it will report the number of
-groups which had at least one shared sample and which had matching
-junctions (from the query) which were fully annotated.
-This function can be used to determine how much cross-sample support there
-is for a particular junction configuration (typically a cassette exon).
+An SSC query will return a single line for GroupA which will have
+the total number of samples which had at least one junction which
+was returned from both basic queries. It will also report a summary
+statistic of the total number of groups which had one or more
+samples that were shared across the basic queries, in this case it
+would be 1.  Also, it will report the number of groups which had at
+least one shared sample and which had matching junctions (from the
+query) which were fully annotated.
+
+This function can be used to determine how much cross-sample
+support there is for a particular junction configuration (typically
+a cassette exon).
 }
 \examples{
 group1 <- SnaptronQueryBuilder$new()

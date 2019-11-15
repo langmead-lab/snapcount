@@ -24,4 +24,6 @@
 #' @importFrom magrittr %>%
 #' @importFrom stats median
 #' @importFrom R6 R6Class
+#' @importFrom GenomicRanges GRanges
+#' @importFrom SummarizedExperiment SummarizedExperiment
 "_PACKAGE"

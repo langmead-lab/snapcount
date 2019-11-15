@@ -16,15 +16,14 @@ A Reference Class for building Snaptron queries
 \code{compilation} Get or set query compilation. See
 \code{\link{Compilation}} for details.
 
-\code{regions} Get or set query region which can be either a chromosome
-range or HUGO gene name.
+\code{regions} Get or set query region which can be either a chromosome range
+or HUGO gene name.
 
-\code{range_filters} Get or set query range filters. Range filters can be
-set to a list or vector of either strings or R boolean expressions. If
-filters are R boolean expressions then the right-hand-side of the R
-expression should evaluate to either a string, float or whole number.
-The expression will then be converted to a string before being sent out
-to Snaptron.
+\code{range_filters} Get or set query range filters. Range filters can be set
+to a list or vector of either strings or R boolean expressions. If filters
+are R boolean expressions then the right-hand-side of the R expression
+should evaluate to either a string, float or whole number.  The expression
+will then be converted to a string before being sent out to Snaptron.
 
 \code{sample_filters} Get or set query sample filters. When setting sample
 filters the argument is expected to follow the sample rules as described

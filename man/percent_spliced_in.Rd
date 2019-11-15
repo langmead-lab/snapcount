@@ -9,16 +9,19 @@ percent_spliced_in(inclusion_group1, inclusion_group2, exclusion_group,
   min_count = 20, group_names = NULL)
 }
 \arguments{
-\item{inclusion_group1, inclusion_group2, exclusion_group}{Where each is a list of 1 or
-more SnaptronQueryBuilder objects}
+\item{inclusion_group1, inclusion_group2, exclusion_group}{Where each
+is a list of 1 or more SnaptronQueryBuilder objects}
 
-\item{min_count}{minimum total count (denominator) required to not be assigned -1}
+\item{min_count}{minimum total count (denominator) required to not
+be assigned -1}
 
-\item{group_names}{Optional vector of strings representing the group names}
+\item{group_names}{Optional vector of strings representing the
+group names}
 }
 \value{
-A DataFrame of samples, with their PSI score and metadata, which had > 0 coverage
-in at least one resulting row in at least one of the groups
+A DataFrame of samples, with their PSI score and metadata,
+which had > 0 coverage in at least one resulting row in at
+least one of the groups
 }
 \description{
 Similar to the JIR, this calculates Percent Spliced In (PSI) statistics
@@ -58,5 +61,6 @@ exclusion_group$regions("chr1:94468008-94475142")
 exclusion_group$coordinate_modifier(Coordinates$Exact)
 exclusion_group$range_filters(strand == "+")
 
-percent_spliced_in(list(inclusion_group1), list(inclusion_group2), list(exclusion_group))
+percent_spliced_in(list(inclusion_group1), list(inclusion_group2),
+                   list(exclusion_group))
 }

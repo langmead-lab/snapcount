@@ -52,8 +52,9 @@
 #'
 #' junction_union(sb1, sb2)
 junction_union <- function(...) {
-    assert_that(is_list_of_query_builders(list(...)),
-                msg = "junction_union expects 1 or more SnaptronQueryBuilder objects")
+    assert_that(
+        is_list_of_query_builders(list(...)),
+        msg = "junction_union expects 1 or more SnaptronQueryBuilder objects")
     merge_compilations(..., all = TRUE)
 }
 
@@ -85,73 +86,79 @@ junction_union <- function(...) {
 #'
 #' junction_intersection(sb1, sb2)
 junction_intersection <- function(...) {
-    assert_that(is_list_of_query_builders(list(...)),
-                msg = "junction_intersection expects 1 or more SnaptronQueryBuilder objects")
+    assert_that(
+        is_list_of_query_builders(list(...)),
+        "junction_intersection expects 1 or more SnaptronQueryBuilder objects")
     merge_compilations(..., all = FALSE)
 }
 
 merge_compilations <- function(..., all) {
-    metadata_list <- list()
-    datasets <- lapply(list(...), function(sb) {
-        df <- sb$query_jx(return_rse = FALSE)
-        compilation <- sb$compilation()
-        compilation_metadata <- get_compilation_metadata(sb$compilation())
-
-        if (is.null(metadata_list[[compilation]])) {
-            metadata_list[[compilation]] <<- compilation_metadata
-        }
-        return(df)
+    compilations <- lapply(list(...), function(sb) { sb$compilation() })
+    query_data_list <- lapply(list(...), function(sb) {
+        sb$query_jx(return_rse = FALSE)
+    })
+    metadata_list <- lapply(unique(compilations), function(compilation) {
+        get_compilation_metadata(compilation)
     })
 
-    if (length(datasets) == 1) {
-        return(rse(datasets[[1]], metadata_list[[1]]))
+    if (length(query_data_list) == 1) {
+        return(rse(query_data_list[[1]], metadata_list[[1]]))
     }
 
-    for (i in seq_along(datasets)) {
+    for (i in seq_along(query_data_list)) {
         if (i == 1) {
-            res <- datasets[[1]]
+            merged_query_data <- query_data_list[[1]]
         } else {
-            res <- merge(res, datasets[[i]], all = all,
-                         by = c("chromosome", "start", "end", "strand")) %>%
-                finalize_merge(col_names = names(datasets[[1]]))
+            merged_query_data <-
+                merge(
+                    merged_query_data, query_data_list[[i]], all = all,
+                    by = c("chromosome", "start", "end", "strand")
+                ) %>% finalize_merge(col_names = names(query_data_list[[1]]))
         }
     }
 
     for (i in seq_along(metadata_list)) {
         if (i == 1) {
-            metadata <- metadata_list[[1]]
+            merged_metadata <- metadata_list[[1]]
         } else {
-            metadata <- merge(metadata, metadata_list[[i]], by = "rail_id", all = TRUE)
+            merged_metadata <-
+                merge(
+                    merged_metadata, metadata_list[[i]],
+                    by = "rail_id", all = TRUE
+                )
         }
     }
 
-    rse(res, metadata)
+    rse(merged_query_data, merged_metadata)
 }
 
 finalize_merge <- function(dt, col_names) {
     dt$samples <- str_cat(dt$samples.x, dt$samples.y)
     dt$snaptron_id <- str_cat(dt$snaptron_id.x, dt$snaptron_id.y, sep = ",")
-
-    dt$`DataSource:Type` <- str_cat(dt$`DataSource:Type.x`,
-                                    dt$`DataSource:Type.y`, sep = ",")
-    dt$source_dataset_id <- str_cat(dt$source_dataset_id.x,
-                                    dt$source_dataset_id.y, sep = ",")
-
-    dt$coverage_sum <- purrr::map2_int(dt$coverage_sum.x,
-                                   dt$coverage_sum.y, sum, na.rm = TRUE)
-    dt$samples_count <- purrr::map2_int(dt$samples_count.x,
-                                    dt$samples_count.y, sum, na.rm = TRUE)
+    dt$`DataSource:Type` <-
+        str_cat(dt$`DataSource:Type.x`, dt$`DataSource:Type.y`, sep = ",")
+    dt$source_dataset_id <-
+        str_cat(dt$source_dataset_id.x, dt$source_dataset_id.y, sep = ",")
+    dt$coverage_sum <-
+        purrr::map2_int(dt$coverage_sum.x, dt$coverage_sum.y, sum, na.rm = TRUE)
     dt$coverage_avg <- dt$coverage_sum / dt$samples_count
     dt$coverage_median <-
         stringr::str_extract_all(dt$samples, "\\b\\d+\\b") %>%
         lapply(calculate_coverage_median) %>% unlist()
-
     dt$length <- choose_non_na(dt$length.x, dt$length.y)
     dt$left_motif <- choose_non_na(dt$left_motif.x, dt$left_motif.y)
     dt$right_motif <- choose_non_na(dt$right_motif.x, dt$right_motif.y)
     dt$annotated <- choose_non_na(dt$annotated.x, dt$annotated.y)
-    dt$left_annotated <- choose_non_na(dt$left_annotated.x, dt$left_annotated.y)
-    dt$right_annotated <- choose_non_na(dt$right_annotated.x, dt$right_annotated.y)
+    dt$left_annotated <-
+        choose_non_na(dt$left_annotated.x, dt$left_annotated.y)
+    dt$right_annotated <-
+        choose_non_na(dt$right_annotated.x, dt$right_annotated.y)
+    dt$samples_count <-
+        purrr::map2_int(
+                   dt$samples_count.x,
+                   dt$samples_count.y,
+                   sum, na.rm = TRUE
+               )
 
     dt[, col_names, with = FALSE]
 }
@@ -185,10 +192,13 @@ calculate_coverage_median <- function(samples) {
 #' This is calculated for every sample that occurs in one or the other
 #' (or both) groups’ results.
 #'
-#' @param group1,group2 Each group is a list of 1 or more SnaptronQueryBuilder objects
-#' @param group_names Optional vector of strings representing the group names
-#' @return A DataFrame of samples, with their JIR score and metadata, which had > 0 coverage
-#'  in at least one resulting row in at least one of the groups
+#' @param group1,group2 Each group is a list of 1 or more
+#'     SnaptronQueryBuilder objects
+#' @param group_names Optional vector of strings representing the
+#'     group names
+#' @return A DataFrame of samples, with their JIR score and metadata,
+#'     which had > 0 coverage in at least one resulting row in at
+#'     least one of the groups
 #'
 #' @examples
 #' sb1 <- SnaptronQueryBuilder$new()
@@ -260,12 +270,15 @@ calc_jir <- function(a, b) {
 #' where each term denotes the coverage of junctions that resulted
 #' from the basic queries in that group in the current sample.
 #'
-#' @param inclusion_group1,inclusion_group2,exclusion_group Where each is a list of 1 or
-#'   more SnaptronQueryBuilder objects
-#' @param min_count minimum total count (denominator) required to not be assigned -1
-#' @param group_names Optional vector of strings representing the group names
-#' @return A DataFrame of samples, with their PSI score and metadata, which had > 0 coverage
-#'  in at least one resulting row in at least one of the groups
+#' @param inclusion_group1,inclusion_group2,exclusion_group Where each
+#'     is a list of 1 or more SnaptronQueryBuilder objects
+#' @param min_count minimum total count (denominator) required to not
+#'     be assigned -1
+#' @param group_names Optional vector of strings representing the
+#'     group names
+#' @return A DataFrame of samples, with their PSI score and metadata,
+#'     which had > 0 coverage in at least one resulting row in at
+#'     least one of the groups
 #'
 #' @examples
 #' inclusion_group1 <- SnaptronQueryBuilder$new()
@@ -286,7 +299,8 @@ calc_jir <- function(a, b) {
 #' exclusion_group$coordinate_modifier(Coordinates$Exact)
 #' exclusion_group$range_filters(strand == "+")
 #'
-#' percent_spliced_in(list(inclusion_group1), list(inclusion_group2), list(exclusion_group))
+#' percent_spliced_in(list(inclusion_group1), list(inclusion_group2),
+#'                    list(exclusion_group))
 #' @export
 percent_spliced_in <- function(inclusion_group1, inclusion_group2,
                                exclusion_group, min_count = 20,
@@ -314,9 +328,11 @@ percent_spliced_in <- function(inclusion_group1, inclusion_group2,
     psi$psi <- calc_psi(psi$coverage.x, psi$coverage.y, psi$coverage, min_count)
 
     if (is.null(group_names)) {
-        group_names <- c("inclusion_group1_coverage",
-                         "inclusion_group2_coverage",
-                         "exclusion_group_coverage")
+        group_names <- c(
+            "inclusion_group1_coverage",
+            "inclusion_group2_coverage",
+            "exclusion_group_coverage"
+        )
     } else {
         group_names <- paste(group_names, "coverage", sep = "_")
     }
@@ -359,12 +375,14 @@ calc_psi <- function(inclusion1, inclusion2, exclusion, min_count) {
 #' few compilations that has consistent and complete tissue metadata.
 #'
 #' @param ... One or more SnaptronQueryBuilder objects
-#' @param group_names Optional vector of strings representing the group names
-#' @return A DataFrame of all samples in the compilation with either a 0 or 1
-#'  indicating their occurrence and shared status (if > 1 group passed in).
-#'  Occurrence here is if the sample has at least one result with > 0 coverage,
-#'  and further, if > 1 group passed in, if it occurs in the results of all groups.
-#'  Also includes the sample tissue type and sample_id.
+#' @param group_names Optional vector of strings representing the
+#'   group names
+#' @return A DataFrame of all samples in the compilation with either a
+#'   0 or 1 indicating their occurrence and shared status (if > 1
+#'   group passed in).  Occurrence here is if the sample has at least
+#'   one result with > 0 coverage, and further, if > 1 group passed
+#'   in, if it occurs in the results of all groups.  Also includes the
+#'   sample tissue type and sample_id.
 #'
 #' @examples
 #' inclusion_group1 <- SnaptronQueryBuilder$new()
@@ -383,9 +401,8 @@ calc_psi <- function(inclusion1, inclusion2, exclusion, min_count) {
 #' @export
 tissue_specificity <- function(..., group_names = NULL) {
     list_of_groups <- list(...)
-    assert_that(is_list_of_query_builder_groups(list_of_groups),
-                msg = paste("tissue_specificity expects 1 or",
-                            "more list of SnaptronQueryBuilder objects"))
+    assert_that(is_list_of_query_builder_groups(list_of_groups))
+
     num_groups <- length(list_of_groups)
 
     if (is.null(group_names)) {
@@ -423,9 +440,10 @@ tissue_specificity_per_group <- function(group1, group2, group_name) {
         stop("Unable to calculate TS: group2 returned no results")
     }
 
-    merged_data <-
-        merge(query_data[[1]], query_data[[2]],
-              by = "sample_id", all = TRUE) %>% replace_na(0)
+    merged_data <- merge(
+        query_data[[1]], query_data[[2]],
+        by = "sample_id", all = TRUE
+    ) %>% replace_na(0)
     merged_data$shared <- shared(merged_data$coverage.x, merged_data$coverage.y)
     merged_data <- merged_data[, !c("coverage.x", "coverage.y")]
 
@@ -449,29 +467,34 @@ shared <- function(cov1, cov2) {
 #' Shared Sample Count (SSC): counts total number of samples in which 2
 #' different junctions both occur in.
 #'
-#' This produces a list of user-specified groups and the read coverage of the
-#' junctions in all the samples which were shared across all the basic queries
-#' occurring in each group.
+#' This produces a list of user-specified groups and the read coverage
+#' of the junctions in all the samples which were shared across all
+#' the basic queries occurring in each group.
 #'
 #' Example: User defines a single group of junctions "GroupA" made up of 2
 #' separate regions (two basic queries).
 #'
-#' An SSC query will return a single line for GroupA which will have the total
-#' number of samples which had at least one junction which was returned from both basic
-#' queries. It will also report a summary statistic of the total number of
-#' groups which had one or more samples that were shared across the basic
-#' queries, in this case it would be 1.  Also, it will report the number of
-#' groups which had at least one shared sample and which had matching
-#' junctions (from the query) which were fully annotated.
-
-#' This function can be used to determine how much cross-sample support there
-#' is for a particular junction configuration (typically a cassette exon).
+#' An SSC query will return a single line for GroupA which will have
+#' the total number of samples which had at least one junction which
+#' was returned from both basic queries. It will also report a summary
+#' statistic of the total number of groups which had one or more
+#' samples that were shared across the basic queries, in this case it
+#' would be 1.  Also, it will report the number of groups which had at
+#' least one shared sample and which had matching junctions (from the
+#' query) which were fully annotated.
+#'
+#' This function can be used to determine how much cross-sample
+#' support there is for a particular junction configuration (typically
+#' a cassette exon).
 #'
 #' @param ... One or more lists of SnaptronQueryBuilder objects
-#' @param group_names Optional vector of character strings representing group names
-#' @return A DataFrame of results based on the list of groups passed in via "group_names".
-#'  Each group is reported with the # of unique samples which occurred in all of its defined set
-#'  of related basic queries (e.g. two inclusion basic queries in a cassette exon scenario).
+#' @param group_names Optional vector of character strings
+#'   representing group names
+#' @return A DataFrame of results based on the list of groups passed
+#'   in via "group_names".  Each group is reported with the # of
+#'   unique samples which occurred in all of its defined set of
+#'   related basic queries (e.g. two inclusion basic queries in a
+#'   cassette exon scenario).
 #'
 #' @examples
 #' group1 <- SnaptronQueryBuilder$new()
@@ -490,9 +513,7 @@ shared <- function(cov1, cov2) {
 #' @export
 shared_sample_counts <- function(..., group_names = NULL) {
     list_of_groups <- list(...)
-    assert_that(is_list_of_query_builder_groups(list_of_groups),
-                msg = paste("shared_sample_counts expects 1 or",
-                            "more lists of SnaptronQueryBuilder objects"))
+    assert_that(is_list_of_query_builder_groups(list_of_groups))
 
     counts <- lapply(list_of_groups, function(g) {
         shared_sample_count(g[[1]], g[[2]])
@@ -532,14 +553,17 @@ run_queries <- function(..., summarize = TRUE) {
 }
 
 count_samples <- function(group, summarize = TRUE) {
-    dfs <- lapply(group, function(e) {
-        q <- e$query_jx(return_rse = FALSE)
-        if (is.null(q)) {
+    dfs <- lapply(group, function(sb) {
+        query_data <- sb$query_jx(return_rse = FALSE)
+        if (is.null(query_data)) {
             return()
         }
+        dt <- data.table(sample = extract_samples(query_data))
+        dt <- dt[, c("sample_id", "coverage") := tstrsplit(dt$sample, ":")]
+        dt$coverage <- as.numeric(dt$coverage)
+        dt$sample_id <- as.numeric(dt$sample_id)
 
-        data.table::data.table(sample = extract_samples(q)) %>%
-            tidyr::separate("sample", into = c("sample_id", "coverage"), convert = TRUE)
+        dt[, c("sample_id", "coverage")]
     })
 
     res <- do.call(rbind, dfs)

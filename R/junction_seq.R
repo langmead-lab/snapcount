@@ -1,24 +1,26 @@
-#' Formats Snapcount results in a form that can be easily passed into the
-#' third-party package, JunctionSeq.
+#' Formats Snapcount results in a form that can be easily passed into
+#' the third-party package, JunctionSeq.
 #'
-#' This allows for the visualization of junction counts along with their
-#' associated gene and exon counts in the context of a gene model. Performance
-#' is dependent on the total number of junctions and the length of the gene
-#' model i.e. larger gene regions may either completely fail to draw or take
-#' too long to be visualized.
+#' This allows for the visualization of junction counts along with
+#' their associated gene and exon counts in the context of a gene
+#' model. Performance is dependent on the total number of junctions
+#' and the length of the gene model i.e. larger gene regions may
+#' either completely fail to draw or take too long to be visualized.
 #'
 #' @field query_builders A list of 1 of more SnapQueryBuilder objects.
 #' @field group_names A vector of strings representing tissue groups.
-#' @field gene The name of the gene to match with the exon and gene query results.
+#' @field gene The name of the gene to match with the exon and gene
+#'     query results.
 #' @field sample_names A vector of strings representing sample names.
 #'
-#' @section Important methods:
-#' \code{write_gff}: This method takes an optional file name and attempts to
-#'   write the generated GFF data to disk. This method must be called before
+#' @section Important methods: \code{write_gff}: This method takes an
+#'   optional file name and attempts to write the generated GFF data
+#'   to disk. This method must be called before
 #'   \code{format_for_junction_seq}.
 #'
-#' \code{format_for_junction_seq}: This method will output two function calls
-#'   needed to produce the junction plot for the requested gene.
+#' \code{format_for_junction_seq}: This method will output two
+#'   function calls needed to produce the junction plot for the
+#'   requested gene.
 #'
 #' @examples
 #' sb1 <- SnaptronQueryBuilder$new()
@@ -33,11 +35,12 @@
 #' sb3 <- sb2$clone(deep = TRUE)
 #' sb3$sample_filters(SMTS == "Spleen")
 #'
-#' # initializer does the work of running the necessary queries and processing
-#' # their outputs
-#' js <- FormatForJunctionSeq$new(query_builders = list(sb1, sb2, sb3),
-#'                                group_names = list("Brain", "Pituitary", "Spleen"),
-#'                                gene = "IMPDH1")
+#' # initializer does the work of running the necessary queries and
+#' # processing their outputs
+#' js <- FormatForJunctionSeq$new(
+#'     query_builders = list(sb1, sb2, sb3),
+#'     group_names = list("Brain", "Pituitary", "Spleen"),
+#'     gene = "IMPDH1")
 #' # write gff file to disk
 #' js$write_gff_file()
 #'
@@ -189,19 +192,31 @@ FormatForJunctionSeq <-
                                    uri_of_last_successful_request(),
                                    ", returned NULL"))
                     }
+                    query_builder <-
+                        private$query_builders[[i]]$clone()$range_filters(NULL)
                     private$exons[[name]] <-
-                        private$query_builders[[i]]$clone()$range_filters(NULL)$query_exon(return_rse = FALSE)
+                        query_builder$query_exon(return_rse = FALSE)
                     if (is.null(private$exons[[name]])) {
-                        stop(paste("exon query with uri: ",
-                                   uri_of_last_successful_request(),
-                                   ", returned NULL"))
+                        stop(
+                            paste(
+                                "exon query with uri: ",
+                                uri_of_last_successful_request(),
+                                ", returned NULL"
+                            )
+                        )
                     }
+                    query_builder <-
+                        private$query_builders[[i]]$clone()$range_filters(NULL)
                     private$genes[[name]] <-
-                        private$query_builders[[i]]$clone()$range_filters(NULL)$query_gene(return_rse = FALSE)
+                        query_builder$query_gene(return_rse = FALSE)
                     if (is.null(private$genes[[name]])) {
-                        stop(paste("gene query with uri: ",
-                                   uri_of_last_successful_request(),
-                                   ", returned NULL"))
+                        stop(
+                            paste(
+                                "gene query with uri: ",
+                                uri_of_last_successful_request(),
+                                ", returned NULL"
+                            )
+                        )
                     }
                 })
             },
@@ -210,15 +225,15 @@ FormatForJunctionSeq <-
                 for (group in private$group_names) {
                     apply(private$junctions[[group]], 1, function(row) {
                         key <-
-                            private$create_key(row[["chromosome"]], row[["start"]],
-                                row[["end"]], row[["strand"]])
+                            private$create_key(
+                                        row[["chromosome"]], row[["start"]],
+                                        row[["end"]], row[["strand"]])
                         if (key %in% names(private$key_to_group)) {
                             idx <- private$key_to_index[[key]]
                             type <- private$key_to_type[[key]]
                         } else {
                             private$idx <- private$idx + 1
-                            private$key_to_index[[key]] <-
-                                private$idx
+                            private$key_to_index[[key]] <- private$idx
                             private$key_to_group[[key]] <- NULL
                             idx <- private$key_to_index[[key]]
                             type <- "J"
@@ -247,11 +262,12 @@ FormatForJunctionSeq <-
                             )
                         }
 
-                        private$write_count(group,
-                            private$gene,
-                            type,
-                            idx,
-                            row[["coverage_sum"]])
+                        private$write_count(
+                                    group,
+                                    private$gene,
+                                    type,
+                                    idx,
+                                    row[["coverage_sum"]])
                         private$assign_group_to_key(group, key)
                         private$key_to_type[[key]] <- type
                     })
@@ -262,23 +278,24 @@ FormatForJunctionSeq <-
                 for (group in private$group_names) {
                     apply(private$exons[[group]], 1, function(row) {
                         gene_name <-
-                            base::strsplit(row[["gene_id:gene_name:gene_type:bp_length"]],
-                                split = ":")[[1]][2]
+                            strsplit(
+                                row[["gene_id:gene_name:gene_type:bp_length"]],
+                                split = ":"
+                            )[[1]][[2]]
                         if (gene_name != private$gene) {
                             return()
-
                         }
 
                         key <-
-                            private$create_key(row[["chromosome"]], row[["start"]],
-                                row[["end"]], row[["strand"]])
+                            private$create_key(
+                                        row[["chromosome"]], row[["start"]],
+                                        row[["end"]], row[["strand"]])
                         if (key %in% names(private$key_to_group)) {
                             idx <- private$key_to_index[[key]]
                             type <- private$key_to_type[[key]]
                         } else {
                             private$idx <- private$idx + 1
-                            private$key_to_index[[key]] <-
-                                private$idx
+                            private$key_to_index[[key]] <- private$idx
                             private$key_to_group[[key]] <- NULL
                             idx <- private$key_to_index[[key]]
                             str_type <- "exonic_part"
@@ -297,11 +314,12 @@ FormatForJunctionSeq <-
                             )
                         }
 
-                        private$write_count(group,
-                            private$gene,
-                            type,
-                            idx,
-                            row[["coverage_sum"]])
+                        private$write_count(
+                                    group,
+                                    private$gene,
+                                    type,
+                                    idx,
+                                    row[["coverage_sum"]])
                         private$assign_group_to_key(group, key)
                         private$key_to_type[[key]] <- type
                     })
@@ -312,17 +330,20 @@ FormatForJunctionSeq <-
                 for (group in private$group_names) {
                     apply(private$genes[[group]], 1, function(row) {
                         gene_name <-
-                            strsplit(row[["gene_id:gene_name:gene_type:bp_length"]],
-                                     split = ":")[[1]][2]
+                            strsplit(
+                                row[["gene_id:gene_name:gene_type:bp_length"]],
+                                split = ":"
+                            )[[1]][[2]]
                         if (gene_name != private$gene) {
                             return()
                         }
 
                         key <-
-                            private$create_key(row[["chromosome"]],
-                                               row[["start"]],
-                                               row[["end"]],
-                                               row[["strand"]])
+                            private$create_key(
+                                        row[["chromosome"]],
+                                        row[["start"]],
+                                        row[["end"]],
+                                        row[["strand"]])
                         if (key %in% names(private$key_to_group)) {
                             idx <- private$key_to_index[[key]]
                             type <- private$key_to_type[[key]]
@@ -347,11 +368,12 @@ FormatForJunctionSeq <-
                             )
                         }
 
-                        private$write_count(group,
-                            private$gene,
-                            type,
-                            idx,
-                            row[["coverage_sum"]])
+                        private$write_count(
+                                    group,
+                                    private$gene,
+                                    type,
+                                    idx,
+                                    row[["coverage_sum"]])
                         private$assign_group_to_key(group, key)
                         private$key_to_type[[key]] <- type
                     })
@@ -401,9 +423,8 @@ FormatForJunctionSeq <-
             },
 
             assign_group_to_key = function(group, key) {
-                if (is.null(private$key_to_group)
-                    ||
-                        !any(is.element(private$key_to_group[[key]], group))) {
+                if (is.null(private$key_to_group) ||
+                    !any(is.element(private$key_to_group[[key]], group))) {
                     private$key_to_group[[key]] <-
                         c(private$key_to_group[[key]], group)
                 }
@@ -414,11 +435,7 @@ FormatForJunctionSeq <-
                     lapply(private$group_counts, function(group) {
                         tsv <- paste(group, collapse = "\n")
                         dt <-
-                            data.table::fread(
-                                tsv,
-                                sep = "\t",
-                                header = FALSE
-                             )
+                            data.table::fread(tsv, sep = "\t", header = FALSE)
                         as.data.frame(data.table::setorder(dt, V1))
                     })
             },
@@ -436,8 +453,8 @@ FormatForJunctionSeq <-
 
             get_object_name = function(env) {
                 res <- ls(envir = env) %>%
-                    purrr::keep(private$FormatForJunctionSeq_objs, env = env) %>%
-                    purrr::keep(private$same_address_as_self, env = env)
+                    purrr::keep(private$FormatForJunctionSeq_objs, env) %>%
+                    purrr::keep(private$same_address_as_self, env)
 
                 return(if (length(res) == 0) NULL else res[[1]])
             },

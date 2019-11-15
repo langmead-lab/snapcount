@@ -9,13 +9,16 @@ cassette exons).}
 junction_inclusion_ratio(group1, group2, group_names = NULL)
 }
 \arguments{
-\item{group1, group2}{Each group is a list of 1 or more SnaptronQueryBuilder objects}
+\item{group1, group2}{Each group is a list of 1 or more
+SnaptronQueryBuilder objects}
 
-\item{group_names}{Optional vector of strings representing the group names}
+\item{group_names}{Optional vector of strings representing the
+group names}
 }
 \value{
-A DataFrame of samples, with their JIR score and metadata, which had > 0 coverage
-in at least one resulting row in at least one of the groups
+A DataFrame of samples, with their JIR score and metadata,
+which had > 0 coverage in at least one resulting row in at
+least one of the groups
 }
 \description{
 Calculates a coverage summary statistic per sample of the normalized

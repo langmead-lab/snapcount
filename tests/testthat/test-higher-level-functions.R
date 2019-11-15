@@ -134,6 +134,8 @@ test_that("tissue specificity", {
     result <- tissue_specificity(list(sb1, sb2))
     expected <- readRDS(file = get_full_path_name("test_ts_output.rds"))
 
+    print(result)
+    print(expected)
     expect_equal(expected, result)
 
     sb0 <- sb1$clone(deep = TRUE)$coordinate_modifier(Coordinates$Within)

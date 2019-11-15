@@ -7,13 +7,13 @@
 uri_of_last_successful_request()
 }
 \value{
-URI of last successful request to Snaptron or \code{NULL} if there have
-not been any successful requests.
+URI of last successful request to Snaptron or \code{NULL} if there
+have not been any successful requests.
 }
 \description{
-This function can be paired with the \code{from_url} method from the
-SnaptronQueryBuilder class, allowing users to share sources of
-data from Snaptron.
+This function can be paired with the \code{from_url} method from
+the SnaptronQueryBuilder class, allowing users to share sources of data
+from Snaptron.
 }
 \examples{
 query_jx(compilation = "gtex", regions = "CD99")

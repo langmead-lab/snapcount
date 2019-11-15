@@ -3,18 +3,18 @@
 \docType{data}
 \name{FormatForJunctionSeq}
 \alias{FormatForJunctionSeq}
-\title{Formats Snapcount results in a form that can be easily passed into the
-third-party package, JunctionSeq.}
+\title{Formats Snapcount results in a form that can be easily passed into
+the third-party package, JunctionSeq.}
 \format{An object of class \code{R6ClassGenerator} of length 24.}
 \usage{
 FormatForJunctionSeq
 }
 \description{
-This allows for the visualization of junction counts along with their
-associated gene and exon counts in the context of a gene model. Performance
-is dependent on the total number of junctions and the length of the gene
-model i.e. larger gene regions may either completely fail to draw or take
-too long to be visualized.
+This allows for the visualization of junction counts along with
+their associated gene and exon counts in the context of a gene
+model. Performance is dependent on the total number of junctions
+and the length of the gene model i.e. larger gene regions may
+either completely fail to draw or take too long to be visualized.
 }
 \section{Fields}{
 
@@ -23,19 +23,21 @@ too long to be visualized.
 
 \item{\code{group_names}}{A vector of strings representing tissue groups.}
 
-\item{\code{gene}}{The name of the gene to match with the exon and gene query results.}
+\item{\code{gene}}{The name of the gene to match with the exon and gene
+query results.}
 
 \item{\code{sample_names}}{A vector of strings representing sample names.}
 }}
 
 \section{Important methods}{
-
-\code{write_gff}: This method takes an optional file name and attempts to
-write the generated GFF data to disk. This method must be called before
+ \code{write_gff}: This method takes an
+optional file name and attempts to write the generated GFF data
+to disk. This method must be called before
 \code{format_for_junction_seq}.
 
-\code{format_for_junction_seq}: This method will output two function calls
-needed to produce the junction plot for the requested gene.
+\code{format_for_junction_seq}: This method will output two
+function calls needed to produce the junction plot for the
+requested gene.
 }
 
 \examples{
@@ -51,11 +53,12 @@ sb2$sample_filters(SMTS == "Pituitary")
 sb3 <- sb2$clone(deep = TRUE)
 sb3$sample_filters(SMTS == "Spleen")
 
-# initializer does the work of running the necessary queries and processing
-# their outputs
-js <- FormatForJunctionSeq$new(query_builders = list(sb1, sb2, sb3),
-                               group_names = list("Brain", "Pituitary", "Spleen"),
-                               gene = "IMPDH1")
+# initializer does the work of running the necessary queries and
+# processing their outputs
+js <- FormatForJunctionSeq$new(
+    query_builders = list(sb1, sb2, sb3),
+    group_names = list("Brain", "Pituitary", "Spleen"),
+    gene = "IMPDH1")
 # write gff file to disk
 js$write_gff_file()
 
