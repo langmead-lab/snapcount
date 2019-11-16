@@ -92,6 +92,7 @@ junction_intersection <- function(...) {
             "junction_intersection expects 1 or more",
             "SnaptronQueryBuilder objects"
         )
+    )
     merge_compilations(..., all = FALSE)
 }
 
