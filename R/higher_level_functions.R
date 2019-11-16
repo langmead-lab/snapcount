@@ -88,7 +88,10 @@ junction_union <- function(...) {
 junction_intersection <- function(...) {
     assert_that(
         is_list_of_query_builders(list(...)),
-        "junction_intersection expects 1 or more SnaptronQueryBuilder objects")
+        msg = paste(
+            "junction_intersection expects 1 or more",
+            "SnaptronQueryBuilder objects"
+        )
     merge_compilations(..., all = FALSE)
 }
 
