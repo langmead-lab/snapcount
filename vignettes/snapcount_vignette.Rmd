@@ -36,7 +36,7 @@ by using the following commands in your `R` session:
 ```{r 'installDer', eval = TRUE}
 #Snapcount is not yet in BioConductor,
 #you can install it from the GitHub repository directly using devtools
-devtools::install_github("langmead-lab/snapr")
+devtools::install_github("langmead-lab/snapcount")
 
 ```
 
@@ -61,7 +61,7 @@ We hope that snapcount will be useful for your research. Please use the followin
 Christopher Wilks, Rone Charles, Ben Langmead (2019).
 snapcount: R/Bioconductor Package for interfacing with Snaptron
 for rapid quering of expression counts.
-https://github.com/langmead-lab/snapr
+https://github.com/langmead-lab/snapcount
 ```
 
 The Snaptron project itself is published separately and can be cited with the following:

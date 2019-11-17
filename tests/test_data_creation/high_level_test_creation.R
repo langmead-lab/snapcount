@@ -1,6 +1,6 @@
 #test higher level functions in Snapcount
 
-devtools::install_github("langmead-lab/snapr")
+devtools::install_github("langmead-lab/snapcount")
 library(snapcount)
 library(recount)
 

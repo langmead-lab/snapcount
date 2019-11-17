@@ -30,8 +30,8 @@ connecting to Snaptron. Default: \code{80}}
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/langmead-lab/snapr}
-  \item Report bugs at \url{https://github.com/langmead-lab/snapr/issues}
+  \item \url{https://github.com/langmead-lab/snapcount}
+  \item Report bugs at \url{https://github.com/langmead-lab/snapcount/issues}
 }
 
 }

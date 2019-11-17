@@ -2,12 +2,12 @@
 
 
 
-# snapr
-[![Build Status](https://travis-ci.com/langmead-lab/snapr.svg?token=vEUBb2QKjox3PdRAssp8&branch=master)](https://travis-ci.com/langmead-lab/snapr)
-[![Coverage Status](https://img.shields.io/codecov/c/github/langmead-lab/snapr/master.svg)](https://codecov.io/gh/langmead-lab/snapr?branch=master)
+# snapcount
+[![Build Status](https://travis-ci.com/langmead-lab/snapcount.svg?token=vEUBb2QKjox3PdRAssp8&branch=master)](https://travis-ci.com/langmead-lab/snapcount)
+[![Coverage Status](https://img.shields.io/codecov/c/github/langmead-lab/snapcount/master.svg)](https://codecov.io/gh/langmead-lab/snapcount?branch=master)
 
 ## Overview
-`snapr` is a package for interfacing with Snaptron's REST API.
+`snapcount` is a package for interfacing with Snaptron's REST API.
 
 ## Installation
 
@@ -15,12 +15,12 @@
 ```r
 # Install the development version from GitHub:
 # install.packages("devtools")
-devtools::install_github("langmead-lab/snapr")
+devtools::install_github("langmead-lab/snapcount")
 ```
 
 ## Usage
 
-##### snapr can be used with either a procedural interface
+##### snapcount can be used with either a procedural interface
 
 ```r
 library(snapcount)

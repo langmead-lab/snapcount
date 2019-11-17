@@ -1,6 +1,6 @@
 Package: snapcount
 Type: Package
-Title: R/Bioconductor Package for interfacing with Snaptron for rapid quering of expression counts
+Title: R/Bioconductor Package for interfacing with Snaptron for rapid querying of expression counts
 Version: 0.1.0
 Author: Rone Charles
 Maintainer: Rone Charles <rcharle8@jhu.edu>
@@ -42,8 +42,8 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE, roclets = c("rd", "namespace", "collate"))
-URL: https://github.com/langmead-lab/snapr
-BugReports: https://github.com/langmead-lab/snapr/issues
+URL: https://github.com/langmead-lab/snapcount
+BugReports: https://github.com/langmead-lab/snapcount/issues
 biocViews: Coverage, GeneExpression, RNASeq, Sequencing, Software, DataImport
 VignetteBuilder: knitr
 ByteCompile: true
