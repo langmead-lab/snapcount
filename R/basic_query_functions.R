@@ -281,7 +281,7 @@ query_jx <-function(compilation, regions, range_filters = NULL,
     range_filters <- bool_expressions_to_strings(rlang::enexpr(range_filters))
     sample_filters <- bool_expressions_to_strings(rlang::enexpr(sample_filters))
 
-    if (class(regions) == "GRanges") {
+    if (is(regions, "GRanges")) {
         strands <- extract_strands(regions)
         regions <- extract_intervals(regions)
 
@@ -331,7 +331,7 @@ query_gene <- function(compilation, regions,
     range_filters <- bool_expressions_to_strings(rlang::enexpr(range_filters))
     sample_filters <- bool_expressions_to_strings(rlang::enexpr(sample_filters))
 
-    if (class(regions) == "GRanges") {
+    if (is(regions, "GRanges")) {
         strands <- extract_strands(regions)
         regions <- extract_intervals(regions)
 
@@ -381,7 +381,7 @@ query_exon <- function(compilation, regions,
     range_filters <- bool_expressions_to_strings(rlang::enexpr(range_filters))
     sample_filters <- bool_expressions_to_strings(rlang::enexpr(sample_filters))
 
-    if (class(regions) == "GRanges") {
+    if (is(regions, "GRanges")) {
         strands <- extract_strands(regions)
         regions <- extract_intervals(regions)
 

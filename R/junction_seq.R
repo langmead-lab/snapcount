@@ -461,7 +461,7 @@ FormatForJunctionSeq <-
 
             FormatForJunctionSeq_objs = function(obj_name, env) {
                 obj <- get(obj_name, envir = env)
-                all(class(obj) == c("FormatForJunctionSeq", "R6"))
+                is(obj, c("FormatForJunctionSeq", "R6"))
             },
 
             same_address_as_self = function(obj_name, env) {

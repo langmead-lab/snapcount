@@ -14,7 +14,7 @@ is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) {
 }
 
 is_query_builder <- function(object) {
-    all(c("SnaptronQueryBuilder", "R6") == class(object))
+    is(object, c("SnaptronQueryBuilder", "R6"))
 }
 
 is_list_of_query_builders <- function(list) {
