@@ -20,10 +20,11 @@
 #'
 #' @import data.table
 #' @importFrom assertthat assert_that
-#' @importFrom rlang !!
 #' @importFrom magrittr %>%
+#' @importFrom methods is
+#' @importFrom rlang !!
 #' @importFrom stats median
-#' @importFrom R6 R6Class
 #' @importFrom GenomicRanges GRanges
+#' @importFrom R6 R6Class
 #' @importFrom SummarizedExperiment SummarizedExperiment
 "_PACKAGE"
