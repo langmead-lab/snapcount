@@ -1,6 +1,6 @@
 is_hugo_gene <- function(str) {
     assert_that(is.character(str))
-    stringr::str_detect(str, "^[A-Za-z-0-9_]+@?$")
+    stringr::str_detect(str, "^[A-Za-z0-9_]+@?$")
 }
 
 is_chromosome_interval <- function(str) {

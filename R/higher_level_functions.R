@@ -232,7 +232,7 @@ junction_inclusion_ratio <- function(group1, group2, group_names = NULL) {
     data.table::setnames(jir, old = "coverage.x", new = group_names[[1]])
     data.table::setnames(jir, old = "coverage.y", new = group_names[[2]])
 
-    jir[order(-jir)]
+    jir[order(jir$jir, decreasing = TRUE)]
 }
 
 calc_jir <- function(a, b) {
@@ -443,7 +443,7 @@ tissue_specificity_per_group <- function(group1, group2, group_name) {
 }
 
 shared <- function(cov1, cov2) {
-    as.integer(cov1 != 0 & cov2 != 0)
+    cov1 != 0 & cov2 != 0
 }
 
 #' Shared Sample Count (SSC): counts total number of samples in which 2

@@ -7,27 +7,35 @@ test_that("Invalid chromosome range", {
 })
 
 test_that("Invalid sample filters", {
-    expect_error(query_gene(compilation = "gtex", regions = "CD99",
-                            sample_filters = SNTS == "Brain"),
+    sb <- SnaptronQueryBuilder$new()
+    sb$compilation("gtex")
+    sb$regions("CD99")
+    sb$sample_filters(SNTS == "Brain")
+    expect_error(query_gene(sb),
                  "(is not a valid sample filter)|(Invalid sample filter)")
 })
 
 test_that("Invalid compilation", {
-    expect_error(query_gene(compilation = "abcde", regions = "CD99"),
-                 "Invalid compilation")
+    sb <- SnaptronQueryBuilder$new()
+    sb$compilation("abcde")
+    sb$regions("CD99")
+    expect_error(query_gene(sb), "Invalid compilation")
 })
 
 test_that("Invalid coordinate modifier", {
-    expect_error(query_exon(compilation = "gtex", regions = "CD99",
-                            coordinate_modifier = "none"),
-                 "Invalid coordinate modifier")
+    sb <- SnaptronQueryBuilder$new()
+    sb$compilation("gtex")
+    sb$regions("CD99")
+    sb$coordinate_modifier("none")
+    expect_error(query_exon(sb), "Invalid coordinate modifier")
 })
 
 test_that("Invalid SIDs", {
-    expect_error(query_exon(compilation = "gtex", regions = "CD99",
-                            sids = c("1", "2")),
-                 "sids should be whole numbers")
-    expect_error(query_exon(compilation = "gtex", regions = "CD99",
-                            sids = c(1.2, 3.4)),
-                 "sids should be whole numbers")
+    sb <- SnaptronQueryBuilder$new()
+    sb$compilation("gtex")
+    sb$regions("CD99")
+    sb$sids(c("1", "2"))
+    expect_error(query_exon(sb), "sids should be whole numbers")
+    sb$sids(c(1.2, 3.4))
+    expect_error(query_exon(sb), "sids should be whole numbers")
 })
