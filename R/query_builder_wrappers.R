@@ -202,8 +202,8 @@ set_sids <- function(qb, sids) {
 
 #' @rdname get_coordinate_modifier
 #' @export
-set_coordinate_modifier <- function(coordinate_modifier) {
-    cloned_qb <- qb$clone(deep = TRUE)$coodinate_modifier(coordinate_modifier)
+set_coordinate_modifier <- function(qb, coordinate_modifier) {
+    cloned_qb <- qb$clone(deep = TRUE)$coordinate_modifier(coordinate_modifier)
     cloned_qb
 }
 
