@@ -13,6 +13,8 @@ query_gene(sb, return_rse = TRUE, split_by_region = FALSE)
 query_exon(sb, return_rse = TRUE, split_by_region = FALSE)
 }
 \arguments{
+\item{sb}{A SnaptonQueryBuilder object}
+
 \item{return_rse}{Should the query data be returned as a simple data frame or
 converted to a RangeSummarizedExperiment.}
 
@@ -33,7 +35,25 @@ intervals it will return a list of 0 or more genes, junctions, or exons
 (depending on which query form is used) which overlap the ranges.
 }
 \examples{
-query_jx(Compilation$gtex, "chr1:1-100000", range_filters = "samples_count >= 20")
-query_gene(Compilation$gtex, "CD99", sample_filters = SMTS == "Brain")
+# Contruct SnaptronQueryBuilder object using wrapper functions
+qb <- QueryBuilder(compilation = "gtex", regions = "chr1:1-100000")
+qb <- set_row_filters(samples_count >= 20)
+query_jx(qb)
+
+qb <- set_row_filters(NULL)
+qb <- set_column_filters(SMTS == "Brain")
+query_gene(qb)
+
+# or directly using R6
+sb <- SnaptronQueryBuilder$new()
+sb$compilation("gtex")
+sb$regions("chr1:1-100000")
+sb$row_filters("samples_count >= 20")
+query_jx(sb)
+
+sb$regions("CD99")
+sb$row_filters(NULL)
+sb$column_filters(SMTS == "Brain")
+query_gene(sb)
 
 }

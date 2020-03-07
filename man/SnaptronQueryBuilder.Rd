@@ -27,7 +27,7 @@ Strand information is ignored.}
 \item{\code{sids}}{A list of rail_ids (integer sample IDs) to filter results on. Only
 records which have been found in at least one of these samples will be returned.}
 
-\item{\code{coordinate_modifier}}{Snaptron coordinate modifier enum. Invariants include:
+\item{\code{coordinate_modifier}}{Snaptron coordinate modifier enum. Variants include:
 
 Coordinate$Exact - Contraints the results so that the start/end coordinates
 match the start/end of the specifiied range.
