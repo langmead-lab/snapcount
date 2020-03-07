@@ -12,7 +12,7 @@
 #' @field sids A list of rail_ids (integer sample IDs) to filter results on. Only
 #'   records which have been found in at least one of these samples will be returned.
 #'
-#' @field coordinate_modifier Snaptron coordinate modifier enum. Invariants include:
+#' @field coordinate_modifier Snaptron coordinate modifier enum. Variants include:
 #'
 #'   Coordinate$Exact - Contraints the results so that the start/end coordinates
 #'              match the start/end of the specifiied range.
@@ -91,9 +91,9 @@ SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
         },
         regions = function(regions = NULL) {
             if (!missing(regions)) {
-                if (is_hugo_gene(regions)) {
+                if (is(regions, "GRanges")) {
                     private$query$regions <- regions
-                } else if (is(regions, "GRanges")) {
+                } else if (is_hugo_gene(regions)) {
                     private$query$regions <- regions
                 } else {
                     message <-
@@ -225,8 +225,8 @@ SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
         query = list(),
         call = function(fn_name, args) {
             fn <- get(fn_name, parent.frame())
-            arg_names <- intersect(names(formals(fn)), names(args))
-            do.call(fn, args[arg_names])
+            ## arg_names <- intersect(names(formals(fn)), names(args))
+            do.call(fn, args)
         }
     )
 )

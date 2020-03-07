@@ -232,7 +232,7 @@ junction_inclusion_ratio <- function(group1, group2, group_names = NULL) {
     data.table::setnames(jir, old = "coverage.x", new = group_names[[1]])
     data.table::setnames(jir, old = "coverage.y", new = group_names[[2]])
 
-    jir[order(jir$jir, decreasing = TRUE)]
+    jir[order(jir, decreasing = TRUE)]
 }
 
 calc_jir <- function(a, b) {

@@ -4,6 +4,7 @@
 #' intervals it will return a list of 0 or more genes, junctions, or exons
 #' (depending on which query form is used) which overlap the ranges.
 #'
+#' @param sb A SnaptonQueryBuilder object
 #' @param return_rse Should the query data be returned as a simple data frame or
 #'   converted to a RangeSummarizedExperiment.
 #'
@@ -15,8 +16,26 @@
 #'   sample metadata for each original interval/gene.
 #'
 #' @examples
-#' query_jx(Compilation$gtex, "chr1:1-100000", range_filters = "samples_count >= 20")
-#' query_gene(Compilation$gtex, "CD99", sample_filters = SMTS == "Brain")
+#' # Contruct SnaptronQueryBuilder object using wrapper functions
+#' qb <- QueryBuilder(compilation = "gtex", regions = "chr1:1-100000")
+#' qb <- set_row_filters(samples_count >= 20)
+#' query_jx(qb)
+#'
+#' qb <- set_row_filters(NULL)
+#' qb <- set_column_filters(SMTS == "Brain")
+#' query_gene(qb)
+#'
+#' # or directly using R6
+#' sb <- SnaptronQueryBuilder$new()
+#' sb$compilation("gtex")
+#' sb$regions("chr1:1-100000")
+#' sb$row_filters("samples_count >= 20")
+#' query_jx(sb)
+#'
+#' sb$regions("CD99")
+#' sb$row_filters(NULL)
+#' sb$column_filters(SMTS == "Brain")
+#' query_gene(sb)
 #'
 #' @return Functions will return either a RangeSummarizedexperiment or data.table depending
 #'   on whether the \code{return_rse} parameter is set to \code{TRUE} or \code{FALSE}.
@@ -26,8 +45,8 @@ query_jx <- function(sb, return_rse = TRUE, split_by_region = FALSE)
 {
     strands <- NULL
     regions <- sb$regions()
-    range_filters <- sb$row_filters()
-    sample_filters <- sb$column_filters()
+    row_filters <- sb$row_filters()
+    column_filters <- sb$column_filters()
 
     if (class(sb$regions()) == "GRanges") {
         strands <- extract_strands(sb$regions())
@@ -39,19 +58,19 @@ query_jx <- function(sb, return_rse = TRUE, split_by_region = FALSE)
     should_bind <- length(regions) > 1 && !split_by_region
     res <- lapply(seq_along(regions), function(i) {
         if (!is.null(strands) && (strands[[i]] == "+" || strands[[i]] == "-")) {
-            pos <- grep("strand", range_filters)
+            pos <- grep("strand", row_filters)
             if (!identical(pos, integer(0))) {
-                range_filters[[pos]] <- paste0("strand:", strands[[i]])
+                row_filters[[pos]] <- paste0("strand:", strands[[i]])
             } else {
-                range_filters <-
-                    c(range_filters, paste0("strand:", strands[[i]]))
+                row_filters <-
+                    c(row_filters, paste0("strand:", strands[[i]]))
             }
         }
 
         run_query(compilation = sb$compilation(),
                   regions = regions[[i]],
-                  range_filters = range_filters,
-                  sample_filters = sample_filters,
+                  row_filters = row_filters,
+                  column_filters = column_filters,
                   coordinate_modifier = sb$coordinate_modifier(),
                   sids = sb$sids(),
                   return_rse = return_rse)
@@ -74,8 +93,8 @@ query_gene <- function(sb, return_rse = TRUE, split_by_region = FALSE)
 {
     strands <- NULL
     regions <- sb$regions()
-    range_filters <- sb$range_filters()
-    sample_filters <- sb$sample_filters()
+    row_filters <- sb$row_filters()
+    column_filters <- sb$column_filters()
 
     if (class(regions) == "GRanges") {
         strands <- extract_strands(sb$regions())
@@ -87,18 +106,18 @@ query_gene <- function(sb, return_rse = TRUE, split_by_region = FALSE)
     should_bind <- length(regions) > 1 && !split_by_region
     res <- lapply(seq_along(regions), function(i) {
         if (!is.null(strands) && (strands[i] == "+" || strands[[i]] == "-")) {
-            pos <- grep("strand", range_filters)
+            pos <- grep("strand", row_filters)
             if (!identical(pos, integer(0))) {
-                range_filters[pos] <- paste0("strand:", strands[[i]])
+                row_filters[pos] <- paste0("strand:", strands[[i]])
             } else {
-                range_filters <- c(range_filters, paste0("strand:", strands[[i]]))
+                row_filters <- c(row_filters, paste0("strand:", strands[[i]]))
             }
         }
 
         run_query(compilation = sb$compilation(),
                   regions = regions[[i]],
-                  range_filters = range_filters,
-                  sample_filters = sample_filters,
+                  row_filters = row_filters,
+                  column_filters = column_filters,
                   coordinate_modifier = sb$coordinate_modifier(),
                   sids = sb$sids(),
                   endpoint = "genes",
@@ -121,8 +140,8 @@ query_exon <- function(sb, return_rse = TRUE, split_by_region = FALSE)
 {
     strands <- NULL
     regions <- sb$regions()
-    range_filters <- sb$range_filters()
-    sample_filters <- sb$sample_filters()
+    row_filters <- sb$row_filters()
+    column_filters <- sb$column_filters()
 
     if (class(regions) == "GRanges") {
         strands <- extract_strands(sb$regions())
@@ -135,18 +154,18 @@ query_exon <- function(sb, return_rse = TRUE, split_by_region = FALSE)
     should_bind <- length(regions) > 1 && !split_by_region
     res <- lapply(seq_along(regions), function(i) {
         if (!is.null(strands) && (strands[i] == "+" || strands[i] == "-")) {
-            pos <- grep("strand", range_filters)
+            pos <- grep("strand", row_filters)
             if (!identical(pos, integer(0))) {
-                range_filters[pos] <- paste0("strand:", strands[i])
+                row_filters[pos] <- paste0("strand:", strands[i])
             } else {
-                range_filters <- c(range_filters, paste0("strand:", strands[i]))
+                row_filters <- c(row_filters, paste0("strand:", strands[i]))
             }
         }
 
         run_query(compilation = sb$compilation(),
                   regions = regions[i],
-                  range_filters = range_filters,
-                  sample_filters = sample_filters,
+                  row_filters = row_filters,
+                  column_filters = column_filters,
                   coordinate_modifier = sb$coordinate_modifier(),
                   sids = sb$sids(),
                   endpoint = "exons",
@@ -217,7 +236,7 @@ tidy_filters <- function(filters) {
 }
 
 run_query <- function(compilation, regions, endpoint = "snaptron",
-                      range_filters = NULL, sample_filters = NULL, sids = NULL,
+                      row_filters = NULL, column_filters = NULL, sids = NULL,
                       coordinate_modifier = NULL, construct_rse = TRUE,
                       return_rse = TRUE) {
     uri <-
@@ -225,8 +244,8 @@ run_query <- function(compilation, regions, endpoint = "snaptron",
             compilation = compilation,
             regions = regions,
             endpoint = endpoint,
-            range_filters = range_filters,
-            sample_filters = sample_filters,
+            row_filters = row_filters,
+            column_filters = column_filters,
             coordinate_modifier = coordinate_modifier,
             sids = sids
         )
@@ -260,8 +279,8 @@ run_query <- function(compilation, regions, endpoint = "snaptron",
 }
 
 generate_snaptron_uri <- function(compilation, regions,
-                                  endpoint = "snaptron", range_filters = NULL,
-                                  sample_filters = NULL,
+                                  endpoint = "snaptron", row_filters = NULL,
+                                  column_filters = NULL,
                                   coordinate_modifier = NULL, sids = NULL) {
     assert_that(compilation %in% names(Compilation),
                 msg = "Invalid compilation")
@@ -275,14 +294,14 @@ generate_snaptron_uri <- function(compilation, regions,
         stop("please specify either a gene or an interval", call. = FALSE)
     }
 
-    if (!is.null(range_filters)) {
+    if (!is.null(row_filters)) {
         query <- c(query, paste("rfilter",
-                                tidy_filters(range_filters), sep = "="))
+                                tidy_filters(row_filters), sep = "="))
     }
 
-    if (!is.null(sample_filters)) {
-        sample_filters <- tidy_filters(sample_filters)
-        errors <- lapply(sample_filters, function(filter) {
+    if (!is.null(column_filters)) {
+        column_filters <- tidy_filters(column_filters)
+        errors <- lapply(column_filters, function(filter) {
             fields <- stringr::str_split(filter, "\\W", n = 2)[[1]]
             validate_sample_filter(compilation,
                                    name = fields[[1]],
@@ -294,7 +313,7 @@ generate_snaptron_uri <- function(compilation, regions,
                 stop(error_string, call. = FALSE)
         }
         query <- c(query, paste("sfilter",
-                                tidy_filters(sample_filters),
+                                tidy_filters(column_filters),
                                 sep = "="))
     }
 
