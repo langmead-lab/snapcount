@@ -93,7 +93,7 @@ SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
             if (!missing(regions)) {
                 if (is(regions, "GRanges")) {
                     private$query$regions <- regions
-                } else if (is_hugo_gene(regions)) {
+                } else if (is_genes_or_intervals(regions)) {
                     private$query$regions <- regions
                 } else {
                     message <-
