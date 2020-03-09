@@ -43,24 +43,36 @@ where each term denotes the coverage of junctions that resulted
 from the basic queries in that group in the current sample.
 }
 \examples{
-inclusion_group1 <- SnaptronQueryBuilder$new()
-inclusion_group1$compilation("srav2")
-inclusion_group1$regions("chr1:94468008-94472172")
-inclusion_group1$coordinate_modifier(Coordinates$Exact)
-inclusion_group1$row_filters(strand == "+")
+in1 <- SnaptronQueryBuilder$new()
+in1$compilation("srav2")
+in1$regions("chr1:94468008-94472172")
+in1$coordinate_modifier(Coordinates$Exact)
+in1$row_filters(strand == "+")
 
-inclusion_group2 <- SnaptronQueryBuilder$new()
-inclusion_group2$compilation("srav2")
-inclusion_group2$regions("chr1:94468008-94472172")
-inclusion_group2$coordinate_modifier(Coordinates$Exact)
-inclusion_group2$row_filters(strand == "+")
+in2 <- SnaptronQueryBuilder$new()
+in2$compilation("srav2")
+in2$regions("chr1:94468008-94472172")
+in2$coordinate_modifier(Coordinates$Exact)
+in2$row_filters(strand == "+")
 
-exclusion_group <- SnaptronQueryBuilder$new()
-exclusion_group$compilation("srav2")
-exclusion_group$regions("chr1:94468008-94475142")
-exclusion_group$coordinate_modifier(Coordinates$Exact)
-exclusion_group$row_filters(strand == "+")
+ex <- SnaptronQueryBuilder$new()
+ex$compilation("srav2")
+ex$regions("chr1:94468008-94475142")
+ex$coordinate_modifier(Coordinates$Exact)
+ex$row_filters(strand == "+")
 
-percent_spliced_in(list(inclusion_group1), list(inclusion_group2),
-                   list(exclusion_group))
+# Using query builder wrappers
+in1 <- QueryBuilder(compilation = "srav2", regions = "chr1:94468008-94472172")
+in1 <- set_coordinate_modifier(in1, Coordinates$Exact)
+in1 <- set_row_filters(in1, strand == "+")
+
+in2 <- QueryBuilder(compilation = "srav2", regions = "chr1:94468008-94472172")
+in2 <- set_coordinate_modifier(in2, Coordinates$Exact)
+in2 <- set_row_filters(in2, strand == "+")
+
+ex <- QueryBuilder(compilation = "srav2", regions = "chr1:94468008-94475142")
+ex <- set_coordinate_modifier(ex, Coordinates$Exact)
+ex <- set_row_filters(ex, strand == "+")
+
+percent_spliced_in(list(in1), list(in2), list(ex))
 }

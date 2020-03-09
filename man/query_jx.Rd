@@ -32,9 +32,9 @@ data.table depending on whether the \code{return_rse} parameter is set to
 \code{TRUE} or \code{FALSE}.
 }
 \description{
-Given one or more gene names or genomic range intervals it will return a list
-of 0 or more genes, junctions, or exons (depending on which query form is
-used) which overlap the ranges.
+Given one or more gene names or genomic range
+intervals it will return a list of 0 or more genes, junctions, or exons
+(depending on which query form is used) which overlap the ranges.
 }
 \examples{
 # Contruct SnaptronQueryBuilder object using wrapper functions

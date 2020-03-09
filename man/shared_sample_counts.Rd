@@ -43,17 +43,26 @@ support there is for a particular junction configuration (typically
 a cassette exon).
 }
 \examples{
-group1 <- SnaptronQueryBuilder$new()
-group1$compilation("gtex")
-group1$regions("chr1:1879786-1879786")
-group1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-group1$row_filters(strand == "-")
+g1 <- SnaptronQueryBuilder$new()
+g1$compilation("gtex")
+g1$regions("chr1:1879786-1879786")
+g1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+g1$row_filters(strand == "-")
 
-group2 <- SnaptronQueryBuilder$new()
-group2$compilation("gtex")
-group2$regions("chr1:1879903-1879903")
-group2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
-group2$row_filters(strand == "-")
+g2 <- SnaptronQueryBuilder$new()
+g2$compilation("gtex")
+g2$regions("chr1:1879903-1879903")
+g2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
+g2$row_filters(strand == "-")
 
-ssc<-shared_sample_counts(list(group1, group2))
+# Using query builder wrappers
+g1 <- QueryBuilder(compilation = "gtex", regions = "chr1:1879786-1879786")
+g1 <- set_coordinate_modifier(g1, Coordinates$EndIsExactOrWithin)
+g1 <- set_row_filters(g1, strand == "-")
+
+g2 <- QueryBuilder(compilation = "gtex", regions = "chr1:1879903-1879903")
+g2 <- set_coordinate_modifier(g2, Coordinates$StartIsExactOrWithin)
+g2 <- set_row_filters(g2, strand == "-")
+
+ssc<-shared_sample_counts(list(g1, g2))
 }

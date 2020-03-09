@@ -41,17 +41,26 @@ This query is limited to GTEx only due to the fact that GTEx is one of the
 few compilations that has consistent and complete tissue metadata.
 }
 \examples{
-inclusion_group1 <- SnaptronQueryBuilder$new()
-inclusion_group1$compilation("gtex")
-inclusion_group1$regions("chr4:20763023-20763023")
-inclusion_group1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-inclusion_group1$row_filters(strand == "-")
+in1 <- SnaptronQueryBuilder$new()
+in1$compilation("gtex")
+in1$regions("chr4:20763023-20763023")
+in1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+in1$row_filters(strand == "-")
 
-inclusion_group2 <- SnaptronQueryBuilder$new()
-inclusion_group2$compilation("gtex")
-inclusion_group2$regions("chr4:20763098-20763098")
-inclusion_group2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
-inclusion_group2$row_filters(strand == "-")
+in2 <- SnaptronQueryBuilder$new()
+in2$compilation("gtex")
+in2$regions("chr4:20763098-20763098")
+in2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
+in2$row_filters(strand == "-")
 
-tissue_specificity(list(inclusion_group1, inclusion_group2))
+# Using query builder wrappers
+in1 <- QueryBuilder(compilation = "gtex", regions = "chr4:20763023-20763023")
+in1 <- set_coordinate_modifier(in1, Coordinates$EndIsExactOrWithin)
+in1 <- set_row_filters(in1, strand == "-")
+
+in2 <- QueryBuilder(compilation = "gtex", regions = "chr4:20763098-20763098")
+in2 <- set_coordinate_modifier(in2, Coordinates$StartIsExactOrWithin)
+in2 <- set_row_filters(in2, strand == "-")
+
+tissue_specificity(list(in1, in2))
 }

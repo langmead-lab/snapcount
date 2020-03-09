@@ -54,6 +54,15 @@ sb2$column_filters(SMTS == "Pituitary")
 sb3 <- sb2$clone(deep = TRUE)
 sb3$column_filters(SMTS == "Spleen")
 
+# Using query builder wrappers
+sb1 <- QueryBuilder(compilation = "gtex", regions = "chr7:128393029-128394277")
+sb1 <- set_row_filters(sb1, contains == 1, coverage_sum >= 1000)
+sb1 <- set_column_filters(sb1, SMTS == "Brain")
+
+sb2 <- set_column_filters(sb1, SMTS == "Pituitary")
+
+sb3 <- set_column_filters(sb2, SMTS == "Spleen")
+
 # initializer does the work of running the necessary queries and
 # processing their outputs
 js <- FormatForJunctionSeq$new(

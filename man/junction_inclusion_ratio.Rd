@@ -47,5 +47,14 @@ sb2$regions("chr2:29416789-29446394")
 sb2$coordinate_modifier(Coordinates$Within)
 sb2$row_filters(strand == "-")
 
+# Using query builder wappers
+sb1 <- QueryBuilder(compilation = "srav2", regions = "chr2:29446395-30142858")
+sb1 <- set_coordinate_modifier(sb1, Coordinates$Within)
+sb1 <- set_row_filters(sb1, strand == "-")
+
+sb2 <- QueryBuilder(compilation = "srav2", regions = "chr2:29416789-29446394")
+sb2 <- set_coordinate_modifier(sb2, Coordinates$Within)
+sb2 <- set_row_filters(sb2, strand == "-")
+
 junction_inclusion_ratio(list(sb1), list(sb2))
 }

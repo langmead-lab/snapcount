@@ -36,7 +36,7 @@
 #' @return A RangedSummarizedExperiment of junctions appearing in at least
 #' one compilation
 #' @seealso [junction_intersection()]
-#' @export
+#'
 #' @examples
 #' sb1 <- SnaptronQueryBuilder$new()
 #' sb1$compilation(Compilation$gtex)
@@ -50,7 +50,17 @@
 #' sb2$coordinate_modifier(Coordinates$EndIsExactOrWithin)
 #' sb2$row_filters(strand == "-")
 #'
+#' # Using query builder wrappers
+#' sb1 <- QueryBuilder(compilation = "gtex", regions = "chr1:1879786-1879786")
+#' sb1 <- set_coordinate_modifier(sb1, Coordinates$EndIsExactOrWithin)
+#' sb1 <- set_row_filters(sb1, strand == "-")
+#'
+#' sb2 <- QueryBuilder(compilation = "tcga", regions = "chr1:1879786-1879786")
+#' sb2 <- set_coordinate_modifier(sb2, Coordinates$EndIsExactOrWithin)
+#' sb2 <- set_row_filters(sb2, strand == "-")
+#'
 #' junction_union(sb1, sb2)
+#' @export
 junction_union <- function(...) {
     assert_that(
         is_list_of_query_builders(list(...)),
@@ -70,7 +80,7 @@ junction_union <- function(...) {
 #' @param ... One or more SnaptronQueryBuilder objects
 #' @return A RangedSummarizedExperiment of junctions common across compilations
 #' @seealso [junction_union()]
-#' @export
+#'
 #' @examples
 #' sb1 <- SnaptronQueryBuilder$new()
 #' sb1$compilation("gtex")
@@ -84,7 +94,17 @@ junction_union <- function(...) {
 #' sb2$coordinate_modifier(Coordinates$EndIsExactOrWithin)
 #' sb2$row_filters(strand == "-")
 #'
+#' # Using query builder wrappers
+#' sb1 <- QueryBuilder(compilation = "gtex", regions = "chr1:1879786-1879786")
+#' sb1 <- set_coordinate_modifier(sb1, Coordinates$EndIsExactOrWithin)
+#' sb1 <- set_row_filters(sb1, strand == "-")
+#'
+#' sb2 <- QueryBuilder(compilation = "tcga", regions = "chr1:1879786-1879786")
+#' sb2 <- set_coordinate_modifier(sb2, Coordinates$EndIsExactOrWithin)
+#' sb2 <- set_row_filters(sb2, strand == "-")
+#'
 #' junction_intersection(sb1, sb2)
+#' @export
 junction_intersection <- function(...) {
     assert_that(
         is_list_of_query_builders(list(...)),
@@ -217,6 +237,15 @@ calculate_coverage_median <- function(samples) {
 #' sb2$coordinate_modifier(Coordinates$Within)
 #' sb2$row_filters(strand == "-")
 #'
+#' # Using query builder wappers
+#' sb1 <- QueryBuilder(compilation = "srav2", regions = "chr2:29446395-30142858")
+#' sb1 <- set_coordinate_modifier(sb1, Coordinates$Within)
+#' sb1 <- set_row_filters(sb1, strand == "-")
+#'
+#' sb2 <- QueryBuilder(compilation = "srav2", regions = "chr2:29416789-29446394")
+#' sb2 <- set_coordinate_modifier(sb2, Coordinates$Within)
+#' sb2 <- set_row_filters(sb2, strand == "-")
+#'
 #' junction_inclusion_ratio(list(sb1), list(sb2))
 #' @export
 junction_inclusion_ratio <- function(group1, group2, group_names = NULL) {
@@ -285,26 +314,38 @@ calc_jir <- function(a, b) {
 #'     least one of the groups
 #'
 #' @examples
-#' inclusion_group1 <- SnaptronQueryBuilder$new()
-#' inclusion_group1$compilation("srav2")
-#' inclusion_group1$regions("chr1:94468008-94472172")
-#' inclusion_group1$coordinate_modifier(Coordinates$Exact)
-#' inclusion_group1$row_filters(strand == "+")
+#' in1 <- SnaptronQueryBuilder$new()
+#' in1$compilation("srav2")
+#' in1$regions("chr1:94468008-94472172")
+#' in1$coordinate_modifier(Coordinates$Exact)
+#' in1$row_filters(strand == "+")
 #'
-#' inclusion_group2 <- SnaptronQueryBuilder$new()
-#' inclusion_group2$compilation("srav2")
-#' inclusion_group2$regions("chr1:94468008-94472172")
-#' inclusion_group2$coordinate_modifier(Coordinates$Exact)
-#' inclusion_group2$row_filters(strand == "+")
+#' in2 <- SnaptronQueryBuilder$new()
+#' in2$compilation("srav2")
+#' in2$regions("chr1:94468008-94472172")
+#' in2$coordinate_modifier(Coordinates$Exact)
+#' in2$row_filters(strand == "+")
 #'
-#' exclusion_group <- SnaptronQueryBuilder$new()
-#' exclusion_group$compilation("srav2")
-#' exclusion_group$regions("chr1:94468008-94475142")
-#' exclusion_group$coordinate_modifier(Coordinates$Exact)
-#' exclusion_group$row_filters(strand == "+")
+#' ex <- SnaptronQueryBuilder$new()
+#' ex$compilation("srav2")
+#' ex$regions("chr1:94468008-94475142")
+#' ex$coordinate_modifier(Coordinates$Exact)
+#' ex$row_filters(strand == "+")
 #'
-#' percent_spliced_in(list(inclusion_group1), list(inclusion_group2),
-#'                    list(exclusion_group))
+#' # Using query builder wrappers
+#' in1 <- QueryBuilder(compilation = "srav2", regions = "chr1:94468008-94472172")
+#' in1 <- set_coordinate_modifier(in1, Coordinates$Exact)
+#' in1 <- set_row_filters(in1, strand == "+")
+#'
+#' in2 <- QueryBuilder(compilation = "srav2", regions = "chr1:94468008-94472172")
+#' in2 <- set_coordinate_modifier(in2, Coordinates$Exact)
+#' in2 <- set_row_filters(in2, strand == "+")
+#'
+#' ex <- QueryBuilder(compilation = "srav2", regions = "chr1:94468008-94475142")
+#' ex <- set_coordinate_modifier(ex, Coordinates$Exact)
+#' ex <- set_row_filters(ex, strand == "+")
+#'
+#' percent_spliced_in(list(in1), list(in2), list(ex))
 #' @export
 percent_spliced_in <- function(inclusion_group1, inclusion_group2,
                                exclusion_group, min_count = 20,
@@ -389,19 +430,28 @@ calc_psi <- function(inclusion1, inclusion2, exclusion, min_count) {
 #'   sample tissue type and sample_id.
 #'
 #' @examples
-#' inclusion_group1 <- SnaptronQueryBuilder$new()
-#' inclusion_group1$compilation("gtex")
-#' inclusion_group1$regions("chr4:20763023-20763023")
-#' inclusion_group1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-#' inclusion_group1$row_filters(strand == "-")
+#' in1 <- SnaptronQueryBuilder$new()
+#' in1$compilation("gtex")
+#' in1$regions("chr4:20763023-20763023")
+#' in1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+#' in1$row_filters(strand == "-")
 #'
-#' inclusion_group2 <- SnaptronQueryBuilder$new()
-#' inclusion_group2$compilation("gtex")
-#' inclusion_group2$regions("chr4:20763098-20763098")
-#' inclusion_group2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
-#' inclusion_group2$row_filters(strand == "-")
+#' in2 <- SnaptronQueryBuilder$new()
+#' in2$compilation("gtex")
+#' in2$regions("chr4:20763098-20763098")
+#' in2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
+#' in2$row_filters(strand == "-")
 #'
-#' tissue_specificity(list(inclusion_group1, inclusion_group2))
+#' # Using query builder wrappers
+#' in1 <- QueryBuilder(compilation = "gtex", regions = "chr4:20763023-20763023")
+#' in1 <- set_coordinate_modifier(in1, Coordinates$EndIsExactOrWithin)
+#' in1 <- set_row_filters(in1, strand == "-")
+#'
+#' in2 <- QueryBuilder(compilation = "gtex", regions = "chr4:20763098-20763098")
+#' in2 <- set_coordinate_modifier(in2, Coordinates$StartIsExactOrWithin)
+#' in2 <- set_row_filters(in2, strand == "-")
+#'
+#' tissue_specificity(list(in1, in2))
 #' @export
 tissue_specificity <- function(..., group_names = NULL) {
     list_of_groups <- list(...)
@@ -501,19 +551,28 @@ shared <- function(cov1, cov2) {
 #'   cassette exon scenario).
 #'
 #' @examples
-#' group1 <- SnaptronQueryBuilder$new()
-#' group1$compilation("gtex")
-#' group1$regions("chr1:1879786-1879786")
-#' group1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-#' group1$row_filters(strand == "-")
+#' g1 <- SnaptronQueryBuilder$new()
+#' g1$compilation("gtex")
+#' g1$regions("chr1:1879786-1879786")
+#' g1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+#' g1$row_filters(strand == "-")
 #'
-#' group2 <- SnaptronQueryBuilder$new()
-#' group2$compilation("gtex")
-#' group2$regions("chr1:1879903-1879903")
-#' group2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
-#' group2$row_filters(strand == "-")
+#' g2 <- SnaptronQueryBuilder$new()
+#' g2$compilation("gtex")
+#' g2$regions("chr1:1879903-1879903")
+#' g2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
+#' g2$row_filters(strand == "-")
 #'
-#' ssc<-shared_sample_counts(list(group1, group2))
+#' # Using query builder wrappers
+#' g1 <- QueryBuilder(compilation = "gtex", regions = "chr1:1879786-1879786")
+#' g1 <- set_coordinate_modifier(g1, Coordinates$EndIsExactOrWithin)
+#' g1 <- set_row_filters(g1, strand == "-")
+#'
+#' g2 <- QueryBuilder(compilation = "gtex", regions = "chr1:1879903-1879903")
+#' g2 <- set_coordinate_modifier(g2, Coordinates$StartIsExactOrWithin)
+#' g2 <- set_row_filters(g2, strand == "-")
+#'
+#' ssc<-shared_sample_counts(list(g1, g2))
 #' @export
 shared_sample_counts <- function(..., group_names = NULL) {
     list_of_groups <- list(...)
