@@ -4,8 +4,9 @@ is_hugo_gene <- function(str) {
 }
 
 is_genes_or_intervals <- function(strings) {
-    Map(function(s) is_hugo_gene(s) || is_chromosome_interval(s), strings) %>%
-        Reduce(`&&`, ., TRUE)
+    bools <-
+        Map(function(s) is_hugo_gene(s) || is_chromosome_interval(s), strings)
+    Reduce(`&&`, bools, TRUE)
 }
 
 is_chromosome_interval <- function(str) {

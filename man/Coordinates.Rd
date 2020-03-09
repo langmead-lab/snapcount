@@ -32,7 +32,8 @@ boudnaries of the region requested.}
 }}
 
 \examples{
-query_jx(compilation = "gtex", regions = "CD99",
-  coordinate_modifier = Coordinates$Exact)
+qb <- QueryBuilder(compilation = "gtex", regions = "CD99")
+qb <- set_coordinate_modifier(qb, Coordinates$Exact)
+qb
 }
 \keyword{datasets}

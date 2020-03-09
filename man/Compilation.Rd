@@ -22,7 +22,8 @@ the variants will default to:
 }
 }
 \examples{
-query_jx(compilation = Compilation$gtex, regions = "KCNIP4")
+qb <- QueryBuilder(compilation = Compilation$gtex, regions = "KCNIP4")
+query_jx(qb)
 }
 \seealso{
 \url{http://snaptron.cs.jhu.edu/data.html} for more information

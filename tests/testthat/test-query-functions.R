@@ -108,9 +108,7 @@ test_that("query with non-numeric sids", {
     sb <- SnaptronQueryBuilder$new()
     sb$compilation("tcga")
     sb$regions("CD99")
-    sb$sids(c("1", "2", "3"))
-
-    expect_error(query_jx(sb))
+    expect_error(sb$sids(c("1", "2", "3")), msg = "sids should be whole numbers")
 })
 
 test_that("test coordinate Coordinates$Exact", {

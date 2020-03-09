@@ -69,13 +69,13 @@
 #' sb <- SnaptronQueryBuilder$new()
 #' sb$compilation("gtex")$regions("CD99")$query_jx()
 #' sb$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1-100000")
-#' sb$sample_filters(SMTS == "Brain")
+#' sb$column_filters(SMTS == "Brain")
 #'
 #' # The RHS of an R boolean expression can itself be an expression,
 #' # but the expression has to evaluate to either a String, Float or Integer.
 #' a <- 10
 #' b <- 10
-#' sb$range_filters(samples_count >= (a + b))
+#' sb$row_filters(samples_count >= (a + b))
 #' sb$query_jx(return_rse = FALSE)
 #' @export
 SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",

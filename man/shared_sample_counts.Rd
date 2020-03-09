@@ -41,13 +41,13 @@ group1 <- SnaptronQueryBuilder$new()
 group1$compilation("gtex")
 group1$regions("chr1:1879786-1879786")
 group1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-group1$range_filters(strand == "-")
+group1$row_filters(strand == "-")
 
 group2 <- SnaptronQueryBuilder$new()
 group2$compilation("gtex")
 group2$regions("chr1:1879903-1879903")
 group2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
-group2$range_filters(strand == "-")
+group2$row_filters(strand == "-")
 
 ssc<-shared_sample_counts(list(group1, group2))
 }

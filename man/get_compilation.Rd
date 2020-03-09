@@ -27,6 +27,6 @@ Get or set query compilation
 \examples{
 qb <- QueryBuilder(compilation = "gtex", regions = "CD99")
 get_compilation(qb)
-qb <- set_compilation(qb, Compilations$tcga)
+qb <- set_compilation(qb, Compilation$tcga)
 get_compilation(qb)
 }

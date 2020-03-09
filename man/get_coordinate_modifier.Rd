@@ -28,6 +28,6 @@ Get or set coordinate modifiers for query.
 }
 \examples{
 qb <- QueryBuilder(compilation = "gtex", regions = "CD99")
-qb <- set_coordinate_modifier(qb, Coordinate$Within)
+qb <- set_coordinate_modifier(qb, Coordinates$Within)
 get_coordinate_modifier(qb)
 }

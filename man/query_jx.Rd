@@ -37,11 +37,11 @@ intervals it will return a list of 0 or more genes, junctions, or exons
 \examples{
 # Contruct SnaptronQueryBuilder object using wrapper functions
 qb <- QueryBuilder(compilation = "gtex", regions = "chr1:1-100000")
-qb <- set_row_filters(samples_count >= 20)
+qb <- set_row_filters(qb, samples_count >= 20)
 query_jx(qb)
 
-qb <- set_row_filters(NULL)
-qb <- set_column_filters(SMTS == "Brain")
+qb <- set_row_filters(qb, NULL)
+qb <- set_column_filters(qb, SMTS == "Brain")
 query_gene(qb)
 
 # or directly using R6

@@ -26,8 +26,9 @@ enum <- function(...) {
 #'   boudnaries of the region requested.
 #'
 #' @examples
-#' query_jx(compilation = "gtex", regions = "CD99",
-#'   coordinate_modifier = Coordinates$Exact)
+#' qb <- QueryBuilder(compilation = "gtex", regions = "CD99")
+#' qb <- set_coordinate_modifier(qb, Coordinates$Exact)
+#' qb
 #' @export
 Coordinates <- enum(Exact, Within, StartIsExactOrWithin, EndIsExactOrWithin)
 
@@ -48,7 +49,8 @@ Coordinates <- enum(Exact, Within, StartIsExactOrWithin, EndIsExactOrWithin)
 #'   about Snaptron compilations.
 #'
 #' @examples
-#' query_jx(compilation = Compilation$gtex, regions = "KCNIP4")
+#' qb <- QueryBuilder(compilation = Compilation$gtex, regions = "KCNIP4")
+#' query_jx(qb)
 #' @export
 Compilation <- enum(gtex, tcga, srav2, sra)
 

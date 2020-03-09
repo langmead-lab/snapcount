@@ -16,6 +16,7 @@ SnaptronQueryBuilder class, allowing users to share sources of
 data from Snaptron.
 }
 \examples{
-query_jx(compilation = "gtex", regions = "CD99")
+qb <- QueryBuilder(compilation = "gtex", regions = "CD99")
+query_jx(qb)
 uri_of_last_successful_request()
 }

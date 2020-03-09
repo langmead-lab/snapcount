@@ -50,13 +50,13 @@ sb1 <- SnaptronQueryBuilder$new()
 sb1$compilation(Compilation$gtex)
 sb1$regions("chr1:1879786-1879786")
 sb1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-sb1$range_filters(strand == "-")
+sb1$row_filters(strand == "-")
 
 sb2 <- SnaptronQueryBuilder$new()
 sb2$compilation("tcga")
 sb2$regions("chr1:1879786-1879786")
 sb2$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-sb2$range_filters(strand == "-")
+sb2$row_filters(strand == "-")
 
 junction_union(sb1, sb2)
 }

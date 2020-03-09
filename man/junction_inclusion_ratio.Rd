@@ -36,13 +36,13 @@ sb1 <- SnaptronQueryBuilder$new()
 sb1$compilation("srav2")
 sb1$regions("chr2:29446395-30142858")
 sb1$coordinate_modifier(Coordinates$Within)
-sb1$range_filters(strand == "-")
+sb1$row_filters(strand == "-")
 
 sb2 <- SnaptronQueryBuilder$new()
 sb2$compilation("srav2")
 sb2$regions("chr2:29416789-29446394")
 sb2$coordinate_modifier(Coordinates$Within)
-sb2$range_filters(strand == "-")
+sb2$row_filters(strand == "-")
 
 junction_inclusion_ratio(list(sb1), list(sb2))
 }

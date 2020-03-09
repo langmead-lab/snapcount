@@ -18,11 +18,11 @@
 #' @examples
 #' # Contruct SnaptronQueryBuilder object using wrapper functions
 #' qb <- QueryBuilder(compilation = "gtex", regions = "chr1:1-100000")
-#' qb <- set_row_filters(samples_count >= 20)
+#' qb <- set_row_filters(qb, samples_count >= 20)
 #' query_jx(qb)
 #'
-#' qb <- set_row_filters(NULL)
-#' qb <- set_column_filters(SMTS == "Brain")
+#' qb <- set_row_filters(qb, NULL)
+#' qb <- set_column_filters(qb, SMTS == "Brain")
 #' query_gene(qb)
 #'
 #' # or directly using R6
@@ -194,7 +194,8 @@ query_exon <- function(sb, return_rse = TRUE, split_by_region = FALSE)
 #'
 #' @export
 #' @examples
-#' query_jx(compilation = "gtex", regions = "CD99")
+#' qb <- QueryBuilder(compilation = "gtex", regions = "CD99")
+#' query_jx(qb)
 #' uri_of_last_successful_request()
 uri_of_last_successful_request <- function() {
     pkg_globals$last_uri_accessed

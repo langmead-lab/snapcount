@@ -40,7 +40,7 @@ QueryBuilder <- function(compilation, regions) {
 #' @examples
 #' qb <- QueryBuilder(compilation = "gtex", regions = "CD99")
 #' get_compilation(qb)
-#' qb <- set_compilation(qb, Compilations$tcga)
+#' qb <- set_compilation(qb, Compilation$tcga)
 #' get_compilation(qb)
 #' @export
 get_compilation <- function(qb) {
@@ -158,7 +158,7 @@ get_sids <- function(qb) {
 #'
 #' @examples
 #' qb <- QueryBuilder(compilation = "gtex", regions = "CD99")
-#' qb <- set_coordinate_modifier(qb, Coordinate$Within)
+#' qb <- set_coordinate_modifier(qb, Coordinates$Within)
 #' get_coordinate_modifier(qb)
 #' @export
 get_coordinate_modifier <- function(qb) {
