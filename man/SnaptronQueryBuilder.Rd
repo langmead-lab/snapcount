@@ -47,7 +47,7 @@ specified range.}
 
 \section{Methods}{
 
-\describe{
+\itemize{
 \item{\code{compilation} Get or set query compilation. See
 \code{\link{Compilation}} for details.}
 
@@ -78,7 +78,8 @@ for \code{row_filters}.}
 
 \item{\code{print} print query builder object}
 
-\item{\code{from_url} use URL to instantiate SnaptronQueryBuilder object }}
+\item{\code{from_url} use URL to instantiate SnaptronQueryBuilder object }
+}
 }
 
 \examples{
