@@ -1,4 +1,5 @@
 #' A Reference Class for building Snaptron queries
+#'
 #' @field compilation A single string containing the name of the Snaptron datasource
 #'
 #' @field regions Either a list of 1 or more `HUGO` gene names `(e.g. "BRCA1")` or a
@@ -30,7 +31,7 @@
 #'              specified range.
 #'
 #' @section Methods:
-#' \describe{
+#' \itemize{
 #'   \item{\code{compilation} Get or set query compilation. See
 #'   \code{\link{Compilation}} for details.}
 #'
@@ -61,9 +62,9 @@
 #'
 #'   \item{\code{print} print query builder object}
 #'
-#'   \item{\code{from_url} use URL to instantiate SnaptronQueryBuilder object }}
+#'   \item{\code{from_url} use URL to instantiate SnaptronQueryBuilder object }
+#' }
 #'
-#' @export
 #' @examples
 #' sb <- SnaptronQueryBuilder$new()
 #' sb$compilation("gtex")$regions("CD99")$query_jx()
@@ -76,6 +77,7 @@
 #' b <- 10
 #' sb$range_filters(samples_count >= (a + b))
 #' sb$query_jx(return_rse = FALSE)
+#' @export
 SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
     public = list(
         initialize = function(...) {
@@ -83,6 +85,8 @@ SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
         },
         compilation = function(compilation = NULL) {
             if (!missing(compilation)) {
+                assert_that(compilation %in% names(Compilation),
+                            msg = paste0(compilation, ": is not a valid compilation"))
                 private$query$compilation <- compilation
                 invisible(self)
             } else {
@@ -132,6 +136,8 @@ SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
         },
         sids = function(sids = NULL) {
             if (!missing(sids)) {
+                assert_that(is.wholenumber(sids),
+                    msg = "sids should be whole numbers")
                 private$query$sids <- sids
                 invisible(self)
             } else {
@@ -224,8 +230,19 @@ SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
     private = list(
         query = list(),
         call = function(fn_name, args) {
+            if (is.null(self$compilation())) {
+                stop(
+                    paste("Please set a compilation before running", fn_name),
+                    call. = FALSE
+                )
+            }
+            if (is.null(self$regions())) {
+                stop(
+                    paste("Please specify query regions before running", fn_name),
+                    call. = FALSE
+                )
+            }
             fn <- get(fn_name, parent.frame())
-            ## arg_names <- intersect(names(formals(fn)), names(args))
             do.call(fn, args)
         }
     )

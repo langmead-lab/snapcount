@@ -282,17 +282,8 @@ generate_snaptron_uri <- function(compilation, regions,
                                   endpoint = "snaptron", row_filters = NULL,
                                   column_filters = NULL,
                                   coordinate_modifier = NULL, sids = NULL) {
-    assert_that(compilation %in% names(Compilation),
-                msg = "Invalid compilation")
-
-    query <- ""
     path <- paste(compilation, paste0(endpoint, "?"), sep = "/")
-
-    if (!missing(regions)) {
-        query <- paste("regions", regions, sep = "=")
-    } else {
-        stop("please specify either a gene or an interval", call. = FALSE)
-    }
+    query <- paste("regions", regions, sep = "=")
 
     if (!is.null(row_filters)) {
         query <- c(query, paste("rfilter",
@@ -332,8 +323,6 @@ generate_snaptron_uri <- function(compilation, regions,
     }
 
     if (!is.null(sids)) {
-        assert_that(is.wholenumber(sids),
-                    msg = "sids should be whole numbers")
         query <- c(query, paste("sids", paste(sids, collapse = ","), sep = "="))
     }
 
