@@ -45,13 +45,13 @@ inclusion_group1 <- SnaptronQueryBuilder$new()
 inclusion_group1$compilation("gtex")
 inclusion_group1$regions("chr4:20763023-20763023")
 inclusion_group1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-inclusion_group1$range_filters(strand == "-")
+inclusion_group1$row_filters(strand == "-")
 
 inclusion_group2 <- SnaptronQueryBuilder$new()
 inclusion_group2$compilation("gtex")
 inclusion_group2$regions("chr4:20763098-20763098")
 inclusion_group2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
-inclusion_group2$range_filters(strand == "-")
+inclusion_group2$row_filters(strand == "-")
 
 tissue_specificity(list(inclusion_group1, inclusion_group2))
 }

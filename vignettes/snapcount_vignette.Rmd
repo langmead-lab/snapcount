@@ -111,28 +111,27 @@ library('snapcount')
 ##Query all exon-exon splice junctions within the region of gene CD99
 #from GTEx v6 sample compilation
 #CD99 is chosen for its size
-sb <- SnaptronQueryBuilder$new()
-sb$compilation("gtex")$regions("CD99")
-cd99.jx.all <- sb$query_jx()
+sb <- QueryBuilder(compilation = "gtex", regions = "CD99")
+cd99.jx.all <- query_jx(sb)
 head(cd99.jx.all)
 
 ##Query coverage for gene, exon, and annotated junctions across all
 #GTEx samples that are labeled with tissue type "Brain"
 #in the region of the CD99 gene
-sb$sample_filters(SMTS == "Brain")
-cd99.gene <- sb$query_gene()
+sb <- set_row_filters(sb, SMTS == "Brain")
+cd99.gene <- query_gene(sb)
 dim(cd99.gene)
 head(cd99.gene)
 
-cd99.exon <- sb$query_exon()
+cd99.exon <- query_exon(sb)
 dim(cd99.exon)
 head(cd99.exon)
 
 ###Only query junctions which are fully annotated---both left and
 #right splice sites are found together in one or more of the
 #Snaptron sourced annotations
-sb$range_filters(annotated == 1)
-cd99.jx <- sb$query_jx()
+sb <- set_row_filters(sb, annotated == 1)
+cd99.jx <- query_jx(sb)
 dim(cd99.jx)
 head(cd99.jx)
 
@@ -159,20 +158,17 @@ across groups was less than a specified minimum count (`min_count` defaults to 2
 ```{r 'psi', eval = TRUE}
 #Build new query against GTEx
 #left inclusion query
-lq <- SnaptronQueryBuilder$new()
-lq$compilation("gtex")$regions("chr19:45297955-45298142")
-lq$range_filters(strand == "+")
-lq$coordinate_modifier(Coordinates$Exact)
+lq <- QueryBuilder(compilation = "gtex", regions = "chr19:45297955-45298142")
+lq <- set_row_filters(lq, strand == "+")
+lq <- set_coordinate_modifier(lq, Coordinates$Exact)
 #right inclusion query
-rq <- SnaptronQueryBuilder$new()
-rq$compilation("gtex")$regions("chr19:45298223-45299810")
-rq$range_filters(strand == "+")
-rq$coordinate_modifier(Coordinates$Exact)
+rq <- QueryBuilder(compilation = "gtex", regions = "chr19:45298223-45299810")
+rq <- set_row_filters(rq, strand == "+")
+rq <- set_coordinate_modifier(rq, Coordinates$Exact)
 #exclusion query
-ex <- SnaptronQueryBuilder$new()
-ex$compilation("gtex")$regions("chr19:45297955-45299810")
-ex$range_filters(strand == "+")
-ex$coordinate_modifier(Coordinates$Exact)
+ex <- QueryBuilder(compilation = "gtex", regions = "chr19:45297955-45299810")
+ex <- set_row_filters(ex, strand == "+")
+ex <- set_coordinate_modifier(ex, Coordinates$Exact)
 
 psi<-percent_spliced_in(list(lq), list(rq), list(ex))
 #order by psi descending
@@ -190,16 +186,14 @@ The list of results is presented in descending order by JIR.
 
 ```{r 'jir', eval = TRUE}
 #groupA
-A <- SnaptronQueryBuilder$new()
-A$compilation("srav2")$regions("chr2:29446395-30142858")
-A$range_filters(strand == "-")
-A$coordinate_modifier(Coordinates$Within)
+A <- QueryBuilder(compilation = "srav2", regions = "chr2:29446395-30142858")
+A <- set_row_filters(A, strand == "-")
+A <- set_coordinate_modifier(A, Coordinates$Within)
 
 #groupB
-B <- SnaptronQueryBuilder$new()
-B$compilation("srav2")$regions("chr2:29416789-29446394")
-B$range_filters(strand == "-")
-B$coordinate_modifier(Coordinates$Within)
+B <- QueryBuilder(compilation = "srav2", regions = "chr2:29416789-29446394")
+B <- set_row_filters(B, stand == "-")
+B <- set_coordinate_modifier(B, Coordinates$Within)
 
 jir<-junction_inclusion_ratio(list(A),
                               list(B),
@@ -222,37 +216,31 @@ SSC reports the number of samples where one or more sets of junctions co-occur. 
 
 sqb<-SnaptronQueryBuilder
 ###GNB1
-GNB1l <- SnaptronQueryBuilder$new()
-GNB1l$compilation("gtex")$regions("chr1:1879786-1879786")
-GNB1l$range_filters(strand == "-")
-GNB1l$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+GNB1l <- QueryBuilder(compilation = "gtex", regions = "chr1:1879786-1879786")
+GNB1l <- set_row_filters(GNB1l, strand == "-")
+GNB1l <- set_coordinate_modifier(GNB1l, Coordinates$EndIsExactOrWithin)
 
-GNB1r <- SnaptronQueryBuilder$new()
-GNB1r$compilation("gtex")$regions("chr1:1879903-1879903")
-GNB1r$range_filters(strand == "-")
-GNB1r$coordinate_modifier(Coordinates$StartIsExactOrWithin)
+GNB1r <- QueryBuilder(compilation = "gtex", regions = "chr1:1879903-1879903")
+GNB1r <- set_row_filters(GNB1r, strand == "-")
+GNB1r <- set_coordinate_modifier(GNB1r, Coordinate$StartIsExactOrWithin)
 
 ###PIK3CD
-PIK3CDl <- SnaptronQueryBuilder$new()
-PIK3CDl$compilation("gtex")$regions("chr1:9664595-9664595")
-PIK3CDl$range_filters(strand == "+")
-PIK3CDl$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+PIK3CDl <- QueryBuilder(compilation = "gtex", regions = "chr1:9664595-9664595")
+PIK3CDl <- set_row_filters(PIK3CDl, strand == "+")
+PIK3CDl <- set_coordinate_modifier(PIK3CDl, Coordinates$EndIsExactOrWithin)
 
-PIK3CDr <- SnaptronQueryBuilder$new()
-PIK3CDr$compilation("gtex")$regions("chr1:9664759-9664759")
-PIK3CDr$range_filters(strand == "+")
-PIK3CDr$coordinate_modifier(Coordinates$StartIsExactOrWithin)
+PIK3CDr <- QueryBuilder(compilation = "gtex", regions = "chr1:9664759-9664759")
+PIK3CDr <- set_row_filters(PIK3CDr, strand == "+")
+PIK3CDr <- set_coordinate_modifier(PIK3CDr, Coordinates$StartIsExactOrWithin)
 
 ###TAP2
-TAP2l <- SnaptronQueryBuilder$new()
-TAP2l$compilation("gtex")$regions("chr6:32831148-32831148")
-TAP2l$range_filters(strand == "-")
-TAP2l$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+TAP2l <- QueryBuilder(compilation = "gtex", regions = "chr6:32831148-32831148")
+TAP2l <- set_row_filters(TAP2l, strand == "-")
+TAP2l <- set_coordinate_modifier(TAP2l, Coordinates$EndIsExactOrWithin)
 
-TAP2r <- SnaptronQueryBuilder$new()
-TAP2r$compilation("gtex")$regions("chr6:32831182-32831182")
-TAP2r$range_filters(strand == "-")
-TAP2r$coordinate_modifier(Coordinates$StartIsExactOrWithin)
+TAP2r <- QueryBuilder(compilation = "gtex", regions = "chr6:32831182-32831182")
+TAP2r <- set_row_filters(TAP2r, strand == "-")
+TAP2r <- set_coordinate_modifier(TAP2r, Coordinates$StartIsExactOrWithin)
 
 ssc_func<-shared_sample_counts
 ssc<-ssc_func(list(GNB1l, GNB1r),
@@ -266,20 +254,19 @@ ssc
 
 ## Tissue Specificity (TS)
 
-This query asks if a particular set of junctions seems to be associated with tissue type.  
-This query defaults to using the `gtex` compilation, but it could work with any compilation having a `tissue` metadata field (e.g. `tcga`).  
+This query asks if a particular set of junctions seems to be associated with tissue type.
+This query defaults to using the `gtex` compilation, but it could work with any compilation having a `tissue` metadata field (e.g. `tcga`).
 
-The main output is a list of all the samples in the compilation with either a 0 or a 1 in the *shared* column.  
+The main output is a list of all the samples in the compilation with either a 0 or a 1 in the *shared* column.
 1 indicates that a junction from the query occurs in that sample (tissue type).
 
 This output can be passed to a statistical test such as an F-test to assess the significance of tissue enrichment.
 
 
 ```{r 'ts1', eval = TRUE}
-setA <- SnaptronQueryBuilder$new()
-setA$compilation("gtex")$regions("chr4:20763023-20763023")
-setA$range_filters(strand == "-")
-setA$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+setA <- QueryBuilder(compilation = "gtex", regions = "chr4:20763023-20763023")
+setA <- set_row_filters(setA, strand == "-")
+setA <- set_coordinate_modifier(setA, Coordinates$EndIsExactOrWithin)
 
 ts<-tissue_specificity(list(setA))
 head(ts)
@@ -287,24 +274,22 @@ head(ts)
 
 The TS function also supports more than one set of junctions.
 
-The main output is a list of all the samples in the compilation with either a 0 or a 1 in the *shared* column.  
+The main output is a list of all the samples in the compilation with either a 0 or a 1 in the *shared* column.
 1 here indicates that at least one junction from all sets occurred in that sample, i.e. the sample is shared across the results of all the junction queries.
 
 A use case of the 2-set TS function is to measure the significance of tissue enrichment across junctions which support a cassette exon.
 
 
 ```{r 'ts2', eval = TRUE}
-setA <- SnaptronQueryBuilder$new()
-setA$compilation("gtex")$regions("chr4:20763023-20763023")
-setA$range_filters(strand == "-")
-setA$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+setA <- QueryBuilder(compilation = "gtex", regions = "chr4:20763023-20763023")
+setA <- set_row_filters(setA, strand == "-")
+setA <- set_coordinate_modifier(setA, Coordinates$EndIsExactOrWithin)
 
-setB <- SnaptronQueryBuilder$new()
-setB$compilation("gtex")$regions("chr4:20763098-20763098")
-setB$range_filters(strand == "-")
-setB$coordinate_modifier(Coordinates$StartIsExactOrWithin)
+setB <- QueryBuilder(compilation = "gtex", regions = "chr4:20763098-20763098")
+setB <- set_row_filters(setB, strand == "-")
+setB <- set_coordinate_modifier(setB, Coordinates$StartIsExactOrWithin)
 
-ts<-tissue_specificity(list(setA, setB))
+ts <- tissue_specificity(list(setA, setB))
 head(ts)
 ```
 
@@ -320,15 +305,13 @@ In the following example we query for all junctions that have a specific 5' (don
 Note, this query, due to the number of samples involved (approximately 18,000) takes several seconds to complete.
 
 ```{r 'jm', eval = TRUE}
-gtex <- SnaptronQueryBuilder$new()
-gtex$compilation("gtex")$regions("chr1:1879786-1879786")
-gtex$range_filters(strand == "-")
-gtex$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+gtex <- QueryBuilder(compilation = "gtex", regions = "chr1:1879786-1879786")
+gtex <- set_row_filters(gtex, strand == "-")
+gtex <- set_coordinate_modifier(gtex, Coordinates$EndIsExactOrWithin)
 
-tcga <- SnaptronQueryBuilder$new()
-tcga$compilation("tcga")$regions("chr1:1879786-1879786")
-tcga$range_filters(strand == "-")
-tcga$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+tcga <- QueryBuilder(compilation = "tcga", regions = "chr1:1879786-1879786")
+tcga <- set_row_filters(tcga, strand == "-")
+tcga <- set_coordinate_modifier(tcga, Coordinates$EndIsExactOrWithin)
 
 gtex_tcga_union<-junction_union(gtex,tcga)
 dim(gtex_tcga_union)
@@ -340,15 +323,13 @@ The junction intersection query provides similar functionality but restricting t
 Using the same scenario as above, but this time the result set will be reduced.
 
 ```{r 'ji', eval = TRUE}
-gtex <- SnaptronQueryBuilder$new()
-gtex$compilation("gtex")$regions("chr1:1879786-1879786")
-gtex$range_filters(strand == "-")
-gtex$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+gtex <- QueryBuilder(compilation = "gtex", regions = "chr1:1879786-1879786")
+gtex <- set_row_filters(gtex, strand == "-")
+gtex <- set_coordinate_modifier(gtex, Coordinates$EndIsExactOrWithin)
 
-tcga <- SnaptronQueryBuilder$new()
-tcga$compilation("tcga")$regions("chr1:1879786-1879786")
-tcga$range_filters(strand == "-")
-tcga$coordinate_modifier(Coordinates$EndIsExactOrWithin)
+tcga <- QueryBuilder(compilation = "tcga", regions = "chr1:1879786-1879786")
+tcga <- set_row_filters(tcga, strand == "-")
+tcga <- set_coordinate_modifier(tcga, Coordinates$EndIsExactOrWithin)
 
 gtex_tcga_intersection<-junction_intersection(gtex,tcga)
 dim(gtex_tcga_intersection)

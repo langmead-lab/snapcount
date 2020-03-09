@@ -47,19 +47,19 @@ inclusion_group1 <- SnaptronQueryBuilder$new()
 inclusion_group1$compilation("srav2")
 inclusion_group1$regions("chr1:94468008-94472172")
 inclusion_group1$coordinate_modifier(Coordinates$Exact)
-inclusion_group1$range_filters(strand == "+")
+inclusion_group1$row_filters(strand == "+")
 
 inclusion_group2 <- SnaptronQueryBuilder$new()
 inclusion_group2$compilation("srav2")
 inclusion_group2$regions("chr1:94468008-94472172")
 inclusion_group2$coordinate_modifier(Coordinates$Exact)
-inclusion_group2$range_filters(strand == "+")
+inclusion_group2$row_filters(strand == "+")
 
 exclusion_group <- SnaptronQueryBuilder$new()
 exclusion_group$compilation("srav2")
 exclusion_group$regions("chr1:94468008-94475142")
 exclusion_group$coordinate_modifier(Coordinates$Exact)
-exclusion_group$range_filters(strand == "+")
+exclusion_group$row_filters(strand == "+")
 
 percent_spliced_in(list(inclusion_group1), list(inclusion_group2),
                    list(exclusion_group))

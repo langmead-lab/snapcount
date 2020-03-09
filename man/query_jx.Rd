@@ -6,51 +6,14 @@
 \alias{query_exon}
 \title{Query Junctions/Genes/Exons}
 \usage{
-query_jx(compilation, regions, range_filters = NULL,
-  sample_filters = NULL, sids = NULL, coordinate_modifier = NULL,
-  return_rse = TRUE, split_by_region = FALSE)
+query_jx(sb, return_rse = TRUE, split_by_region = FALSE)
 
-query_gene(compilation, regions, range_filters = NULL,
-  sample_filters = NULL, sids = NULL, coordinate_modifier = NULL,
-  return_rse = TRUE, split_by_region = FALSE)
+query_gene(sb, return_rse = TRUE, split_by_region = FALSE)
 
-query_exon(compilation, regions, range_filters = NULL,
-  sample_filters = NULL, sids = NULL, coordinate_modifier = NULL,
-  return_rse = TRUE, split_by_region = FALSE)
+query_exon(sb, return_rse = TRUE, split_by_region = FALSE)
 }
 \arguments{
-\item{compilation}{A single string containing the name of the Snaptron
-datasource}
-
-\item{regions}{Either a list of 1 or more \code{HUGO} gene names \code{(e.g. "BRCA1")}
-or a GRanges-class object containing one or more genomic intervals
-\code{(e.g. "chr1:1-1000")}.  Strand information is ignored.}
-
-\item{range_filters}{A list of strings defining range-related contraints}
-
-\item{sample_filters}{A list of strings defining sample-related contraints}
-
-\item{sids}{A list of rail_ids (integer sample IDs) to filter results
-on. Only records which have been found in at least one of these samples
-will be returned.}
-
-\item{coordinate_modifier}{Snaptron coordinate modifier enum. Invariants
-include:
-
-Coordinate$Exact - Contraints the results so that the start/end coordinates
-match the start/end of the specifiied range.
-
-Coordinate$Within - Contraints the results so that the coordinates are
-within (inclusive) the specified range.
-
-Coordinate$StartIsExactOrWithin - Constraints the results so that the start
-coorindate matches or is within the boundaries of the specified range.
-
-Coorindate$EndIsExactOrWithin - Contraints the results so that that the
-end coordinate matches or is within the boundaries of the specified range.
-
-Coordinate$Overlaps - Contraints the results so that the coorindates
-overlaps the specified range.}
+\item{sb}{A SnaptonQueryBuilder object}
 
 \item{return_rse}{Should the query data be returned as a simple data frame or
 converted to a RangeSummarizedExperiment.}
@@ -74,8 +37,25 @@ of 0 or more genes, junctions, or exons (depending on which query form is
 used) which overlap the ranges.
 }
 \examples{
-query_jx(Compilation$gtex, "chr1:1-100000",
-         range_filters = "samples_count >= 20")
-query_gene(Compilation$gtex, "CD99", sample_filters = SMTS == "Brain")
+# Contruct SnaptronQueryBuilder object using wrapper functions
+qb <- QueryBuilder(compilation = "gtex", regions = "chr1:1-100000")
+qb <- set_row_filters(qb, samples_count >= 20)
+query_jx(qb)
+
+qb <- set_row_filters(qb, NULL)
+qb <- set_column_filters(qb, SMTS == "Brain")
+query_gene(qb)
+
+# or directly using R6
+sb <- SnaptronQueryBuilder$new()
+sb$compilation("gtex")
+sb$regions("chr1:1-100000")
+sb$row_filters("samples_count >= 20")
+query_jx(sb)
+
+sb$regions("CD99")
+sb$row_filters(NULL)
+sb$column_filters(SMTS == "Brain")
+query_gene(sb)
 
 }

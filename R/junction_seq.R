@@ -23,17 +23,18 @@
 #'   requested gene.
 #'
 #' @examples
+#' \dontrun{
 #' sb1 <- SnaptronQueryBuilder$new()
 #' sb1$compilation("gtex")
 #' sb1$regions("chr7:128393029-128394277")
-#' sb1$range_filters(c(contains == 1, coverage_sum >= 1000))
-#' sb1$sample_filters(SMTS == "Brain")
+#' sb1$row_filters(contains == 1, coverage_sum >= 1000)
+#' sb1$column_filters(SMTS == "Brain")
 #'
 #' sb2 <- sb1$clone(deep = TRUE)
-#' sb2$sample_filters(SMTS == "Pituitary")
+#' sb2$column_filters(SMTS == "Pituitary")
 #'
 #' sb3 <- sb2$clone(deep = TRUE)
-#' sb3$sample_filters(SMTS == "Spleen")
+#' sb3$column_filters(SMTS == "Spleen")
 #'
 #' # initializer does the work of running the necessary queries and
 #' # processing their outputs
@@ -47,6 +48,7 @@
 #' # output the necessary JunctionSeq function calls needed
 #' # to produce plot
 #' js$format_for_junction_seq()
+#' }
 #' @export
 FormatForJunctionSeq <-
     R6Class(
@@ -193,7 +195,7 @@ FormatForJunctionSeq <-
                                    ", returned NULL"))
                     }
                     query_builder <-
-                        private$query_builders[[i]]$clone()$range_filters(NULL)
+                        private$query_builders[[i]]$clone()$row_filters(NULL)
                     private$exons[[name]] <-
                         query_builder$query_exon(return_rse = FALSE)
                     if (is.null(private$exons[[name]])) {
@@ -206,7 +208,7 @@ FormatForJunctionSeq <-
                         )
                     }
                     query_builder <-
-                        private$query_builders[[i]]$clone()$range_filters(NULL)
+                        private$query_builders[[i]]$clone()$row_filters(NULL)
                     private$genes[[name]] <-
                         query_builder$query_gene(return_rse = FALSE)
                     if (is.null(private$genes[[name]])) {

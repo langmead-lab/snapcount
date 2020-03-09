@@ -21,37 +21,30 @@ is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) {
     }
 }
 
-bool_expressions_to_strings <- function(exprs) {
-    if (rlang::is_bare_character(exprs)) {
-        return(exprs)
-    }
-
-    res <- NULL
-    if (rlang::is_call(exprs)) {
-        if (exprs[[1]] == rlang::as_name("c") ||
-            exprs[[1]] == rlang::as_name("list")) {
-            res <- lapply(exprs[-1], expression_to_string_helper)
-        } else {
-            res <- expression_to_string_helper(exprs)
+bool_expressions_to_strings <- function(quosures) {
+    if (length(quosures) == 1) {
+        expr <- rlang::get_expr(quosures[[1]])
+        if (is.null(expr) || rlang::is_bare_character(expr)) {
+            return(expr)
         }
     }
-
-    res
+    lapply(quosures, expression_to_string_helper)
 }
 
-expression_to_string_helper <- function(expr) {
-    assert_that(
-        length(expr) == 3,
-        msg = paste(deparse(expr), ": is not a valid filter")
-    )
-    assert_that(
-        is_logical_op(expr[[1]]),
-        msg = paste(deparse(expr), ": is not a bool expression")
-    )
-    assert_that(
-        rlang::is_symbol(expr[[2]]),
-        msg = paste(deparse(expr[[2]]), ": is not a valid name")
-    )
+expression_to_string_helper <- function(quosure) {
+    env <- rlang::get_env(quosure)
+    expr <- rlang::get_expr(quosure)
+
+    if (rlang::is_bare_character(expr)) {
+        return(expr)
+    }
+
+    assert_that(length(expr) == 3,
+                msg = paste(deparse(expr), ": is not a valid filter"))
+    assert_that(is_logical_op(expr[[1]]),
+                msg = paste(deparse(expr), ": is not a bool expression"))
+    assert_that(rlang::is_symbol(expr[[2]]),
+                msg = paste(deparse(expr[[2]]), ": is not a valid name"))
 
     if (rlang::is_call(expr[[3]]) || rlang::is_symbol(expr[[3]])) {
         res <- rlang::eval_tidy(expr[[3]])

@@ -42,13 +42,13 @@
 #' sb1$compilation(Compilation$gtex)
 #' sb1$regions("chr1:1879786-1879786")
 #' sb1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-#' sb1$range_filters(strand == "-")
+#' sb1$row_filters(strand == "-")
 #'
 #' sb2 <- SnaptronQueryBuilder$new()
 #' sb2$compilation("tcga")
 #' sb2$regions("chr1:1879786-1879786")
 #' sb2$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-#' sb2$range_filters(strand == "-")
+#' sb2$row_filters(strand == "-")
 #'
 #' junction_union(sb1, sb2)
 junction_union <- function(...) {
@@ -76,13 +76,13 @@ junction_union <- function(...) {
 #' sb1$compilation("gtex")
 #' sb1$regions("chr1:1879786-1879786")
 #' sb1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-#' sb1$range_filters(strand == "-")
+#' sb1$row_filters(strand == "-")
 #'
 #' sb2 <- SnaptronQueryBuilder$new()
 #' sb2$compilation("tcga")
 #' sb2$regions("chr1:1879786-1879786")
 #' sb2$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-#' sb2$range_filters(strand == "-")
+#' sb2$row_filters(strand == "-")
 #'
 #' junction_intersection(sb1, sb2)
 junction_intersection <- function(...) {
@@ -209,13 +209,13 @@ calculate_coverage_median <- function(samples) {
 #' sb1$compilation("srav2")
 #' sb1$regions("chr2:29446395-30142858")
 #' sb1$coordinate_modifier(Coordinates$Within)
-#' sb1$range_filters(strand == "-")
+#' sb1$row_filters(strand == "-")
 #'
 #' sb2 <- SnaptronQueryBuilder$new()
 #' sb2$compilation("srav2")
 #' sb2$regions("chr2:29416789-29446394")
 #' sb2$coordinate_modifier(Coordinates$Within)
-#' sb2$range_filters(strand == "-")
+#' sb2$row_filters(strand == "-")
 #'
 #' junction_inclusion_ratio(list(sb1), list(sb2))
 #' @export
@@ -246,7 +246,7 @@ junction_inclusion_ratio <- function(group1, group2, group_names = NULL) {
     data.table::setnames(jir, old = "coverage.x", new = group_names[[1]])
     data.table::setnames(jir, old = "coverage.y", new = group_names[[2]])
 
-    jir[order(-jir)]
+    jir[order(jir, decreasing = TRUE)]
 }
 
 calc_jir <- function(a, b) {
@@ -289,19 +289,19 @@ calc_jir <- function(a, b) {
 #' inclusion_group1$compilation("srav2")
 #' inclusion_group1$regions("chr1:94468008-94472172")
 #' inclusion_group1$coordinate_modifier(Coordinates$Exact)
-#' inclusion_group1$range_filters(strand == "+")
+#' inclusion_group1$row_filters(strand == "+")
 #'
 #' inclusion_group2 <- SnaptronQueryBuilder$new()
 #' inclusion_group2$compilation("srav2")
 #' inclusion_group2$regions("chr1:94468008-94472172")
 #' inclusion_group2$coordinate_modifier(Coordinates$Exact)
-#' inclusion_group2$range_filters(strand == "+")
+#' inclusion_group2$row_filters(strand == "+")
 #'
 #' exclusion_group <- SnaptronQueryBuilder$new()
 #' exclusion_group$compilation("srav2")
 #' exclusion_group$regions("chr1:94468008-94475142")
 #' exclusion_group$coordinate_modifier(Coordinates$Exact)
-#' exclusion_group$range_filters(strand == "+")
+#' exclusion_group$row_filters(strand == "+")
 #'
 #' percent_spliced_in(list(inclusion_group1), list(inclusion_group2),
 #'                    list(exclusion_group))
@@ -393,13 +393,13 @@ calc_psi <- function(inclusion1, inclusion2, exclusion, min_count) {
 #' inclusion_group1$compilation("gtex")
 #' inclusion_group1$regions("chr4:20763023-20763023")
 #' inclusion_group1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-#' inclusion_group1$range_filters(strand == "-")
+#' inclusion_group1$row_filters(strand == "-")
 #'
 #' inclusion_group2 <- SnaptronQueryBuilder$new()
 #' inclusion_group2$compilation("gtex")
 #' inclusion_group2$regions("chr4:20763098-20763098")
 #' inclusion_group2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
-#' inclusion_group2$range_filters(strand == "-")
+#' inclusion_group2$row_filters(strand == "-")
 #'
 #' tissue_specificity(list(inclusion_group1, inclusion_group2))
 #' @export
@@ -465,7 +465,7 @@ tissue_specificity_per_group <- function(group1, group2, group_name) {
 }
 
 shared <- function(cov1, cov2) {
-    as.integer(cov1 != 0 & cov2 != 0)
+    cov1 != 0 & cov2 != 0
 }
 
 #' Shared Sample Count (SSC): counts total number of samples in which 2
@@ -505,13 +505,13 @@ shared <- function(cov1, cov2) {
 #' group1$compilation("gtex")
 #' group1$regions("chr1:1879786-1879786")
 #' group1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-#' group1$range_filters(strand == "-")
+#' group1$row_filters(strand == "-")
 #'
 #' group2 <- SnaptronQueryBuilder$new()
 #' group2$compilation("gtex")
 #' group2$regions("chr1:1879903-1879903")
 #' group2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
-#' group2$range_filters(strand == "-")
+#' group2$row_filters(strand == "-")
 #'
 #' ssc<-shared_sample_counts(list(group1, group2))
 #' @export
