@@ -10,7 +10,7 @@ Description: snapcount is a client interface to the Snaptron webservices
     and/or various summarized measures of expression across one or more regions/genes
     per-sample (e.g. percent spliced in).
 Depends:
-    R (>= 3.6.0)
+    R (>= 4.0.0)
 Imports:
     R6,
     httr,
