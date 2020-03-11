@@ -95,7 +95,7 @@ SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
         },
         regions = function(regions = NULL) {
             if (!missing(regions)) {
-                if (class(regions) == "GRanges") {
+                if (is(regions, "GRanges")) {
                     private$query$regions <- regions
                 } else if (is_genes_or_intervals(regions)) {
                     private$query$regions <- regions

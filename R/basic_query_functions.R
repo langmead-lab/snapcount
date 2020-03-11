@@ -49,7 +49,7 @@ query_jx <- function(sb, return_rse = TRUE, split_by_region = FALSE)
     row_filters <- sb$row_filters()
     column_filters <- sb$column_filters()
 
-    if (class(sb$regions()) == "GRanges") {
+    if (is(regions, "GRanges")) {
         strands <- extract_strands(sb$regions())
         regions <- extract_intervals(sb$regions())
 
@@ -97,7 +97,7 @@ query_gene <- function(sb, return_rse = TRUE, split_by_region = FALSE)
     row_filters <- sb$row_filters()
     column_filters <- sb$column_filters()
 
-    if (class(regions) == "GRanges") {
+    if (is(regions, "GRanges")) {
         strands <- extract_strands(sb$regions())
         regions <- extract_intervals(sb$regions())
 
@@ -144,7 +144,7 @@ query_exon <- function(sb, return_rse = TRUE, split_by_region = FALSE)
     row_filters <- sb$row_filters()
     column_filters <- sb$column_filters()
 
-    if (class(regions) == "GRanges") {
+    if (is(regions, "GRanges")) {
         strands <- extract_strands(sb$regions())
         regions <- extract_intervals(sb$regions())
 
