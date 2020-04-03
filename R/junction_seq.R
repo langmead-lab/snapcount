@@ -7,7 +7,7 @@
 #' and the length of the gene model i.e. larger gene regions may
 #' either completely fail to draw or take too long to be visualized.
 #'
-#' @field query_builders A list of 1 of more SnapQueryBuilder objects.
+#' @field query_builders A list of 1 of more QueryBuilder objects.
 #' @field group_names A vector of strings representing tissue groups.
 #' @field gene The name of the gene to match with the exon and gene
 #'     query results.
@@ -24,19 +24,6 @@
 #'
 #' @examples
 #' \dontrun{
-#' sb1 <- SnaptronQueryBuilder$new()
-#' sb1$compilation("gtex")
-#' sb1$regions("chr7:128393029-128394277")
-#' sb1$row_filters(contains == 1, coverage_sum >= 1000)
-#' sb1$column_filters(SMTS == "Brain")
-#'
-#' sb2 <- sb1$clone(deep = TRUE)
-#' sb2$column_filters(SMTS == "Pituitary")
-#'
-#' sb3 <- sb2$clone(deep = TRUE)
-#' sb3$column_filters(SMTS == "Spleen")
-#'
-#' # Using query builder wrappers
 #' sb1 <- QueryBuilder(compilation = "gtex", regions = "chr7:128393029-128394277")
 #' sb1 <- set_row_filters(sb1, contains == 1, coverage_sum >= 1000)
 #' sb1 <- set_column_filters(sb1, SMTS == "Brain")

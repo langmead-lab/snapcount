@@ -6,18 +6,18 @@
 #'
 #' @param sb A SnaptonQueryBuilder object
 #' @param return_rse Should the query data be returned as a simple data frame or
-#'   converted to a RangeSummarizedExperiment.
+#'   converted to a RangedSummarizedExperiment.
 #'
 #' @param split_by_region By default the results from multiple queries will be
-#'   returned in `RangedSummarizedExperiment` object with a `rowData` entry for
-#'   each labeling each result row according to the query it resulted
+#'   returned in a `RangedSummarizedExperiment` object with a `rowData` entry for
+#'   each, labeling each result row according to the query it resulted
 #'   from. However, if this is set to `TRUE`, the result will be a list of
 #'   RangedSummarizedExperiment objects, one per original interval/gene. This
-#'   latter option may be useful but requires a separate copy of the sample
+#'   latter option may be useful, but it requires a separate copy of the sample
 #'   metadata for each original interval/gene.
 #'
 #' @examples
-#' # Contruct SnaptronQueryBuilder object using wrapper functions
+#' # Contruct a QueryBuilder object
 #' qb <- QueryBuilder(compilation = "gtex", regions = "chr1:1-100000")
 #' qb <- set_row_filters(qb, samples_count >= 20)
 #' query_jx(qb)
@@ -26,19 +26,7 @@
 #' qb <- set_column_filters(qb, SMTS == "Brain")
 #' query_gene(qb)
 #'
-#' # or directly using R6
-#' sb <- SnaptronQueryBuilder$new()
-#' sb$compilation("gtex")
-#' sb$regions("chr1:1-100000")
-#' sb$row_filters("samples_count >= 20")
-#' query_jx(sb)
-#'
-#' sb$regions("CD99")
-#' sb$row_filters(NULL)
-#' sb$column_filters(SMTS == "Brain")
-#' query_gene(sb)
-#'
-#' @return Functions will return either a RangeSummarizedexperiment or
+#' @return Functions will return either a RangedSummarizedExperiment or
 #'   data.table depending on whether the \code{return_rse} parameter is set to
 #'   \code{TRUE} or \code{FALSE}.
 #' @export
@@ -186,7 +174,7 @@ query_exon <- function(sb, return_rse = TRUE, split_by_region = FALSE)
 #' Return the URI of the last successful request to Snaptron
 #'
 #' @description This function can be paired with the \code{from_url} method from
-#'   the SnaptronQueryBuilder class, allowing users to share sources of data
+#'   the QueryBuilder class, allowing users to share sources of data
 #'   from Snaptron.
 #' @return URI of last successful request to Snaptron or \code{NULL} if there
 #'   have not been any successful requests.

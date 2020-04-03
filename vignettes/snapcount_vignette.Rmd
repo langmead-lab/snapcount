@@ -33,16 +33,21 @@ startTime <- Sys.time()
 `R` can be installed on any operating system from [CRAN](https://cran.r-project.org/) after which you can install snapcount
 by using the following commands in your `R` session:
 
-```{r 'installDer', eval = TRUE}
-#Snapcount is not yet in BioConductor,
-#you can install it from the GitHub repository directly using devtools
-devtools::install_github("langmead-lab/snapcount")
 
+```{r 'install', eval = FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("snapcount")
+
+## Check that you have a valid Bioconductor installation
+BiocManager::valid()
 ```
+
 
 ## Required knowledge
 
-snapcount is based on other packages and in particular in those that have implemented the infrastructure needed for dealing with RNA-seq data. That is, packages like `r Biocpkg('GenomicFeatures')` and `r Biocpkg('recount')` that allow you to import the data. A snapcount user is not expected to deal with those packages directly but will need to be familiar with `r Biocpkg('SummarizedExperiment')` to understand the results snapcount generates.  This vignette is based partially on the [recount2 quick start guide](https://bioconductor.org/packages/release/bioc/vignettes/recount/inst/doc/recount-quickstart.html).
+snapcount is based on other packages and in particular in those that have implemented the infrastructure needed for dealing with RNA-seq data. That is, packages like `r Biocpkg('GenomicFeatures')` and `r Biocpkg('recount')` that allow you to import the data. A snapcount user is not expected to deal with those packages directly but will need to be familiar with `r Biocpkg('SummarizedExperiment')` to understand the results snapcount generates.  This vignette is based partially on the [recount2 quick start guide](https://bioconductor.org/packages/recount).
 
 If you are asking yourself the question "Where do I start using Bioconductor?" you might be interested in [this blog post](http://lcolladotor.github.io/2014/10/16/startbioc/).
 
@@ -321,7 +326,7 @@ head(ts)
 
 ## Junction Union (Merge) and Intersection
 
-The junction union query provides the ability to get a single RangeSummarizedExpression (RSE) object of non-redundant junctions across multiple compilations which share a common reference (e.g. HG38).
+The junction union query provides the ability to get a single RSE object of non-redundant junctions across multiple compilations which share a common reference (e.g. HG38).
 Junctions which are the same (have the same chromosome coordinates and strand) are merged into a single row.
 
 An example would be search for the same junctions across the human HG38-based compilations, GTEx and TCGA.
