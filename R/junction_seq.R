@@ -116,8 +116,8 @@ FormatForJunctionSeq <-
 
             get_sample_names = function() {
                 if (is.null(private$sample_names)) {
-                    pivate$sample_names <-
-                        paste("SAMP", seq_along(group_names), sep = "")
+                    private$sample_names <-
+                        paste("SAMP", seq_along(private$group_names), sep = "")
                 }
                 private$sample_names
             },
