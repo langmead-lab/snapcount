@@ -1,51 +1,3 @@
-#' Formats Snapcount results in a form that can be easily passed into
-#' the third-party package, JunctionSeq.
-#'
-#' This allows for the visualization of junction counts along with
-#' their associated gene and exon counts in the context of a gene
-#' model. Performance is dependent on the total number of junctions
-#' and the length of the gene model i.e. larger gene regions may
-#' either completely fail to draw or take too long to be visualized.
-#'
-#' @field query_builders A list of 1 of more QueryBuilder objects.
-#' @field group_names A vector of strings representing tissue groups.
-#' @field gene The name of the gene to match with the exon and gene
-#'     query results.
-#' @field sample_names A vector of strings representing sample names.
-#'
-#' @section Important methods: \code{write_gff}: This method takes an
-#'   optional file name and attempts to write the generated GFF data
-#'   to disk. This method must be called before
-#'   \code{format_for_junction_seq}.
-#'
-#' \code{format_for_junction_seq}: This method will output two
-#'   function calls needed to produce the junction plot for the
-#'   requested gene.
-#'
-#' @examples
-#' \dontrun{
-#' sb1 <- QueryBuilder(compilation = "gtex", regions = "chr7:128393029-128394277")
-#' sb1 <- set_row_filters(sb1, contains == 1, coverage_sum >= 1000)
-#' sb1 <- set_column_filters(sb1, SMTS == "Brain")
-#'
-#' sb2 <- set_column_filters(sb1, SMTS == "Pituitary")
-#'
-#' sb3 <- set_column_filters(sb2, SMTS == "Spleen")
-#'
-#' # initializer does the work of running the necessary queries and
-#' # processing their outputs
-#' js <- FormatForJunctionSeq$new(
-#'     query_builders = list(sb1, sb2, sb3),
-#'     group_names = list("Brain", "Pituitary", "Spleen"),
-#'     gene = "IMPDH1")
-#' # write gff file to disk
-#' js$write_gff_file()
-#'
-#' # output the necessary JunctionSeq function calls needed
-#' # to produce plot
-#' js$format_for_junction_seq()
-#' }
-#' @export
 FormatForJunctionSeq <-
     R6Class(
         "FormatForJunctionSeq",
@@ -56,7 +8,7 @@ FormatForJunctionSeq <-
                 private$group_names <- group_names
                 private$gene <- gene
                 private$sample_names <- sample_names
-                private$design <-
+                private$design_ <-
                     data.frame(condition = factor(unlist(group_names)))
                 private$create_gff_inputs()
             },
@@ -68,35 +20,22 @@ FormatForJunctionSeq <-
                 }
 
                 keys <- c("countdata", "samplenames", "design", "flat.gff_file")
-                vals <- c("get_count_data()", "get_sample_names()",
-                          "get_design()", "get_gff_filename()") %>%
+                vals <- c("countdata", "samplenames",
+                          "design", "flat.gff_file") %>%
                     paste(obj_name, ., sep = "$")
                 args <- paste(keys, vals, sep = "=", collapse = ", ")
-                f1 <- paste0("js_counts <- JunctionSeq::readJunctionSeqCounts(",
+                f1 <- paste0("jscs <- JunctionSeq::readJunctionSeqCounts(",
                              args, ")")
 
                 keys <- c("geneID", "jscs", "plot.type", "displayTranscripts")
-                vals <- c(paste(obj_name, "get_gene_name()", sep = "$"),
-                          "js_counts", "\"rawCounts\"", "TRUE")
+                vals <- c(paste(obj_name, "geneID", sep = "$"),
+                          "jscs", "\"rawCounts\"", "TRUE")
                 args <- paste(keys, vals, sep = "=", collapse = ", ")
                 f2 <- paste0("JunctionSeq::plotJunctionSeqResultsForGene(",
                              args, ")")
 
                 cat(f1, f2, sep = "\n\n")
             },
-
-            get_gff_filename = function() {
-                if (is.null(private$gff_filename)) {
-                    stop(paste("please call 'write_gff_file' method",
-                               "first with an optional filename"))
-                }
-                private$gff_filename
-            },
-
-            get_gff_data = function() {
-                private$gff
-            },
-
             write_gff_file = function(filename = NULL) {
                 if (is.null(filename)) {
                     private$gff_filename <- paste0(private$gene, ".gff")
@@ -104,31 +43,40 @@ FormatForJunctionSeq <-
                     private$gff_filename <- filename
                 }
                 writeLines(private$gff, private$gff_filename)
+            }
+        ),
+        active = list(
+            flat.gff_file = function() {
+                if (is.null(private$gff_filename)) {
+                    stop(paste("please call 'write_gff_file' method",
+                               "first with an optional filename"))
+                }
+                private$gff_filename
             },
-
-            get_count_data = function() {
+            gff_data = function() {
+                private$gff
+            },
+            countdata = function() {
                 private$count_dataframes
             },
 
-            get_design = function() {
-                private$design
+            design = function() {
+                private$design_
             },
-
-            get_sample_names = function() {
+            samplenames = function() {
                 if (is.null(private$sample_names)) {
                     private$sample_names <-
                         paste("SAMP", seq_along(private$group_names), sep = "")
                 }
                 private$sample_names
             },
-
-            get_gene_name = function() {
+            geneID = function() {
                 private$gene
             }
         ),
         private = list(
             idx = 0,
-            design = NULL,
+            design_ = NULL,
 
             query_builders = list(),
             group_names = list(),
@@ -459,7 +407,7 @@ FormatForJunctionSeq <-
 
             FormatForJunctionSeq_objs = function(obj_name, env) {
                 obj <- get(obj_name, envir = env)
-                is(obj, c("FormatForJunctionSeq", "R6"))
+                is(obj, "FormatForJunctionSeq")
             },
 
             same_address_as_self = function(obj_name, env) {
@@ -468,3 +416,61 @@ FormatForJunctionSeq <-
             }
         )
     )
+
+#' Formats Snapcount results in a form that can be easily passed into
+#' the third-party package, JunctionSeq.
+#'
+#' This allows for the visualization of junction counts along with
+#' their associated gene and exon counts in the context of a gene
+#' model. Performance is dependent on the total number of junctions
+#' and the length of the gene model i.e. larger gene regions may
+#' either completely fail to draw or take too long to be visualized.
+#'
+#' @param query_builders A list of 1 of more QueryBuilder objects.
+#' @param group_names A vector of strings representing tissue groups.
+#' @param gene The name of the gene to match with the exon and gene
+#'     query results.
+#' @param sample_names A vector of strings representing sample names.
+#' @param js_params An object returned from call to `get_JunctionSeq_params`.
+#'
+#' @return
+#' \code{get_JunctionSeq_params} returns an object containing the necessary
+#'   parameters needed by calls to \code{JunctionSeq::readJunctionSeqCounts} and
+#'   \code{JunctionSeq::plotJunctionSeqResultsForGene}.
+#'
+#' \code{output_example_function_calls} outputs the necessary JunctionSeq
+#'   calls needed to produce a plot.
+#'
+#' @examples
+#' \dontrun{
+#' sb1 <- QueryBuilder(compilation = "gtex", regions = "chr7:128393029-128394277")
+#' sb1 <- set_row_filters(sb1, contains == 1, coverage_sum >= 1000)
+#' sb1 <- set_column_filters(sb1, SMTS == "Brain")
+#'
+#' sb2 <- set_column_filters(sb1, SMTS == "Pituitary")
+#'
+#' sb3 <- set_column_filters(sb2, SMTS == "Spleen")
+#'
+#' js <- get_JunctionSeq_params(
+#'     query_builders = list(sb1, sb2, sb3),
+#'     gene = "IMPDH1",
+#'     group_names = list("Brain", "Pituitary", "Spleen")
+#' )
+#'
+#' output_example_function_calls(js)
+#' }
+#' @export
+get_JunctionSeq_params <- function(query_builders, group_names, gene) {
+    js <- FormatForJunctionSeq$new(query_builders, group_names, gene)
+    js$write_gff_file()
+
+    js
+}
+
+#' @export
+#' @rdname get_JunctionSeq_params
+output_example_function_calls <- function(js_params) {
+    assert_that(is(js_params, "FormatForJunctionSeq"))
+
+    js_params$format_for_junction_seq(env = parent.frame())
+}
