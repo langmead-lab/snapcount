@@ -19,17 +19,21 @@ FormatForJunctionSeq <-
                     obj_name <- "obj"
                 }
 
-                keys <- c("countdata", "samplenames", "design", "flat.gff_file")
+                keys <- c("countdata", "samplenames", "design", "flat.gff.file")
                 vals <- c("countdata", "samplenames",
-                          "design", "flat.gff_file") %>%
+                          "design", "flat.gff.file") %>%
                     paste(obj_name, ., sep = "$")
                 args <- paste(keys, vals, sep = "=", collapse = ", ")
                 f1 <- paste0("jscs <- JunctionSeq::readJunctionSeqCounts(",
                              args, ")")
 
-                keys <- c("geneID", "jscs", "plot.type", "displayTranscripts")
+                keys <- c("geneID", "jscs", "plot.type", "displayTranscripts",
+                          "plot.exon.results", "plot.junction.results",
+                          "plot.novel.junction.results",
+                          "plot.untestable.results")
                 vals <- c(paste(obj_name, "geneID", sep = "$"),
-                          "jscs", "\"rawCounts\"", "TRUE")
+                          "jscs", "\"rawCounts\"", "TRUE",
+                          "TRUE", "TRUE", "TRUE", "TRUE")
                 args <- paste(keys, vals, sep = "=", collapse = ", ")
                 f2 <- paste0("JunctionSeq::plotJunctionSeqResultsForGene(",
                              args, ")")
@@ -46,7 +50,7 @@ FormatForJunctionSeq <-
             }
         ),
         active = list(
-            flat.gff_file = function() {
+            flat.gff.file = function() {
                 if (is.null(private$gff_filename)) {
                     stop(paste("please call 'write_gff_file' method",
                                "first with an optional filename"))
