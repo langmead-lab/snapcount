@@ -15,7 +15,7 @@ percent_spliced_in(
 }
 \arguments{
 \item{inclusion_group1, inclusion_group2, exclusion_group}{Where each
-is a list of 1 or more SnaptronQueryBuilder objects}
+is a list of 1 or more QueryBuilder objects}
 
 \item{min_count}{minimum total count (denominator) required to not
 be assigned -1}

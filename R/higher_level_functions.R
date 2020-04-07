@@ -86,7 +86,7 @@ junction_intersection <- function(...) {
         is_list_of_query_builders(list(...)),
         msg = paste(
             "junction_intersection expects 1 or more",
-            "SnaptronQueryBuilder objects"
+            "QueryBuilder objects"
         )
     )
     merge_compilations(..., all = FALSE)
@@ -268,7 +268,7 @@ calc_jir <- function(a, b) {
 #' from the basic queries in that group in the current sample.
 #'
 #' @param inclusion_group1,inclusion_group2,exclusion_group Where each
-#'     is a list of 1 or more SnaptronQueryBuilder objects
+#'     is a list of 1 or more QueryBuilder objects
 #' @param min_count minimum total count (denominator) required to not
 #'     be assigned -1
 #' @param group_names Optional vector of strings representing the
