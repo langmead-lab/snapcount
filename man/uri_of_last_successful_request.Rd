@@ -12,7 +12,7 @@ have not been any successful requests.
 }
 \description{
 This function can be paired with the \code{from_url} method from
-the SnaptronQueryBuilder class, allowing users to share sources of data
+the QueryBuilder class, allowing users to share sources of data
 from Snaptron.
 }
 \examples{

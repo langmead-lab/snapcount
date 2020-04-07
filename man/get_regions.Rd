@@ -14,8 +14,8 @@ set_regions(qb, regions)
 \code{\link{QueryBuilder}} function.}
 
 \item{regions}{Either a list of 1 more \code{HUGO} gene names as strings
-\code{e.g. "BRCA1"} or a Granges class object containing one or more geneomic
-intervals \code{(e.g. "chr1:1-1000")}.}
+\verb{e.g. "BRCA1"} or a Granges class object containing one or more geneomic
+intervals \verb{(e.g. "chr1:1-1000")}.}
 }
 \value{
 \code{get_regions} returns the current regions as a list of strings.

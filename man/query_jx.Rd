@@ -16,18 +16,18 @@ query_exon(sb, return_rse = TRUE, split_by_region = FALSE)
 \item{sb}{A SnaptonQueryBuilder object}
 
 \item{return_rse}{Should the query data be returned as a simple data frame or
-converted to a RangeSummarizedExperiment.}
+converted to a RangedSummarizedExperiment.}
 
 \item{split_by_region}{By default the results from multiple queries will be
-returned in \code{RangedSummarizedExperiment} object with a \code{rowData} entry for
-each labeling each result row according to the query it resulted
+returned in a \code{RangedSummarizedExperiment} object with a \code{rowData} entry for
+each, labeling each result row according to the query it resulted
 from. However, if this is set to \code{TRUE}, the result will be a list of
 RangedSummarizedExperiment objects, one per original interval/gene. This
-latter option may be useful but requires a separate copy of the sample
+latter option may be useful, but it requires a separate copy of the sample
 metadata for each original interval/gene.}
 }
 \value{
-Functions will return either a RangeSummarizedexperiment or
+Functions will return either a RangedSummarizedExperiment or
 data.table depending on whether the \code{return_rse} parameter is set to
 \code{TRUE} or \code{FALSE}.
 }
@@ -37,7 +37,7 @@ intervals it will return a list of 0 or more genes, junctions, or exons
 (depending on which query form is used) which overlap the ranges.
 }
 \examples{
-# Contruct SnaptronQueryBuilder object using wrapper functions
+# Contruct a QueryBuilder object
 qb <- QueryBuilder(compilation = "gtex", regions = "chr1:1-100000")
 qb <- set_row_filters(qb, samples_count >= 20)
 query_jx(qb)
@@ -45,17 +45,5 @@ query_jx(qb)
 qb <- set_row_filters(qb, NULL)
 qb <- set_column_filters(qb, SMTS == "Brain")
 query_gene(qb)
-
-# or directly using R6
-sb <- SnaptronQueryBuilder$new()
-sb$compilation("gtex")
-sb$regions("chr1:1-100000")
-sb$row_filters("samples_count >= 20")
-query_jx(sb)
-
-sb$regions("CD99")
-sb$row_filters(NULL)
-sb$column_filters(SMTS == "Brain")
-query_gene(sb)
 
 }

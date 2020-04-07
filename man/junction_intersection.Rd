@@ -8,31 +8,19 @@ which are on the same reference}
 junction_intersection(...)
 }
 \arguments{
-\item{...}{One or more SnaptronQueryBuilder objects}
+\item{...}{One or more QueryBuilder objects}
 }
 \value{
 A RangedSummarizedExperiment of junctions common across compilations
 }
 \description{
 This function operates similar to the \code{junction_union()} function, i.e
-it’s cross compilation and merging of the same junction from multiple
+it is cross compilation and merging of the same junction from multiple
 compilations will be handled exactly the same way. But instead
 of every junction which appears in at least one compilation, only
 the junctions which appear in \emph{every} compilation will be returned.
 }
 \examples{
-sb1 <- SnaptronQueryBuilder$new()
-sb1$compilation("gtex")
-sb1$regions("chr1:1879786-1879786")
-sb1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-sb1$row_filters(strand == "-")
-
-sb2 <- SnaptronQueryBuilder$new()
-sb2$compilation("tcga")
-sb2$regions("chr1:1879786-1879786")
-sb2$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-sb2$row_filters(strand == "-")
-
 # Using query builder wrappers
 sb1 <- QueryBuilder(compilation = "gtex", regions = "chr1:1879786-1879786")
 sb1 <- set_coordinate_modifier(sb1, Coordinates$EndIsExactOrWithin)

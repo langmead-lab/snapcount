@@ -12,8 +12,8 @@ Snaptron data source. Any variant of the \code{Compilation} enum can also be
 passed an argument.}
 
 \item{regions}{Either a list of 1 more \code{HUGO} gene names as strings
-\code{e.g. "BRCA1"} or a Granges class object containing one or more geneomic
-intervals \code{(e.g. "chr1:1-1000")}.}
+\verb{e.g. "BRCA1"} or a Granges class object containing one or more geneomic
+intervals \verb{(e.g. "chr1:1-1000")}.}
 }
 \value{
 A SnaptronQueryBuilder object. See \link{SnaptronQueryBuilder} for details.

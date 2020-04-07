@@ -8,7 +8,7 @@ different junctions both occur in.}
 shared_sample_counts(..., group_names = NULL)
 }
 \arguments{
-\item{...}{One or more lists of SnaptronQueryBuilder objects}
+\item{...}{One or more lists of QueryBuilder objects}
 
 \item{group_names}{Optional vector of character strings
 representing group names}
@@ -43,19 +43,6 @@ support there is for a particular junction configuration (typically
 a cassette exon).
 }
 \examples{
-g1 <- SnaptronQueryBuilder$new()
-g1$compilation("gtex")
-g1$regions("chr1:1879786-1879786")
-g1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-g1$row_filters(strand == "-")
-
-g2 <- SnaptronQueryBuilder$new()
-g2$compilation("gtex")
-g2$regions("chr1:1879903-1879903")
-g2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
-g2$row_filters(strand == "-")
-
-# Using query builder wrappers
 g1 <- QueryBuilder(compilation = "gtex", regions = "chr1:1879786-1879786")
 g1 <- set_coordinate_modifier(g1, Coordinates$EndIsExactOrWithin)
 g1 <- set_row_filters(g1, strand == "-")

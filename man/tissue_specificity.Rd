@@ -10,7 +10,7 @@ tissue enrichment (currently only works for the GTEx compilation).}
 tissue_specificity(..., group_names = NULL)
 }
 \arguments{
-\item{...}{One or more SnaptronQueryBuilder objects}
+\item{...}{One or more QueryBuilder objects}
 
 \item{group_names}{Optional vector of strings representing the
 group names}
@@ -19,8 +19,8 @@ group names}
 A DataFrame of all samples in the compilation with either a
 0 or 1 indicating their occurrence and shared status (if > 1
 group passed in).  Occurrence here is if the sample has at least
-one result with > 0 coverage, and further, if > 1 group passed
-in, if it occurs in the results of all groups.  Also includes the
+one result with > 0 coverage, and further, if > 1 group is passed
+in, then if it occurs in the results of all groups.  Also includes the
 sample tissue type and sample_id.
 }
 \description{
@@ -28,32 +28,19 @@ Lists the number of samples labeled with a specific tissue type.
 Samples are filtered for ones which have junctions across all the
 user-specified groups. That is, if a sample only appears in the results of
 some of the groups (from their basic queries) it will be assigned a 0,
-otherwise if it’s in all of the groups’ results it will be assigned a 1.
-This is similar to the SSC high level query type, but doesn’t sum the
+otherwise if it is in all of the groups' results it will be assigned a 1.
+This is similar to the SSC high level query type, but doesn't sum the
 coverage.
 }
 \details{
 The samples are then grouped by their tissue type (e.g. Brain).
-This is useful for determining if there’s an enrichment for a specific
+This is useful for determining if there's an enrichment for a specific
 tissue in the set of junctions queried.  Results from this can be fed to a
 statistical test, such as the Kruskal-wallis non-parametric rank test.
-This query is limited to GTEx only due to the fact that GTEx is one of the
+This query is limited to GTEx only, due to the fact that GTEx is one of the
 few compilations that has consistent and complete tissue metadata.
 }
 \examples{
-in1 <- SnaptronQueryBuilder$new()
-in1$compilation("gtex")
-in1$regions("chr4:20763023-20763023")
-in1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-in1$row_filters(strand == "-")
-
-in2 <- SnaptronQueryBuilder$new()
-in2$compilation("gtex")
-in2$regions("chr4:20763098-20763098")
-in2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
-in2$row_filters(strand == "-")
-
-# Using query builder wrappers
 in1 <- QueryBuilder(compilation = "gtex", regions = "chr4:20763023-20763023")
 in1 <- set_coordinate_modifier(in1, Coordinates$EndIsExactOrWithin)
 in1 <- set_row_filters(in1, strand == "-")

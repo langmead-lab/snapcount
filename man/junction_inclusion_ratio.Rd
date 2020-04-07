@@ -10,7 +10,7 @@ junction_inclusion_ratio(group1, group2, group_names = NULL)
 }
 \arguments{
 \item{group1, group2}{Each group is a list of 1 or more
-SnaptronQueryBuilder objects}
+QueryBuilder objects}
 
 \item{group_names}{Optional vector of strings representing the
 group names}
@@ -32,22 +32,9 @@ If the coverage of the first group is "A" and the second is "B":
 \code{JIR(A,B)=(A - B) / (A+B+1)}
 
 This is calculated for every sample that occurs in one or the other
-(or both) groups’ results.
+(or both) groups results.
 }
 \examples{
-sb1 <- SnaptronQueryBuilder$new()
-sb1$compilation("srav2")
-sb1$regions("chr2:29446395-30142858")
-sb1$coordinate_modifier(Coordinates$Within)
-sb1$row_filters(strand == "-")
-
-sb2 <- SnaptronQueryBuilder$new()
-sb2$compilation("srav2")
-sb2$regions("chr2:29416789-29446394")
-sb2$coordinate_modifier(Coordinates$Within)
-sb2$row_filters(strand == "-")
-
-# Using query builder wappers
 sb1 <- QueryBuilder(compilation = "srav2", regions = "chr2:29446395-30142858")
 sb1 <- set_coordinate_modifier(sb1, Coordinates$Within)
 sb1 <- set_row_filters(sb1, strand == "-")

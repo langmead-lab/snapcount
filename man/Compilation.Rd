@@ -4,7 +4,7 @@
 \name{Compilation}
 \alias{Compilation}
 \title{Enum for Snaptron compilations}
-\format{An object of class \code{environment} of length 17.}
+\format{An object of class \code{environment} of length 20.}
 \usage{
 Compilation
 }

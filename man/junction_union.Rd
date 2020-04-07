@@ -8,7 +8,7 @@ which are on the same reference}
 junction_union(...)
 }
 \arguments{
-\item{...}{One or more SnaptronQueryBuilder objects}
+\item{...}{One or more QueryBuilder objects}
 }
 \value{
 A RangedSummarizedExperiment of junctions appearing in at least
@@ -46,18 +46,6 @@ are merged across \emph{all} samples from all compilations:
 }
 }
 \examples{
-sb1 <- SnaptronQueryBuilder$new()
-sb1$compilation(Compilation$gtex)
-sb1$regions("chr1:1879786-1879786")
-sb1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-sb1$row_filters(strand == "-")
-
-sb2 <- SnaptronQueryBuilder$new()
-sb2$compilation("tcga")
-sb2$regions("chr1:1879786-1879786")
-sb2$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-sb2$row_filters(strand == "-")
-
 # Using query builder wrappers
 sb1 <- QueryBuilder(compilation = "gtex", regions = "chr1:1879786-1879786")
 sb1 <- set_coordinate_modifier(sb1, Coordinates$EndIsExactOrWithin)

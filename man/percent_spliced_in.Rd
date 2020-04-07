@@ -5,8 +5,13 @@
 \title{Relative measure of splice variant usage, limited currently to
 cassette exon splice variants}
 \usage{
-percent_spliced_in(inclusion_group1, inclusion_group2, exclusion_group,
-  min_count = 20, group_names = NULL)
+percent_spliced_in(
+  inclusion_group1,
+  inclusion_group2,
+  exclusion_group,
+  min_count = 20,
+  group_names = NULL
+)
 }
 \arguments{
 \item{inclusion_group1, inclusion_group2, exclusion_group}{Where each
@@ -43,25 +48,6 @@ where each term denotes the coverage of junctions that resulted
 from the basic queries in that group in the current sample.
 }
 \examples{
-in1 <- SnaptronQueryBuilder$new()
-in1$compilation("srav2")
-in1$regions("chr1:94468008-94472172")
-in1$coordinate_modifier(Coordinates$Exact)
-in1$row_filters(strand == "+")
-
-in2 <- SnaptronQueryBuilder$new()
-in2$compilation("srav2")
-in2$regions("chr1:94468008-94472172")
-in2$coordinate_modifier(Coordinates$Exact)
-in2$row_filters(strand == "+")
-
-ex <- SnaptronQueryBuilder$new()
-ex$compilation("srav2")
-ex$regions("chr1:94468008-94475142")
-ex$coordinate_modifier(Coordinates$Exact)
-ex$row_filters(strand == "+")
-
-# Using query builder wrappers
 in1 <- QueryBuilder(compilation = "srav2", regions = "chr1:94468008-94472172")
 in1 <- set_coordinate_modifier(in1, Coordinates$Exact)
 in1 <- set_row_filters(in1, strand == "+")
