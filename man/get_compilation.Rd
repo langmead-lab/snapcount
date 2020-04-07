@@ -10,7 +10,7 @@ get_compilation(qb)
 set_compilation(qb, compilation)
 }
 \arguments{
-\item{qb}{SnaptronQueryBuilder object}
+\item{qb}{QueryBuilder object}
 
 \item{compilation}{A single string containing the name of the Snaptron data
 source. Any variant of the \code{Compilation} enum can also be passed as an
@@ -18,7 +18,7 @@ argument.}
 }
 \value{
 \code{get_compilation} returns the current compilation as string.
-\code{set_compilation} returns a new \code{SnaptronQueryBuilder} object with
+\code{set_compilation} returns a new \code{QueryBuilder} object with
 the compilation set to the value of \code{compilation}.
 }
 \description{

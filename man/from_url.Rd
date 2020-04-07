@@ -2,7 +2,7 @@
 % Please edit documentation in R/query_builder_wrappers.R
 \name{from_url}
 \alias{from_url}
-\title{Constructs a \code{SnaptronQueryBuilder} object from the given url}
+\title{Constructs a \code{QueryBuilder} object from the given url}
 \usage{
 from_url(url)
 }
@@ -11,11 +11,11 @@ from_url(url)
 \code{\link{uri_of_last_successful_request}} function}
 }
 \value{
-Returns a \code{SnaptronQueryBuilder} object with attributes set from the
+Returns a \code{QueryBuilder} object with attributes set from the
 parsed url.
 }
 \description{
-Constructs a \code{SnaptronQueryBuilder} object from the given url
+Constructs a \code{QueryBuilder} object from the given url
 }
 \examples{
 sb <- from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=CD99")

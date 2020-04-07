@@ -10,7 +10,7 @@ get_row_filters(qb)
 set_row_filters(qb, ...)
 }
 \arguments{
-\item{qb}{a SnaptronQueryBuilder object constructed using the
+\item{qb}{a QueryBuilder object constructed using the
 \code{\link{QueryBuilder}} function.}
 
 \item{...}{one or more boolean predicates as either strings or unevaluated
@@ -18,7 +18,7 @@ expressions.}
 }
 \value{
 \code{get_row_filters} returns the current row filters as list of strings.
-\code{set_row_filters} returns a new \code{SnaptronQueryBuilder} object with
+\code{set_row_filters} returns a new \code{QueryBuilder} object with
 the row filters set to the value of \code{row_filters}.
 }
 \description{

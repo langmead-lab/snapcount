@@ -15,19 +15,19 @@
 #'
 #' @field coordinate_modifier Snaptron coordinate modifier enum. Variants include:
 #'
-#'   Coordinate$Exact - Contraints the results so that the start/end coordinates
-#'              match the start/end of the specifiied range.
+#'   Coordinate$Exact - Consrains the results so that the start/end coordinates
+#'              match the start/end of the specified range.
 #'
-#'   Coordinate$Within - Contraints the results so that the coordinates are
+#'   Coordinate$Within - Constrains the results so that the coordinates are
 #'              within (inclusive) the specified range.
 #'
-#'   Coordinate$StartIsExactOrWithin - Constraints the results so that the start
+#'   Coordinate$StartIsExactOrWithin - Constrains the results so that the start
 #'              coorindate matches or is within the boundaries of the specified range.
 #'
-#'   Coorindate$EndIsExactOrWithin - Contraints the results so that that the end.
+#'   Coorindate$EndIsExactOrWithin - Constrains the results so that the end
 #'              coordinate matches or is within the boundaries of the specified range.
 #'
-#'   Coordinate$Overlaps - Contraints the results so that the coorindates overlaps the
+#'   Coordinate$Overlaps - Constrains the results so that the coordinates overlap the
 #'              specified range.
 #'
 #' @section Methods:
@@ -62,7 +62,7 @@
 #'
 #'   \item{\code{print} print query builder object}
 #'
-#'   \item{\code{from_url} use URL to instantiate SnaptronQueryBuilder object }
+#'   \item{\code{from_url} use URL to instantiate QueryBuilder object }
 #' }
 #'
 #' @examples

@@ -2,7 +2,7 @@
 % Please edit documentation in R/query_builder_wrappers.R
 \name{QueryBuilder}
 \alias{QueryBuilder}
-\title{Construct a SnaptronQueryBuilder object given a compilation and one or regions.}
+\title{Construct a QueryBuilder object given a compilation and one or regions.}
 \usage{
 QueryBuilder(compilation, regions)
 }
@@ -16,10 +16,10 @@ passed an argument.}
 intervals \verb{(e.g. "chr1:1-1000")}.}
 }
 \value{
-A SnaptronQueryBuilder object. See \link{SnaptronQueryBuilder} for details.
+A QueryBuilder object. See \link{SnaptronQueryBuilder} for details.
 }
 \description{
-Construct a SnaptronQueryBuilder object given a compilation and one or regions.
+Construct a QueryBuilder object given a compilation and one or regions.
 }
 \examples{
 # contruct a query builder for GTEX data source and BRAC1 gene

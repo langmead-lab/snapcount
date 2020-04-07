@@ -23,7 +23,7 @@ enum <- function(...) {
 #'   boundaries of the region requested.
 #' @field EndIsExactOrWithin Return junctions whose
 #'   end coordinate matches, or is within, the
-#'   boudnaries of the region requested.
+#'   boundaries of the region requested.
 #'
 #' @examples
 #' qb <- QueryBuilder(compilation = "gtex", regions = "CD99")

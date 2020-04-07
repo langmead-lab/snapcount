@@ -28,7 +28,7 @@ boundaries of the region requested.}
 
 \item{\code{EndIsExactOrWithin}}{Return junctions whose
 end coordinate matches, or is within, the
-boudnaries of the region requested.}
+boundaries of the region requested.}
 }}
 
 \examples{

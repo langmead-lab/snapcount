@@ -1,5 +1,5 @@
 # nocov start
-#' Construct a SnaptronQueryBuilder object given a compilation and one or regions.
+#' Construct a QueryBuilder object given a compilation and one or regions.
 #'
 #' @param compilation A single string containing the name of the
 #'   Snaptron data source. Any variant of the `Compilation` enum can also be
@@ -9,7 +9,7 @@
 #'   intervals `(e.g. "chr1:1-1000")`.
 #'
 #' @return
-#' A SnaptronQueryBuilder object. See \link{SnaptronQueryBuilder} for details.
+#' A QueryBuilder object. See \link{SnaptronQueryBuilder} for details.
 #' @examples
 #' # contruct a query builder for GTEX data source and BRAC1 gene
 #' qb <- QueryBuilder(compilation = Compilation$gtex, regions = "BRCA1")
@@ -27,14 +27,14 @@ QueryBuilder <- function(compilation, regions) {
 
 #' Get or set query compilation
 #'
-#' @param qb SnaptronQueryBuilder object
+#' @param qb QueryBuilder object
 #' @param compilation A single string containing the name of the Snaptron data
 #'   source. Any variant of the `Compilation` enum can also be passed as an
 #'   argument.
 #'
 #' @return
 #' \code{get_compilation} returns the current compilation as string.
-#' \code{set_compilation} returns a new \code{SnaptronQueryBuilder} object with
+#' \code{set_compilation} returns a new \code{QueryBuilder} object with
 #'   the compilation set to the value of \code{compilation}.
 #'
 #' @examples
@@ -49,7 +49,7 @@ get_compilation <- function(qb) {
 
 #' Get or set query regions
 #'
-#' @param qb A SnaptronQueryBuilder object constructed using the
+#' @param qb A QueryBuilder object constructed using the
 #'   \code{\link{QueryBuilder}} function.
 #' @param regions Either a list of 1 more `HUGO` gene names as strings
 #'   `e.g. "BRCA1"` or a Granges class object containing one or more geneomic
@@ -57,7 +57,7 @@ get_compilation <- function(qb) {
 #'
 #' @return
 #' \code{get_regions} returns the current regions as a list of strings.
-#' \code{set_regions} returns a new \code{SnaptronQueryBuilder} object with the
+#' \code{set_regions} returns a new \code{QueryBuilder} object with the
 #'   regions set to the value of \code{regions}.
 #'
 #' @examples
@@ -74,14 +74,14 @@ get_regions <- function(qb) {
 
 #' Get or set sample-related contraints for query
 #'
-#' @param qb a SnaptronQueryBuilder object constructed using the
+#' @param qb a QueryBuilder object constructed using the
 #'   \code{\link{QueryBuilder}} function
 #' @param ... one or more boolean predicates as either strings or unevaluated
 #'   expressions
 #'
 #' @return
 #' \code{get_column_filters} returns the current filters as a list of strings.
-#' \code{set_column_filters} returns a new \code{SnaptronQueryBuilder} object
+#' \code{set_column_filters} returns a new \code{QueryBuilder} object
 #'   with the column filters set to the value of \code{column_filters}.
 #'
 #' @examples
@@ -99,14 +99,14 @@ get_column_filters <- function(qb) {
 
 #' Get or set range-related contraints for query
 #'
-#' @param qb a SnaptronQueryBuilder object constructed using the
+#' @param qb a QueryBuilder object constructed using the
 #'   \code{\link{QueryBuilder}} function.
 #' @param ... one or more boolean predicates as either strings or unevaluated
 #'   expressions.
 #'
 #' @return
 #' \code{get_row_filters} returns the current row filters as list of strings.
-#' \code{set_row_filters} returns a new \code{SnaptronQueryBuilder} object with
+#' \code{set_row_filters} returns a new \code{QueryBuilder} object with
 #'   the row filters set to the value of \code{row_filters}.
 #'
 #' @examples
@@ -124,13 +124,13 @@ get_row_filters <- function(qb) {
 
 #' Get or set query sample ids
 #'
-#' @param qb a SnaptronQueryBuilder object constructed using the
+#' @param qb a QueryBuilder object constructed using the
 #'   \code{\link{QueryBuilder}} function.
 #' @param sids a vector or 1 or more whole numbers to filter results on.
 #'
 #' @return
 #' \code{get_sids} returns the current sample ids as a vector of integers.
-#' \code{set_sids} returns a new \code{SnaptronQueryBuilder} object with the
+#' \code{set_sids} returns a new \code{QueryBuilder} object with the
 #'   sample ids set to the value of \code{sids}.
 #'
 #' @examples
@@ -142,18 +142,18 @@ get_sids <- function(qb) {
     qb$sids()
 }
 
-#' Get or set coordinate modifiers for query.
+#' Get or set coordinate modifiers for the query.
 #'
-#' @param qb a SnaptronQueryBuilderObject constructed using the
+#' @param qb a QueryBuilder object constructed using the
 #'   \code{\link{QueryBuilder}} function.
 #' @param coordinate_modifier any of the variants of the \link{Coordinates}
 #'   enum.
 #'
 #' @return
-#' \code{get_coordinate_modifier} returns the current coodinate modifier in the
-#'    as string.
-#' \code{set_coordinate_modifier} returns a new \code{SnaptronQueryBuilder}
-#'   object with the coordinate modifier set the value of
+#' \code{get_coordinate_modifier} returns the current coodinate modifier
+#'    as a string.
+#' \code{set_coordinate_modifier} returns a new \code{QueryBuilder}
+#'   object with the coordinate modifier set to the value of
 #'   \code{coordinate_modifier}.
 #'
 #' @examples
@@ -207,13 +207,13 @@ set_coordinate_modifier <- function(qb, coordinate_modifier) {
     cloned_qb
 }
 
-#' Constructs a \code{SnaptronQueryBuilder} object from the given url
+#' Constructs a \code{QueryBuilder} object from the given url
 #'
 #' @param url a well-formed url preferably obtained from a call to the
 #'   \code{\link{uri_of_last_successful_request}} function
 #'
 #' @return
-#' Returns a \code{SnaptronQueryBuilder} object with attributes set from the
+#' Returns a \code{QueryBuilder} object with attributes set from the
 #'   parsed url.
 #'
 #' @examples

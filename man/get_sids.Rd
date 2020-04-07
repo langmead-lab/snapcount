@@ -10,14 +10,14 @@ get_sids(qb)
 set_sids(qb, sids)
 }
 \arguments{
-\item{qb}{a SnaptronQueryBuilder object constructed using the
+\item{qb}{a QueryBuilder object constructed using the
 \code{\link{QueryBuilder}} function.}
 
 \item{sids}{a vector or 1 or more whole numbers to filter results on.}
 }
 \value{
 \code{get_sids} returns the current sample ids as a vector of integers.
-\code{set_sids} returns a new \code{SnaptronQueryBuilder} object with the
+\code{set_sids} returns a new \code{QueryBuilder} object with the
 sample ids set to the value of \code{sids}.
 }
 \description{
