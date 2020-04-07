@@ -32,24 +32,12 @@
 #' }
 #'
 #'
-#' @param ... One or more SnaptronQueryBuilder objects
+#' @param ... One or more QueryBuilder objects
 #' @return A RangedSummarizedExperiment of junctions appearing in at least
 #' one compilation
 #' @seealso [junction_intersection()]
 #'
 #' @examples
-#' sb1 <- SnaptronQueryBuilder$new()
-#' sb1$compilation(Compilation$gtex)
-#' sb1$regions("chr1:1879786-1879786")
-#' sb1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-#' sb1$row_filters(strand == "-")
-#'
-#' sb2 <- SnaptronQueryBuilder$new()
-#' sb2$compilation("tcga")
-#' sb2$regions("chr1:1879786-1879786")
-#' sb2$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-#' sb2$row_filters(strand == "-")
-#'
 #' # Using query builder wrappers
 #' sb1 <- QueryBuilder(compilation = "gtex", regions = "chr1:1879786-1879786")
 #' sb1 <- set_coordinate_modifier(sb1, Coordinates$EndIsExactOrWithin)
@@ -64,7 +52,7 @@
 junction_union <- function(...) {
     assert_that(
         is_list_of_query_builders(list(...)),
-        msg = "junction_union expects 1 or more SnaptronQueryBuilder objects")
+        msg = "junction_union expects 1 or more QueryBuilder objects")
     merge_compilations(..., all = TRUE)
 }
 
@@ -72,28 +60,16 @@ junction_union <- function(...) {
 #' which are on the same reference
 #'
 #' This function operates similar to the `junction_union()` function, i.e
-#' it’s cross compilation and merging of the same junction from multiple
+#' it is cross compilation and merging of the same junction from multiple
 #' compilations will be handled exactly the same way. But instead
 #' of every junction which appears in at least one compilation, only
 #' the junctions which appear in *every* compilation will be returned.
 #'
-#' @param ... One or more SnaptronQueryBuilder objects
+#' @param ... One or more QueryBuilder objects
 #' @return A RangedSummarizedExperiment of junctions common across compilations
 #' @seealso [junction_union()]
 #'
 #' @examples
-#' sb1 <- SnaptronQueryBuilder$new()
-#' sb1$compilation("gtex")
-#' sb1$regions("chr1:1879786-1879786")
-#' sb1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-#' sb1$row_filters(strand == "-")
-#'
-#' sb2 <- SnaptronQueryBuilder$new()
-#' sb2$compilation("tcga")
-#' sb2$regions("chr1:1879786-1879786")
-#' sb2$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-#' sb2$row_filters(strand == "-")
-#'
 #' # Using query builder wrappers
 #' sb1 <- QueryBuilder(compilation = "gtex", regions = "chr1:1879786-1879786")
 #' sb1 <- set_coordinate_modifier(sb1, Coordinates$EndIsExactOrWithin)
@@ -214,10 +190,10 @@ calculate_coverage_median <- function(samples) {
 #' `JIR(A,B)=(A - B) / (A+B+1)`
 #'
 #' This is calculated for every sample that occurs in one or the other
-#' (or both) groups’ results.
+#' (or both) groups results.
 #'
 #' @param group1,group2 Each group is a list of 1 or more
-#'     SnaptronQueryBuilder objects
+#'     QueryBuilder objects
 #' @param group_names Optional vector of strings representing the
 #'     group names
 #' @return A DataFrame of samples, with their JIR score and metadata,
@@ -225,19 +201,7 @@ calculate_coverage_median <- function(samples) {
 #'     least one of the groups
 #'
 #' @examples
-#' sb1 <- SnaptronQueryBuilder$new()
-#' sb1$compilation("srav2")
-#' sb1$regions("chr2:29446395-30142858")
-#' sb1$coordinate_modifier(Coordinates$Within)
-#' sb1$row_filters(strand == "-")
-#'
-#' sb2 <- SnaptronQueryBuilder$new()
-#' sb2$compilation("srav2")
-#' sb2$regions("chr2:29416789-29446394")
-#' sb2$coordinate_modifier(Coordinates$Within)
-#' sb2$row_filters(strand == "-")
-#'
-#' # Using query builder wappers
+# Using query builder wappers
 #' sb1 <- QueryBuilder(compilation = "srav2", regions = "chr2:29446395-30142858")
 #' sb1 <- set_coordinate_modifier(sb1, Coordinates$Within)
 #' sb1 <- set_row_filters(sb1, strand == "-")
@@ -314,25 +278,7 @@ calc_jir <- function(a, b) {
 #'     least one of the groups
 #'
 #' @examples
-#' in1 <- SnaptronQueryBuilder$new()
-#' in1$compilation("srav2")
-#' in1$regions("chr1:94468008-94472172")
-#' in1$coordinate_modifier(Coordinates$Exact)
-#' in1$row_filters(strand == "+")
-#'
-#' in2 <- SnaptronQueryBuilder$new()
-#' in2$compilation("srav2")
-#' in2$regions("chr1:94468008-94472172")
-#' in2$coordinate_modifier(Coordinates$Exact)
-#' in2$row_filters(strand == "+")
-#'
-#' ex <- SnaptronQueryBuilder$new()
-#' ex$compilation("srav2")
-#' ex$regions("chr1:94468008-94475142")
-#' ex$coordinate_modifier(Coordinates$Exact)
-#' ex$row_filters(strand == "+")
-#'
-#' # Using query builder wrappers
+# Using query builder wrappers
 #' in1 <- QueryBuilder(compilation = "srav2", regions = "chr1:94468008-94472172")
 #' in1 <- set_coordinate_modifier(in1, Coordinates$Exact)
 #' in1 <- set_row_filters(in1, strand == "+")
@@ -407,42 +353,30 @@ calc_psi <- function(inclusion1, inclusion2, exclusion, min_count) {
 #' Samples are filtered for ones which have junctions across all the
 #' user-specified groups. That is, if a sample only appears in the results of
 #' some of the groups (from their basic queries) it will be assigned a 0,
-#' otherwise if it’s in all of the groups’ results it will be assigned a 1.
-#' This is similar to the SSC high level query type, but doesn’t sum the
+#' otherwise if it is in all of the groups' results it will be assigned a 1.
+#' This is similar to the SSC high level query type, but doesn't sum the
 #' coverage.
 #'
 #' The samples are then grouped by their tissue type (e.g. Brain).
-#' This is useful for determining if there’s an enrichment for a specific
+#' This is useful for determining if there's an enrichment for a specific
 #' tissue in the set of junctions queried.  Results from this can be fed to a
 #' statistical test, such as the Kruskal-wallis non-parametric rank test.
 
-#' This query is limited to GTEx only due to the fact that GTEx is one of the
+#' This query is limited to GTEx only, due to the fact that GTEx is one of the
 #' few compilations that has consistent and complete tissue metadata.
 #'
-#' @param ... One or more SnaptronQueryBuilder objects
+#' @param ... One or more QueryBuilder objects
 #' @param group_names Optional vector of strings representing the
 #'   group names
 #' @return A DataFrame of all samples in the compilation with either a
 #'   0 or 1 indicating their occurrence and shared status (if > 1
 #'   group passed in).  Occurrence here is if the sample has at least
-#'   one result with > 0 coverage, and further, if > 1 group passed
-#'   in, if it occurs in the results of all groups.  Also includes the
+#'   one result with > 0 coverage, and further, if > 1 group is passed
+#'   in, then if it occurs in the results of all groups.  Also includes the
 #'   sample tissue type and sample_id.
 #'
 #' @examples
-#' in1 <- SnaptronQueryBuilder$new()
-#' in1$compilation("gtex")
-#' in1$regions("chr4:20763023-20763023")
-#' in1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-#' in1$row_filters(strand == "-")
-#'
-#' in2 <- SnaptronQueryBuilder$new()
-#' in2$compilation("gtex")
-#' in2$regions("chr4:20763098-20763098")
-#' in2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
-#' in2$row_filters(strand == "-")
-#'
-#' # Using query builder wrappers
+# Using query builder wrappers
 #' in1 <- QueryBuilder(compilation = "gtex", regions = "chr4:20763023-20763023")
 #' in1 <- set_coordinate_modifier(in1, Coordinates$EndIsExactOrWithin)
 #' in1 <- set_row_filters(in1, strand == "-")
@@ -541,7 +475,7 @@ shared <- function(cov1, cov2) {
 #' support there is for a particular junction configuration (typically
 #' a cassette exon).
 #'
-#' @param ... One or more lists of SnaptronQueryBuilder objects
+#' @param ... One or more lists of QueryBuilder objects
 #' @param group_names Optional vector of character strings
 #'   representing group names
 #' @return A DataFrame of results based on the list of groups passed
@@ -551,19 +485,7 @@ shared <- function(cov1, cov2) {
 #'   cassette exon scenario).
 #'
 #' @examples
-#' g1 <- SnaptronQueryBuilder$new()
-#' g1$compilation("gtex")
-#' g1$regions("chr1:1879786-1879786")
-#' g1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-#' g1$row_filters(strand == "-")
-#'
-#' g2 <- SnaptronQueryBuilder$new()
-#' g2$compilation("gtex")
-#' g2$regions("chr1:1879903-1879903")
-#' g2$coordinate_modifier(Coordinates$StartIsExactOrWithin)
-#' g2$row_filters(strand == "-")
-#'
-#' # Using query builder wrappers
+# Using query builder wrappers
 #' g1 <- QueryBuilder(compilation = "gtex", regions = "chr1:1879786-1879786")
 #' g1 <- set_coordinate_modifier(g1, Coordinates$EndIsExactOrWithin)
 #' g1 <- set_row_filters(g1, strand == "-")
