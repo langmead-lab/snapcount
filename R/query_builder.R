@@ -1,5 +1,7 @@
-#' A Reference Class for building Snaptron queries
-#'
+#' @title A Reference Class for building Snaptron queries
+#' 
+#' @description The core query class for Snapcount, is wrapped by QueryBuilder.
+#' 
 #' @field compilation A single string containing the name of the Snaptron datasource
 #'
 #' @field regions Either a list of 1 or more `HUGO` gene names `(e.g. "BRCA1")` or a
@@ -30,53 +32,28 @@
 #'   Coordinate$Overlaps - Constrains the results so that the coordinates overlap the
 #'              specified range.
 #'
-#' @section Methods:
-#' \itemize{
-#'   \item{\code{compilation} Get or set query compilation. See
-#'   \code{\link{Compilation}} for details.}
-#'
-#'   \item{\code{regions} Get or set query region which can be either a chromosome
-#'   range or HUGO gene name.}
-#'
-#'   \item{\code{row_filters} Get or set query range filters. Range filters can be
-#'   set to a list or vector of either strings or R boolean expressions. If
-#'   filters are R boolean expressions then the right-hand-side of the R
-#'   expression should evaluate to either a string, float or whole number.
-#'   The expression will then be converted to a string before being sent out
-#'   to Snaptron.}
-#'
-#'   \item{\code{column_filters} Get or set query sample filters. When setting sample
-#'   filters the argument is expected to follow the sample rules as described
-#'   for \code{row_filters}.}
-#'
-#'   \item{\code{sids} Get or set query sample ids.}
-#'
-#'   \item{\code{coordinate_modifier} Get or set coordinate modifiers for query. See
-#'   \code{\link{Coordinates}} for details.}
-#'
-#'   \item{\code{query_jx} call \code{\link{query_jx}} function}
-#'
-#'   \item{\code{query_gene} call \code{\link{query_gene}} function}
-#'
-#'   \item{\code{query_exon} call \code{\link{query_exon}} function}
-#'
-#'   \item{\code{print} print query builder object}
-#'
-#'   \item{\code{from_url} use URL to instantiate QueryBuilder object }
-#' }
 #'
 #' @examples
+#' # Using the SnaptronQueryBuilder class directly requires R6 style method invocations:
+#' 
 #' sb <- SnaptronQueryBuilder$new()
+#' 
+#' # You can set the compilation, the query, and query all in one line:
+#' 
 #' sb$compilation("gtex")$regions("CD99")$query_jx()
+#' 
+#' # You can also query by inputting directly a Snaptron WSI URL:
+#' 
 #' sb$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1-100000")
+#' 
+#' # Filters can be set using the same query object:
+#' 
 #' sb$column_filters(SMTS == "Brain")
-#'
-#' # The RHS of an R boolean expression can itself be an expression,
-#' # but the expression has to evaluate to either a String, Float or Integer.
 #' a <- 10
 #' b <- 10
 #' sb$row_filters(samples_count >= (a + b))
 #' sb$query_jx(return_rse = FALSE)
+#' @seealso [QueryBuilder()] which wraps this class to allow for S4 style method invocations
 #' @export
 SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
     public = list(
