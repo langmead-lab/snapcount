@@ -11,13 +11,14 @@ The core query class for Snapcount, is wrapped by QueryBuilder.
 
 sb <- SnaptronQueryBuilder$new()
 
-# You can set the compilation, the query, and query all in one line:
+# You can set the compilation, the region, and execute the query all in one line:
 
 sb$compilation("gtex")$regions("CD99")$query_jx()
 
-# You can also query by inputting directly a Snaptron WSI URL:
+# You can also setup a query by using a Snaptron WSI URL directly:
 
 sb$from_url("http://snaptron.cs.jhu.edu/gtex/snaptron?regions=chr1:1-100000")
+sb$query_jx(return_rse = FALSE)
 
 # Filters can be set using the same query object:
 
