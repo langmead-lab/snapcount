@@ -3,7 +3,6 @@
 export(Compilation)
 export(Coordinates)
 export(QueryBuilder)
-export(SnaptronQueryBuilder)
 export(from_url)
 export(get_JunctionSeq_params)
 export(get_column_filters)

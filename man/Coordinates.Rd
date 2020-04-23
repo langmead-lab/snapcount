@@ -4,7 +4,9 @@
 \name{Coordinates}
 \alias{Coordinates}
 \title{Enum for Snaptron Coordinate modifiers}
-\format{An object of class \code{environment} of length 4.}
+\format{
+An object of class \code{environment} of length 4.
+}
 \usage{
 Coordinates
 }

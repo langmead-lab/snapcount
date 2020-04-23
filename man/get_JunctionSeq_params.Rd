@@ -6,7 +6,7 @@
 \title{Formats Snapcount results in a form that can be easily passed into
 the third-party package, JunctionSeq.}
 \usage{
-get_JunctionSeq_params(query_builders, group_names, gene)
+get_JunctionSeq_params(query_builders, group_names, gene, sample_names = NULL)
 
 output_example_function_calls(js_params)
 }
@@ -18,9 +18,9 @@ output_example_function_calls(js_params)
 \item{gene}{The name of the gene to match with the exon and gene
 query results.}
 
-\item{js_params}{An object returned from call to \code{get_JunctionSeq_params}.}
-
 \item{sample_names}{A vector of strings representing sample names.}
+
+\item{js_params}{An object returned from call to \code{get_JunctionSeq_params}.}
 }
 \value{
 \code{get_JunctionSeq_params} returns an object containing the necessary
