@@ -9,7 +9,7 @@
 #'   intervals `(e.g. "chr1:1-1000")`.
 #'
 #' @return
-#' A QueryBuilder object. See \link{SnaptronQueryBuilder} for details.
+#' A QueryBuilder object.
 #' @examples
 #' # contruct a query builder for GTEX data source and BRAC1 gene
 #' qb <- QueryBuilder(compilation = Compilation$gtex, regions = "BRCA1")
@@ -27,7 +27,8 @@ QueryBuilder <- function(compilation, regions) {
 
 #' Get or set query compilation
 #'
-#' @param qb QueryBuilder object
+#' @param qb A QueryBuilder object constructed using the
+#'   \code{\link{QueryBuilder}} function.
 #' @param compilation A single string containing the name of the Snaptron data
 #'   source. Any variant of the `Compilation` enum can also be passed as an
 #'   argument.

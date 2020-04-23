@@ -16,7 +16,7 @@ passed an argument.}
 intervals \verb{(e.g. "chr1:1-1000")}.}
 }
 \value{
-A QueryBuilder object. See \link{SnaptronQueryBuilder} for details.
+A QueryBuilder object.
 }
 \description{
 Construct a QueryBuilder object given a compilation and one or regions.

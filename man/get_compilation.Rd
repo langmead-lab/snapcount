@@ -10,7 +10,8 @@ get_compilation(qb)
 set_compilation(qb, compilation)
 }
 \arguments{
-\item{qb}{QueryBuilder object}
+\item{qb}{A QueryBuilder object constructed using the
+\code{\link{QueryBuilder}} function.}
 
 \item{compilation}{A single string containing the name of the Snaptron data
 source. Any variant of the \code{Compilation} enum can also be passed as an
