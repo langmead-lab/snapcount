@@ -464,8 +464,8 @@ FormatForJunctionSeq <-
 #' output_example_function_calls(js)
 #' }
 #' @export
-get_JunctionSeq_params <- function(query_builders, group_names, gene) {
-    js <- FormatForJunctionSeq$new(query_builders, group_names, gene)
+get_JunctionSeq_params <- function(query_builders, group_names, gene, sample_names = NULL) {
+    js <- FormatForJunctionSeq$new(query_builders, group_names, gene, sample_names)
     js$write_gff_file()
 
     js
