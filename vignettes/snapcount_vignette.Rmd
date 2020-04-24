@@ -25,6 +25,20 @@ vignette: >
 startTime <- Sys.time()
 ```
 
+# Why would you want to use Snapcount?
+
+snapcount is directed at current and potential `r Biocpkg('recount')` users who want the further ability to quickly filter RNA-seq derived coverage data to just the regions of the human genome and the samples they care about.
+
+This avoids having to download a whole study's worth of data across the entire genome.
+
+While it offers the same datasets that `r Biocpkg('recount')` contains, it enables querying via a particular gene or genomic coordinate range entered by the user and only downloading the results from that query.
+
+It then builds a RangedSummarizedExperiment (RSE) object on the fly, based on just the rows/columns in those results.
+
+This query functionality is supported for genes, exons, and exon-exon junctions.
+
+In addition, a set of aggregation functions are available for exon-exon junction data to allow for further filtering and summarizing.
+
 # Basics
 
 ## Install snapcount
@@ -77,9 +91,62 @@ of thousands of RNA-seq samples.
 Bioinformatics, 34, 1:114-116.
 ```
 
-# Quick start to using snapcount
+## Visualizing a set of junctions in JunctionSeq
 
-Similar to the `r Biocpkg('recount')` all coverage counts in Snaptron/snapcount are stored/retrieved as raw, un-normalized counts.
+This is a short example to motivate the usage of snapcount, leveraging the `r Biocpkg('JunctionSeq')` package for visualization purposes.
+The actual running of JunctionSeq will depend on whether or not it's present.
+
+```{r 'jxseq', eval = TRUE}
+library('snapcount')
+
+#This is a "toy" example but using 
+#real junction data from GTEx's samples
+
+#query the exon-exon junctions in a subregion of the 
+#IMPDH1 gene on human chromosome 7 from GTEx
+
+#filtering for 
+#1) junction must be within region
+#2) junction must have >=1000 split reads across all samples in a tissue
+s1 <- QueryBuilder(compilation="gtex",regions="chr7:128393029-128394277")
+s1 <- set_row_filters(s1, contains == 1, coverage_sum >= 1000)
+
+#now we filter for only the tissues we want (3 separate queries)
+sb1 <- set_column_filters(s1, SMTS == "Brain")
+
+sb2 <- set_column_filters(s1, SMTS == "Pituitary")
+
+sb3 <- set_column_filters(s1, SMTS == "Spleen")
+
+js <- get_JunctionSeq_params(
+    query_builders = list(sb1, sb2, sb3),
+    gene = "IMPDH1",
+    group_names = list("Brain", "Pituitary", "Spleen")
+)
+```
+
+```{r 'check_for_js', include=FALSE, eval=TRUE}
+#check to see if JunctionSeq is available, if so, we'll run the next code chunk which will actually plot
+ifJunctionSeqPresent <- "JunctionSeq" %in% rownames(installed.packages())
+ifJunctionSeqNOTPresent <- !ifJunctionSeqPresent
+```
+
+```{r 'jxseq_methods', include=ifJunctionSeqNOTPresent, results='hide', warning=FALSE, message=FALSE, eval = ifJunctionSeqNOTPresent}
+
+#don't want to actually run JunctionSeq yet since it's a separate package
+#instead, just print the JunctionSeq method calls
+output_example_function_calls(js)
+```
+
+Now plot the combined exons, genes and junction coverage data (but only if JunctionSeq is present).
+
+```{r 'jxseq_plot', results='hide', warning=FALSE, message=FALSE, eval = ifJunctionSeqPresent}
+library('JunctionSeq')
+
+jscs <- JunctionSeq::readJunctionSeqCounts(countdata=js$countdata, samplenames=js$samplenames, design=js$design, flat.gff.file=js$flat.gff.file)
+
+JunctionSeq::plotJunctionSeqResultsForGene(geneID=js$geneID, jscs=jscs, plot.type="rawCounts", displayTranscripts=TRUE, plot.exon.results=TRUE, plot.junction.results=TRUE, plot.novel.junction.results=TRUE, plot.untestable.results=TRUE)
+```
 
 
 # Introduction
@@ -92,6 +159,8 @@ snapcount complements the `r Biocpkg('recount')` package, which also allows for 
 In general, `r Biocpkg('recount')` works best when you are interested in *all* the genes, exons, or splice junctions in a study, whereas snapcount is best for queries over a particular subset of genes or intervals across all or most of the samples in recount2/Snaptron.  The more specific your query, the faster and easier it will be to use snapcount.
 
 All the RNA-seq samples in the recount and Snaptron resources were analyzed using the [Rail-RNA](http://rail.bio) aligner.  Rail produces spliced alignments that in turn produce coverage and junction-level summaries that are further processed to obtain the data in recount and Snaptron.
+
+Similar to the `r Biocpkg('recount')` all coverage counts in Snaptron/snapcount are stored/retrieved as raw, un-normalized counts.
 
 # Basic queries
 
@@ -112,7 +181,6 @@ Please be cautious with metadata.  We strive to make it as complete and usable a
 
 Start by querying for all junctions within the region of gene CD99:
 ```{r 'gene', eval = TRUE}
-library('snapcount')
 
 ##Query coverage for gene, exon, and annotated junctions across all
 #in the region of the CD99 gene
