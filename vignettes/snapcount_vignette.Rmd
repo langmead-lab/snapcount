@@ -138,7 +138,19 @@ ifJunctionSeqNOTPresent <- !ifJunctionSeqPresent
 output_example_function_calls(js)
 ```
 
-Now plot the combined exons, genes and junction coverage data (but only if JunctionSeq is present).
+Now we plot the combined exons, genes and 
+junction coverage data (but only if JunctionSeq is present).
+
+This plot shows splice junctions J003 and J005 
+supporting the first of 2 annotated exons (E001).
+
+These splice junctions are present in both 
+brain and pituitary samples, but not in spleen samples 
+at the specified coverage level (>=1000 split reads).
+
+In contrast junction J004 skips exon E001 and is present 
+in all the tissues' samples.
+
 
 ```{r 'jxseq_plot', results='hide', warning=FALSE, message=FALSE, eval = ifJunctionSeqPresent}
 library('JunctionSeq')
