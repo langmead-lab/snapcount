@@ -4,7 +4,7 @@
 #' intervals it will return a list of 0 or more genes, junctions, or exons
 #' (depending on which query form is used) which overlap the ranges.
 #'
-#' @param sb A SnaptonQueryBuilder object
+#' @param sb A SnaptronQueryBuilder object
 #' @param return_rse Should the query data be returned as a simple data frame or
 #'   converted to a RangedSummarizedExperiment.
 #'
