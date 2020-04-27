@@ -109,7 +109,7 @@ library('snapcount')
 #1) junction must be within region
 #2) junction must have >=1000 split reads across all samples in a tissue
 s1 <- QueryBuilder(compilation="gtex",regions="chr7:128393029-128394277")
-s1 <- set_row_filters(s1, contains == 1, coverage_sum >= 1000)
+s1 <- set_row_filters(s1, coverage_sum >= 1000)
 
 #now we filter for only the tissues we want (3 separate queries)
 sb1 <- set_column_filters(s1, SMTS == "Brain")
@@ -141,6 +141,13 @@ output_example_function_calls(js)
 Now we plot the combined exons, genes and 
 junction coverage data (but only if JunctionSeq is present).
 
+```{r 'jxseq_plot', results='hide', warning=FALSE, message=FALSE, eval = ifJunctionSeqPresent}
+library('JunctionSeq')
+
+jscs <- JunctionSeq::readJunctionSeqCounts(countdata=js$countdata, samplenames=js$samplenames, design=js$design, flat.gff.file=js$flat.gff.file)
+
+JunctionSeq::plotJunctionSeqResultsForGene(geneID=js$geneID, jscs=jscs, plot.type="rawCounts", displayTranscripts=TRUE, plot.exon.results=TRUE, plot.junction.results=TRUE, plot.novel.junction.results=TRUE, plot.untestable.results=TRUE)
+```
 This plot shows splice junctions J003 and J005 
 supporting the first of 2 annotated exons (E001).
 
@@ -151,14 +158,6 @@ at the specified coverage level (>=1000 split reads).
 In contrast junction J004 skips exon E001 and is present 
 in all the tissues' samples.
 
-
-```{r 'jxseq_plot', results='hide', warning=FALSE, message=FALSE, eval = ifJunctionSeqPresent}
-library('JunctionSeq')
-
-jscs <- JunctionSeq::readJunctionSeqCounts(countdata=js$countdata, samplenames=js$samplenames, design=js$design, flat.gff.file=js$flat.gff.file)
-
-JunctionSeq::plotJunctionSeqResultsForGene(geneID=js$geneID, jscs=jscs, plot.type="rawCounts", displayTranscripts=TRUE, plot.exon.results=TRUE, plot.junction.results=TRUE, plot.novel.junction.results=TRUE, plot.untestable.results=TRUE)
-```
 
 
 # Introduction
