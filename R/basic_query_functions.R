@@ -387,7 +387,7 @@ get_row_ranges <- function(query_data) {
     GRanges(
         seqnames = query_data$chromosome,
         IRanges::IRanges(query_data$start, query_data$end),
-        strand = query_data$strand,
+        strand = gsub("\\?", "*", query_data$strand),
         mcols
     )
 }
