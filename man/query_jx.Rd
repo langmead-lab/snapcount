@@ -13,7 +13,7 @@ query_gene(sb, return_rse = TRUE, split_by_region = FALSE)
 query_exon(sb, return_rse = TRUE, split_by_region = FALSE)
 }
 \arguments{
-\item{sb}{A SnaptonQueryBuilder object}
+\item{sb}{A SnaptronQueryBuilder object}
 
 \item{return_rse}{Should the query data be returned as a simple data frame or
 converted to a RangedSummarizedExperiment.}
