@@ -1,9 +1,12 @@
 Package: snapcount
 Type: Package
 Title: R/Bioconductor Package for interfacing with Snaptron for rapid querying of expression counts
-Version: 0.99.18
-Author: Rone Charles
-Maintainer: Rone Charles <rcharle8@jh.edu>
+Version: 0.99.19
+Authors@R:
+    c(person(given = "Rone",
+             family = "Charles",
+             role = c("aut", "cre"),
+             email = "rcharle8@jh.edu"))
 Description: snapcount is a client interface to the Snaptron webservices
     which support querying by gene name or genomic region.
     Results include raw expression counts derived from alignment of RNA-seq samples
