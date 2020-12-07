@@ -35,3 +35,7 @@ Useful links:
 }
 
 }
+\author{
+\strong{Maintainer}: Rone Charles \email{rcharle8@jh.edu}
+
+}
