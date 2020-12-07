@@ -21,6 +21,7 @@ vignette: >
 ---
 
 ```{r vignetteSetup, echo=FALSE, message=FALSE, warning = FALSE}
+library(snapcount)
 ## Track time spent on making the vignette
 startTime <- Sys.time()
 ```
@@ -283,7 +284,7 @@ T2r <- QueryBuilder(compilation="gtex", regions="chr6:32831182-32831182")
 T2r <- set_row_filters(T2r, strand == "-")
 T2r <- set_coordinate_modifier(T2r, Coordinates$StartIsExactOrWithin)
 
-ssc_func<-shared_sample_counts
+ssc_func <- shared_sample_counts
 ssc <- ssc_func(list(GNB1l, GNB1r),
               list(PIK3l, PIK3r),
               list(T2l, T2r),
@@ -295,10 +296,10 @@ ssc
 
 ## Tissue Specificity (TS)
 
-This query asks if a particular set of junctions seems to be associated with tissue type.  
-This query defaults to using the `gtex` compilation, but it could work with any compilation having a `tissue` metadata field (e.g. `tcga`).  
+This query asks if a particular set of junctions seems to be associated with tissue type.
+This query defaults to using the `gtex` compilation, but it could work with any compilation having a `tissue` metadata field (e.g. `tcga`).
 
-The main output is a list of all the samples in the compilation with either a 0 or a 1 in the *shared* column.  
+The main output is a list of all the samples in the compilation with either a 0 or a 1 in the *shared* column.
 1 indicates that a junction from the query occurs in that sample (tissue type).
 
 This output can be passed to a statistical test such as an F-test to assess the significance of tissue enrichment.
@@ -315,7 +316,7 @@ head(ts)
 
 The TS function also supports more than one set of junctions.
 
-The main output is a list of all the samples in the compilation with either a 0 or a 1 in the *shared* column.  
+The main output is a list of all the samples in the compilation with either a 0 or a 1 in the *shared* column.
 1 here indicates that at least one junction from all sets occurred in that sample, i.e. the sample is shared across the results of all the junction queries.
 
 A use case of the 2-set TS function is to measure the significance of tissue enrichment across junctions which support a cassette exon.
@@ -330,7 +331,7 @@ B <- QueryBuilder(compilation="gtex", regions="chr4:20763098-20763098")
 B <- set_row_filters(B, strand == "-")
 B <- set_coordinate_modifier(B, Coordinates$StartIsExactOrWithin)
 
-ts<-tissue_specificity(list(A, B))
+ts <- tissue_specificity(list(A, B))
 head(ts)
 ```
 
