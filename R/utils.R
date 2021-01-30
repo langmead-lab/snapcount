@@ -22,12 +22,12 @@ is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) {
 }
 
 bool_expressions_to_strings <- function(quosures) {
-    if (length(quosures) == 1) {
-        expr <- rlang::get_expr(quosures[[1]])
-        if (is.null(expr) || rlang::is_bare_character(expr)) {
-            return(expr)
-        }
-    }
+    ## if (length(quosures) == 1) {
+    ##     expr <- rlang::get_expr(quosures[[1]])
+    ##     if (is.null(expr) || rlang::is_bare_character(expr)) {
+    ##         return(expr)
+    ##     }
+    ## }
     lapply(quosures, expression_to_string_helper)
 }
 
@@ -38,7 +38,6 @@ expression_to_string_helper <- function(quosure) {
     if (rlang::is_bare_character(expr)) {
         return(expr)
     }
-
     assert_that(length(expr) == 3,
                 msg = paste(deparse(expr), ": is not a valid filter"))
     assert_that(is_logical_op(expr[[1]]),
@@ -47,7 +46,7 @@ expression_to_string_helper <- function(quosure) {
                 msg = paste(deparse(expr[[2]]), ": is not a valid name"))
 
     if (rlang::is_call(expr[[3]]) || rlang::is_symbol(expr[[3]])) {
-        res <- rlang::eval_tidy(expr[[3]])
+        res <- rlang::eval_tidy(expr[[3]], env = env)
         assert_that(
             rlang::is_syntactic_literal(res),
             msg = paste(
@@ -64,3 +63,9 @@ expression_to_string_helper <- function(quosure) {
 
     deparse(expr, backtick = FALSE)
 }
+
+## f <- function(...) {
+##                                         # rlang::eval_tidy(rlang::enexprs(...)[[1]])
+##     qs <- rlang::enquos(...)
+##     rlang::eval_tidy(qs[[1]])
+## }

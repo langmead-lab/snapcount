@@ -22,7 +22,7 @@ test_that("using genomic ranges", {
     sb <- SnaptronQueryBuilder$new()
     sb$compilation("gtex")
     sb$regions(g_range)
-    sb$column_filters(SMTS == "Brain")
+    sb <- set_column_filters(sb, SMTS == "Brain")
 
     query_jx(sb)
     expect_equal(uri_of_last_successful_request(),
@@ -33,7 +33,7 @@ test_that("junction query with NSE sample filter", {
     sb <- SnaptronQueryBuilder$new()
     sb$compilation("gtex")
     sb$regions("CD99")
-    sb$column_filters(SMTS == "Brain")
+    sb <- set_column_filters(sb, SMTS == "Brain")
 
     query_jx(sb)
     expect_equal(uri_of_last_successful_request(),
@@ -44,7 +44,7 @@ test_that("junction query with mutiple NSE sample filters", {
     sb <- SnaptronQueryBuilder$new()
     sb$compilation("srav2")
     sb$regions("CD99")
-    sb$column_filters(library_name == "HG00115.6", study_accession == "ERP001942")
+    sb <- set_column_filters(sb, library_name == "HG00115.6", study_accession == "ERP001942")
 
     query_jx(sb)
     expect_equal(uri_of_last_successful_request(),
@@ -55,7 +55,7 @@ test_that("junction query with one NSE range filter", {
     sb <- SnaptronQueryBuilder$new()
     sb$compilation("gtex")
     sb$regions("CD99")
-    sb$row_filters(samples_count >= 5)
+    sb <- set_row_filters(sb, samples_count >= 5)
 
     query_jx(sb)
     expect_equal(uri_of_last_successful_request(),
@@ -66,7 +66,7 @@ test_that("junction query with mutiple NSE range filters", {
     sb <- SnaptronQueryBuilder$new()
     sb$compilation("gtex")
     sb$regions("CD99")
-    sb$row_filters(samples_count <= 10, coverage_sum < 3)
+    sb <- set_row_filters(sb, samples_count <= 10, coverage_sum < 3)
 
     query_jx(sb)
     expect_equal(uri_of_last_successful_request(),
@@ -77,7 +77,7 @@ test_that("invalid sample filter name", {
     sb <- SnaptronQueryBuilder$new()
     sb$compilation("gtex")
     sb$regions("CD99")
-    sb$column_filters(SNTS == "Brain")
+    sb <- set_column_filters(sb, SNTS == "Brain")
     expect_error(
         query_jx(sb),
         "`SNTS' is not a valid sample filter")
@@ -87,7 +87,7 @@ test_that("invalid sample filter value", {
     sb <- SnaptronQueryBuilder$new()
     sb$compilation("gtex")
     sb$regions("CD99")
-    sb$column_filters(SMTS == 2)
+    sb <- set_column_filters(sb, SMTS == 2)
     expect_error(
         query_jx(sb),
         "`SMTS' filter expects value of type String, but got Integer")

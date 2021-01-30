@@ -183,14 +183,16 @@ set_regions <- function(qb, regions) {
 #' @rdname get_column_filters
 #' @export
 set_column_filters <- function(qb, ...) {
-    cloned_qb <- qb$clone(deep = TRUE)$column_filters(...)
+    quosures <- rlang::enquos(...)
+    cloned_qb <- qb$clone(deep = TRUE)$column_filters(quosures)
     cloned_qb
 }
 
 #' @rdname get_row_filters
 #' @export
 set_row_filters <- function(qb, ...) {
-    cloned_qb <- qb$clone(deep = TRUE)$row_filters(...)
+    quosures <- rlang::enquos(...)
+    cloned_qb <- qb$clone(deep = TRUE)$row_filters(quosures)
     cloned_qb
 }
 

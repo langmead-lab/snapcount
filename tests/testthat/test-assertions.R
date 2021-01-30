@@ -21,7 +21,7 @@ test_that("Invalid sample filters", {
     sb <- SnaptronQueryBuilder$new()
     sb$compilation("gtex")
     sb$regions("CD99")
-    sb$column_filters(SNTS == "Brain")
+    sb <- set_column_filters(sb, SNTS == "Brain")
     expect_error(query_gene(sb),
                  "(is not a valid sample filter)|(Invalid sample filter)")
 })

@@ -36,19 +36,19 @@ SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
                 private$query$regions
             }
         },
-        row_filters = function(...) {
-            if (!missing(...)) {
+        row_filters = function(quosures = NULL) {
+            if (!missing(quosures)) {
                 private$query$row_filters <-
-                    bool_expressions_to_strings(rlang::enquos(...))
+                    bool_expressions_to_strings(quosures)
                 invisible(self)
             } else {
                 private$query$row_filters
             }
         },
-        column_filters = function(...) {
-            if (!missing(...)) {
+        column_filters = function(quosures = NULL) {
+            if (!missing(quosures)) {
                 private$query$column_filters <-
-                    bool_expressions_to_strings(rlang::enquos(...))
+                    bool_expressions_to_strings(quosures)
                 invisible(self)
             } else {
                 private$query$column_filters

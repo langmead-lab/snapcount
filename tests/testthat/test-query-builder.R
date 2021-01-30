@@ -25,10 +25,10 @@ test_that("get/set methods", {
     sb$regions("CD99")
     expect_equal(sb$regions(), "CD99")
 
-    sb$row_filters(samples_count <= 10)
+    sb <- set_row_filters(sb, samples_count <= 10)
     expect_equal(as.character(sb$row_filters()), "samples_count <= 10")
 
-    sb$column_filters(SMTS == "Brain")
+    sb <- set_column_filters(sb, SMTS == "Brain")
     expect_equal(as.character(sb$column_filters()), "SMTS == Brain")
 
     sb$sids(1:10)
@@ -40,14 +40,17 @@ test_that("NSE rhs does not evaluate to basic type", {
     sb$compilation("gtex")
     sb$regions("CD99")
     expect_error(
-        sb$column_filters(SMTS == c(1,2,3)),
+        set_column_filters(sb, SMTS == c(1,2,3)),
         "does not evaluate to a basic type")
 })
 
 test_that("query methods", {
     options(test_context = TRUE)
     sb <- SnaptronQueryBuilder$new()
-    sb$compilation("gtex")$regions("CD99")$column_filters(SMTS == "Brain")$row_filters(samples_count <= 10)$sids(c(50099,50102))
+    sb$compilation("gtex")$regions("CD99")
+    sb <- set_column_filters(sb, SMTS == "Brain")
+    sb <- set_row_filters(sb, samples_count <= 10)
+    sb$sids(c(50099,50102))
 
     sb$query_jx()
     expect_equal(uri_of_last_successful_request(), "http://snaptron.cs.jhu.edu/gtex/snaptron?regions=CD99&rfilter=samples_count<:10&sfilter=SMTS:Brain&sids=50099,50102")

@@ -10,7 +10,7 @@ test_that("junction union", {
     sb1$compilation("encode1159")
     sb1$regions("chr1:1879786-1879786")
     sb1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-    sb1$row_filters(strand == "-")
+    sb1 <- set_row_filters(sb1, strand == "-")
 
     sb2 <- sb1$clone(deep = TRUE)
     sb2$compilation("rpc")
@@ -27,7 +27,7 @@ test_that("shared sample count", {
     sb1$compilation("gtex")
     sb1$regions("chr1:1879786-1879786")
     sb1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-    sb1$row_filters(strand == "-")
+    sb1 <-set_row_filters(sb1, strand == "-")
 
     sb2 <- sb1$clone(deep = TRUE)
     sb2$regions("chr1:1879903-1879903")
@@ -37,11 +37,11 @@ test_that("shared sample count", {
     ## group 2
     sb3 <- sb1$clone(deep = TRUE)
     sb3$regions("chr1:9664595-9664595")
-    sb3$row_filters(strand == "+")
+    sb3 <- set_row_filters(sb3, strand == "+")
 
     sb4 <- sb2$clone(deep = TRUE)
     sb4$regions("chr1:9664759-9664759")
-    sb4$row_filters(strand == "+")
+    sb4 <- set_row_filters(sb4, strand == "+")
     group2 <- list(sb3, sb4)
 
     ## group 3
@@ -72,7 +72,7 @@ test_that("junction inclusion ratio", {
     sb1$compilation("srav2")
     sb1$regions("chr2:29446395-30142858")
     sb1$coordinate_modifier(Coordinates$Within)
-    sb1$row_filters(strand == "-")
+    sb1 <- set_row_filters(sb1, strand == "-")
 
     sb2 <- sb1$clone(deep = TRUE)
     sb2$regions("chr2:29416789-29446394")
@@ -98,7 +98,7 @@ test_that("percent spliced in", {
     sb1$compilation("srav2")
     sb1$regions("chr1:94468008-94472172")
     sb1$coordinate_modifier(Coordinates$Exact)
-    sb1$row_filters(strand == "+")
+    sb1 <- set_row_filters(sb1, strand == "+")
 
     ## inclusion group 2
     sb2 <- sb1$clone(deep = TRUE)
@@ -132,7 +132,7 @@ test_that("tissue specificity", {
     sb1$compilation("gtex")
     sb1$regions("chr4:20763023-20763023")
     sb1$coordinate_modifier(Coordinates$EndIsExactOrWithin)
-    sb1$row_filters(strand == "-")
+    sb1 <- set_row_filters(sb1, strand == "-")
 
     sb2 <- sb1$clone(deep = TRUE)
     sb2$regions("chr4:20763098-20763098")
