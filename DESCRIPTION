@@ -1,7 +1,7 @@
 Package: snapcount
 Type: Package
 Title: R/Bioconductor Package for interfacing with Snaptron for rapid querying of expression counts
-Version: 1.5.0
+Version: 1.6.0
 Authors@R:
     c(person(given = "Rone",
              family = "Charles",
