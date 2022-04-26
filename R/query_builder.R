@@ -56,8 +56,8 @@ SnaptronQueryBuilder <- R6Class("SnaptronQueryBuilder",
         },
         sids = function(sids = NULL) {
             if (!missing(sids)) {
-                assert_that(is.wholenumber(sids),
-                    msg = "sids should be whole numbers")
+                assert_that(is.null(sids) || is.wholenumber(sids),
+                    msg = "sids should be whole numbers or NULL")
                 private$query$sids <- sids
                 invisible(self)
             } else {

@@ -22,20 +22,18 @@ is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) {
 }
 
 bool_expressions_to_strings <- function(quosures) {
-    ## if (length(quosures) == 1) {
-    ##     expr <- rlang::get_expr(quosures[[1]])
-    ##     if (is.null(expr) || rlang::is_bare_character(expr)) {
-    ##         return(expr)
-    ##     }
-    ## }
-    lapply(quosures, expression_to_string_helper)
+    res <- lapply(quosures, expression_to_string_helper)
+    if (is.list(res) && is.null(res[[1]]))
+        NULL
+    else
+        res
 }
 
 expression_to_string_helper <- function(quosure) {
     env <- rlang::get_env(quosure)
     expr <- rlang::get_expr(quosure)
 
-    if (rlang::is_bare_character(expr)) {
+    if (is.null(expr) || rlang::is_bare_character(expr)) {
         return(expr)
     }
     assert_that(length(expr) == 3,
@@ -63,9 +61,3 @@ expression_to_string_helper <- function(quosure) {
 
     deparse(expr, backtick = FALSE)
 }
-
-## f <- function(...) {
-##                                         # rlang::eval_tidy(rlang::enexprs(...)[[1]])
-##     qs <- rlang::enquos(...)
-##     rlang::eval_tidy(qs[[1]])
-## }
